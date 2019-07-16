@@ -34,6 +34,8 @@ import (
 	podutil "k8s.io/kubernetes/pkg/api/v1/pod"
 	"k8s.io/kubernetes/pkg/controller"
 	"k8s.io/kubernetes/pkg/controller/history"
+	"sort"
+	"k8s.io/klog"
 )
 
 // maxUpdateRetries is the maximum number of retries used for update conflict resolution prior to failure
@@ -89,6 +91,28 @@ func getParentName(pod *v1.Pod) string {
 func getOrdinal(pod *v1.Pod) int {
 	_, ordinal := getParentNameAndOrdinal(pod)
 	return ordinal
+}
+
+// getOrdinalByLabel get pods's ordinal by label. If pod has label, return 1, else return -1
+func getOrdinalByLabel(lpod *labelPod) int {
+	podLabel := lpod.pod.Labels
+	selectLabel := lpod.label
+	
+	if len(selectLabel) == 0 || len(podLabel) == 0{
+		return -1
+	}
+	
+	for k, selectV := range selectLabel {
+		podV, find := podLabel[k]
+		if !find {
+			return -1
+		}
+		if podV != selectV {
+			return -1
+		}
+	}
+	
+	return 1
 }
 
 // getPodName gets the name of set's child Pod with an ordinal index of ordinal
@@ -399,4 +423,44 @@ func (ao ascendingOrdinal) Swap(i, j int) {
 
 func (ao ascendingOrdinal) Less(i, j int) bool {
 	return getOrdinal(ao[i]) < getOrdinal(ao[j])
+}
+
+type ascendingOrdinalByLabel []*labelPod
+
+type labelPod struct {
+	pod   *v1.Pod
+	label map[string]string
+}
+
+func (ao ascendingOrdinalByLabel) Len() int {
+	return len(ao)
+}
+
+func (ao ascendingOrdinalByLabel) Swap(i, j int) {
+	ao[i], ao[j] = ao[j], ao[i]
+}
+
+func (ao ascendingOrdinalByLabel) Less(i, j int) bool {
+	return getOrdinalByLabel(ao[i]) < getOrdinalByLabel(ao[j])
+}
+
+func sortByLabel(pods []*v1.Pod, labels map[string]string) []*v1.Pod {
+	
+	if len(labels) == 0 {
+		return pods
+	}
+	
+	sortedPod := []*v1.Pod{}
+	replicasByLabels := []*labelPod{}
+	for _, pod := range pods {
+		replicasByLabels = append(replicasByLabels, &labelPod{pod, labels})
+	}
+	sort.Sort(ascendingOrdinalByLabel(replicasByLabels))
+	
+	for _, labelPod := range replicasByLabels {
+		sortedPod = append(sortedPod, labelPod.pod)
+		klog.V(4).Infof("sorted replicas pod's name: %v, pods's labels", labelPod.pod.Name, labelPod.pod.Labels)
+	}
+	
+	return sortedPod
 }

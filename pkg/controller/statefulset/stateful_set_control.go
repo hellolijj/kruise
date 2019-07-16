@@ -331,6 +331,10 @@ func (ssc *defaultStatefulSetControl) updateStatefulSet(
 
 	// sort the condemned Pods by their ordinals
 	sort.Sort(ascendingOrdinal(condemned))
+	
+	if set.Spec.FirstUpdateLabels != nil {
+		replicas = sortByLabel(replicas, set.Spec.FirstUpdateLabels)
+	}
 
 	// find the first unhealthy Pod
 	for i := range replicas {

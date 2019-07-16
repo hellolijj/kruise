@@ -161,6 +161,9 @@ func ValidateStatefulSetUpdate(statefulSet, oldStatefulSet *appsv1alpha1.Statefu
 
 	restoreStrategy := statefulSet.Spec.UpdateStrategy
 	statefulSet.Spec.UpdateStrategy = oldStatefulSet.Spec.UpdateStrategy
+	
+	firstUpdateLabel := statefulSet.Spec.FirstUpdateLabels
+	statefulSet.Spec.FirstUpdateLabels = oldStatefulSet.Spec.FirstUpdateLabels
 
 	if !apiequality.Semantic.DeepEqual(statefulSet.Spec, oldStatefulSet.Spec) {
 		allErrs = append(allErrs, field.Forbidden(field.NewPath("spec"), "updates to statefulset spec for fields other than 'replicas', 'template', and 'updateStrategy' are forbidden"))
@@ -168,6 +171,7 @@ func ValidateStatefulSetUpdate(statefulSet, oldStatefulSet *appsv1alpha1.Statefu
 	statefulSet.Spec.Replicas = restoreReplicas
 	statefulSet.Spec.Template = restoreTemplate
 	statefulSet.Spec.UpdateStrategy = restoreStrategy
+	statefulSet.Spec.FirstUpdateLabels = firstUpdateLabel
 
 	allErrs = append(allErrs, apivalidation.ValidateNonnegativeField(int64(*statefulSet.Spec.Replicas), field.NewPath("spec", "replicas"))...)
 	return allErrs
