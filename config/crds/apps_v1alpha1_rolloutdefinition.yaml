@@ -1,0 +1,98 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: rolloutdefinitions.apps.kruise.io
+spec:
+  group: apps.kruise.io
+  names:
+    kind: RolloutDefinition
+    plural: rolloutdefinitions
+  scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          properties:
+            controlResource:
+              properties:
+                apiVersion:
+                  type: string
+                resource:
+                  type: string
+              required:
+              - apiVersion
+              - resource
+              type: object
+            path:
+              properties:
+                specPath:
+                  properties:
+                    maxUnavailable:
+                      description: MaxUnavailable indicates the maxUnavailable path
+                        of controlled workload.
+                      type: string
+                    partition:
+                      description: Partition indicates the partition path of controlled
+                        workload.
+                      type: string
+                    paused:
+                      description: Paused indicates the paused path of controlled
+                        workload
+                      type: string
+                  type: object
+                statusPath:
+                  properties:
+                    conditions:
+                      description: Conditions indicates the state
+                      type: string
+                    currentReplicas:
+                      description: CurrentReplicas indicates the currentReplicas path
+                        of controlled workload
+                      type: string
+                    observedGeneration:
+                      description: ObservedGeneration indicates the observedGeneration
+                        path of controlled workload
+                      type: string
+                    readyReplicas:
+                      description: ReadyReplicas indicates the readyReplicas path
+                        of controlled workload
+                      type: string
+                    replicas:
+                      description: Replicas indicates the replicas path of controlled
+                        workload
+                      type: string
+                    updatedReplicas:
+                      description: UpdatedReplicas indicates the updatedReplicas path
+                        of controlled workload
+                      type: string
+                  required:
+                  - replicas
+                  type: object
+              type: object
+          required:
+          - controlResource
+          type: object
+        status:
+          type: object
+  version: v1alpha1
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

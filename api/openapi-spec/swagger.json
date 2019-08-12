@@ -145,6 +145,22 @@
         }
       }
     },
+    "kruise.apps.v1alpha1.ControlResource": {
+      "description": "ControlResource defines the controlled resource",
+      "type": "object",
+      "required": [
+        "apiVersion",
+        "resource"
+      ],
+      "properties": {
+        "apiVersion": {
+          "type": "string"
+        },
+        "resource": {
+          "type": "string"
+        }
+      }
+    },
     "kruise.apps.v1alpha1.InPlaceUpdateContainerStatus": {
       "description": "InPlaceUpdateContainerStatus records the statuses of the container that are mainly used to determine whether the InPlaceUpdate is completed.",
       "type": "object",
@@ -214,6 +230,18 @@
         }
       }
     },
+    "kruise.apps.v1alpha1.Path": {
+      "description": "Path indicates the path",
+      "type": "object",
+      "properties": {
+        "specPath": {
+          "$ref": "#/definitions/kruise.apps.v1alpha1.SpecPath"
+        },
+        "statusPath": {
+          "$ref": "#/definitions/kruise.apps.v1alpha1.StatusPath"
+        }
+      }
+    },
     "kruise.apps.v1alpha1.RollingUpdateStatefulSetStrategy": {
       "description": "RollingUpdateStatefulSetStrategy is used to communicate parameter for RollingUpdateStatefulSetStrategyType.",
       "type": "object",
@@ -236,6 +264,74 @@
           "type": "string"
         }
       }
+    },
+    "kruise.apps.v1alpha1.RolloutDefinition": {
+      "description": "RolloutDefinition is the Schema for the rolloutdefinitions API",
+      "type": "object",
+      "properties": {
+        "apiVersion": {
+          "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+          "type": "string"
+        },
+        "kind": {
+          "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta"
+        },
+        "spec": {
+          "$ref": "#/definitions/kruise.apps.v1alpha1.RolloutDefinitionSpec"
+        },
+        "status": {
+          "$ref": "#/definitions/kruise.apps.v1alpha1.RolloutDefinitionStatus"
+        }
+      }
+    },
+    "kruise.apps.v1alpha1.RolloutDefinitionList": {
+      "description": "RolloutDefinitionList contains a list of RolloutDefinition",
+      "type": "object",
+      "required": [
+        "items"
+      ],
+      "properties": {
+        "apiVersion": {
+          "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/kruise.apps.v1alpha1.RolloutDefinition"
+          }
+        },
+        "kind": {
+          "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ListMeta"
+        }
+      }
+    },
+    "kruise.apps.v1alpha1.RolloutDefinitionSpec": {
+      "description": "RolloutDefinitionSpec defines the desired state of RolloutDefinition",
+      "type": "object",
+      "required": [
+        "controlResource"
+      ],
+      "properties": {
+        "controlResource": {
+          "$ref": "#/definitions/kruise.apps.v1alpha1.ControlResource"
+        },
+        "path": {
+          "$ref": "#/definitions/kruise.apps.v1alpha1.Path"
+        }
+      }
+    },
+    "kruise.apps.v1alpha1.RolloutDefinitionStatus": {
+      "description": "RolloutDefinitionStatus defines the observed state of RolloutDefinition",
+      "type": "object"
     },
     "kruise.apps.v1alpha1.SidecarContainer": {
       "description": "SidecarContainer defines the container of Sidecar",
@@ -347,6 +443,24 @@
           "description": "updatedPods is the number of matched Pods that are injected with the latest SidecarSet's containers",
           "type": "integer",
           "format": "int32"
+        }
+      }
+    },
+    "kruise.apps.v1alpha1.SpecPath": {
+      "description": "SpecPath indicates the spec path",
+      "type": "object",
+      "properties": {
+        "maxUnavailable": {
+          "description": "MaxUnavailable indicates the maxUnavailable path of controlled workload.",
+          "type": "string"
+        },
+        "partition": {
+          "description": "Partition indicates the partition path of controlled workload.",
+          "type": "string"
+        },
+        "paused": {
+          "description": "Paused indicates the paused path of controlled workload",
+          "type": "string"
         }
       }
     },
@@ -515,6 +629,39 @@
         },
         "type": {
           "description": "Type indicates the type of the StatefulSetUpdateStrategy. Default is RollingUpdate.",
+          "type": "string"
+        }
+      }
+    },
+    "kruise.apps.v1alpha1.StatusPath": {
+      "description": "StatusPath indicates the status path",
+      "type": "object",
+      "required": [
+        "replicas"
+      ],
+      "properties": {
+        "conditions": {
+          "description": "Conditions indicates the state",
+          "type": "string"
+        },
+        "currentReplicas": {
+          "description": "CurrentReplicas indicates the currentReplicas path of controlled workload",
+          "type": "string"
+        },
+        "observedGeneration": {
+          "description": "ObservedGeneration indicates the observedGeneration path of controlled workload",
+          "type": "string"
+        },
+        "readyReplicas": {
+          "description": "ReadyReplicas indicates the readyReplicas path of controlled workload",
+          "type": "string"
+        },
+        "replicas": {
+          "description": "Replicas indicates the replicas path of controlled workload",
+          "type": "string"
+        },
+        "updatedReplicas": {
+          "description": "UpdatedReplicas indicates the updatedReplicas path of controlled workload",
           "type": "string"
         }
       }

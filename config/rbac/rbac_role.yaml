@@ -67,6 +67,26 @@ rules:
 - apiGroups:
   - apps.kruise.io
   resources:
+  - rolloutdefinitions
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - apps.kruise.io
+  resources:
+  - rolloutdefinitions/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - apps.kruise.io
+  resources:
   - sidecarsets
   verbs:
   - get
