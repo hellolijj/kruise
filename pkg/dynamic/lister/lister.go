@@ -19,6 +19,8 @@ package lister
 import (
 	"fmt"
 
+	"k8s.io/klog"
+
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
@@ -57,12 +59,14 @@ func (l *Lister) Get(namespace, name string) (*unstructured.Unstructured, error)
 	if namespace != "" {
 		key = fmt.Sprintf("%s/%s", namespace, name)
 	}
+	v := l.indexer.ListKeys()
+	klog.Infof("qwkLog: indexer.listkeys = %v", v)
 	obj, exists, err := l.indexer.GetByKey(key)
 	if err != nil {
 		return nil, err
 	}
 	if !exists {
-		return nil, errors.NewNotFound(l.groupResource, name)
+		return nil, errors.NewNotFound(l.groupResource, key)
 	}
 	return obj.(*unstructured.Unstructured), nil
 }

@@ -3,7 +3,21 @@ kind: RolloutDefinition
 metadata:
   labels:
     controller-tools.k8s.io: "1.0"
-  name: rolloutdefinition-sample
+  name: rolloutdefinition-deployment
 spec:
-  # Add fields here
-  foo: bar
+  controlResource:
+    apiVersion:  apps/v1
+    resource: deployments
+  path:
+    specPath:
+      paused: .spec.paused
+      patition: .spec
+      maxUnavailable: .spec.strategy.rollingUpdate.maxUnavailable
+    statusPath:
+      replicas: .status.replicas
+      readyReplicas: .status.readyReplicas
+      currentReplicas: .status.currentReplicas
+      updatedReplicas: .status.updatedReplicas
+      observedGeneration: .status.observedGeneration
+      conditions: .status.conditions
+

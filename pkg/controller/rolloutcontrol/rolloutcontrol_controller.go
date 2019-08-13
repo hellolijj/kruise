@@ -121,15 +121,21 @@ func (r *ReconcileRolloutControl) Reconcile(request reconcile.Request) (reconcil
 	}
 	klog.Infof("qwkLog：rolloutCtl:( %v + %v )", rolloutCtl.Spec.Resource.NameSpace, rolloutCtl.Spec.Resource.Name)
 	resource, err := resourceInformer.Lister().Get(rolloutCtl.Spec.Resource.NameSpace, rolloutCtl.Spec.Resource.Name)
-	klog.Infof("qwkLog：dynamic resource: %v", resource)
-	var val interface{} = resource.Object
-	if m, ok := val.(map[string]interface{}); ok {
-		val, ok = m["spec"]
-		if ok {
-			klog.Infof("qwkLog：spec val: %v", val)
-		}
+	if err != nil {
+		klog.Infof("qwkLog: can't get resource : %v", err)
 	}
-	klog.Infof("qwkLog：dynamic resource spec object: %v", resource.Object["spec"])
+
+	klog.Infof("qwkLog：dynamic resource: %v", resource)
+	if resource != nil {
+		var val interface{} = resource.Object
+		if m, ok := val.(map[string]interface{}); ok {
+			val, ok = m["spec"]
+			if ok {
+				klog.Infof("qwkLog：spec val: %v", val)
+			}
+		}
+		klog.Infof("qwkLog：dynamic resource spec object: %v", resource.Object["spec"])
+	}
 
 	return reconcile.Result{}, nil
 }
