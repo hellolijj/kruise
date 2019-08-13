@@ -22,7 +22,10 @@ import (
 	"k8s.io/klog"
 
 	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
-	appsv1 "k8s.io/api/apps/v1"
+	"github.com/openkruise/kruise/pkg/dynamic"
+	dynamicclientset "github.com/openkruise/kruise/pkg/dynamic/clientset"
+	dynamicdiscovery "github.com/openkruise/kruise/pkg/dynamic/discovery"
+	dynamicinformer "github.com/openkruise/kruise/pkg/dynamic/informer"
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -34,24 +37,32 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-/**
-* USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
-* business logic.  Delete these comments after modifying this file.*
- */
-
 // Add creates a new RolloutDefinition Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
-	return add(mgr, newReconciler(mgr))
+	r, err := newReconciler(mgr)
+	if err != nil {
+		return err
+	}
+	return add(mgr, r)
 }
 
 // newReconciler returns a new reconcile.Reconciler
-func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileRolloutDefinition{
-		Client:    mgr.GetClient(),
-		scheme:    mgr.GetScheme(),
-		PathTable: make(map[appsv1alpha1.ControlResource]*appsv1alpha1.Path),
+func newReconciler(mgr manager.Manager) (reconcile.Reconciler, error) {
+
+	dynamic, err := dynamic.NewDynamic()
+	if err != nil {
+		return nil, err
 	}
+
+	return &ReconcileRolloutDefinition{
+		Client:       mgr.GetClient(),
+		scheme:       mgr.GetScheme(),
+		PathTable:    make(map[appsv1alpha1.ControlResource]*appsv1alpha1.Path),
+		resources:    dynamic.Resources,
+		dynClient:    dynamic.DynClient,
+		dynInformers: dynamic.DynInformers,
+	}, nil
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -68,16 +79,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// TODO(user): Modify this to be the types you create
-	// Uncomment watch a Deployment created by RolloutDefinition - change this for objects you create
-	err = c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &appsv1alpha1.RolloutDefinition{},
-	})
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -86,8 +87,11 @@ var _ reconcile.Reconciler = &ReconcileRolloutDefinition{}
 // ReconcileRolloutDefinition reconciles a RolloutDefinition object
 type ReconcileRolloutDefinition struct {
 	client.Client
-	scheme    *runtime.Scheme
-	PathTable map[appsv1alpha1.ControlResource]*appsv1alpha1.Path
+	scheme       *runtime.Scheme
+	PathTable    map[appsv1alpha1.ControlResource]*appsv1alpha1.Path
+	resources    *dynamicdiscovery.ResourceMap
+	dynClient    *dynamicclientset.Clientset
+	dynInformers *dynamicinformer.SharedInformerFactory
 }
 
 // Reconcile reads that state of the cluster for a RolloutDefinition object and makes changes based on the state read
@@ -109,8 +113,6 @@ func (r *ReconcileRolloutDefinition) Reconcile(request reconcile.Request) (recon
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
-	klog.Infof("qwkLog：Action rolloutDefinition reconcile %v", rolloutDef)
-	klog.Infof("qwkLog：Action rolloutDefinition reconcile %v", rolloutDef.Spec)
 	klog.Infof("qwkLog：Action rolloutDefinition reconcile %v", rolloutDef.Spec.ControlResource)
 
 	contrlResource := rolloutDef.Spec.ControlResource
@@ -123,7 +125,29 @@ func (r *ReconcileRolloutDefinition) Reconcile(request reconcile.Request) (recon
 		}
 	} else {
 		// TODO: create a new controller
-		klog.Infof("qwkLog：create a new controller for %v", rolloutDef.Spec.ControlResource)
+		klog.Infof("qwkLog：begin create a new controller for %v", rolloutDef.Spec.ControlResource)
+		/*resourceClient, err := r.dynClient.Resource(rolloutDef.Spec.ControlResource.APIVersion, rolloutDef.Spec.ControlResource.Resource)
+		if err != nil {
+			return reconcile.Result{}, err
+		}*/
+		resourceInformer, err := r.dynInformers.Resource(rolloutDef.Spec.ControlResource.APIVersion, rolloutDef.Spec.ControlResource.Resource)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+		klog.Infof("qwkLog：namespace: %v + name: %v", request.Namespace, request.Name)
+		resource, err := resourceInformer.Lister().Get(request.Namespace, request.Name)
+		klog.Infof("qwkLog：dynamic resource: %v", resource)
+		var val interface{} = resource.Object
+		if m, ok := val.(map[string]interface{}); ok {
+			val, ok = m["spec"]
+			if ok {
+				klog.Infof("qwkLog：spec val: %v", val)
+			}
+		}
+		klog.Infof("qwkLog：dynamic resource spec object: %v", resource.Object["spec"])
+
+		klog.Infof("qwkLog：end create a new controller for %v", rolloutDef.Spec.ControlResource)
+
 	}
 	// update pathTable
 	r.PathTable[contrlResource] = &rolloutDef.Spec.Path
