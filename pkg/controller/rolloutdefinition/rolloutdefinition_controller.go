@@ -86,7 +86,7 @@ var _ reconcile.Reconciler = &ReconcileRolloutDefinition{}
 // ReconcileRolloutDefinition reconciles a RolloutDefinition object
 type ReconcileRolloutDefinition struct {
 	client.Client
-	scheme *runtime.Scheme
+	scheme    *runtime.Scheme
 	PathTable map[appsv1alpha1.ControlResource]*appsv1alpha1.Path
 }
 
