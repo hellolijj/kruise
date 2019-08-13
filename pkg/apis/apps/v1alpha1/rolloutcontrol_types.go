@@ -18,18 +18,61 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 // RolloutControlSpec defines the desired state of RolloutControl
 type RolloutControlSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	Resource        CompleteResource `json:"resource"`
+	RolloutStrategy RolloutStrategy  `json:"rolloutstrategy,omitempty"`
+}
+
+type CompleteResource struct {
+	Kind       string `json:"kind"`
+	APIVersion string `json:"apiVersion"`
+	NameSpace  string `json:"namespace"`
+	Name       string `json:"name"`
+}
+
+type RolloutStrategy struct {
+	// Partition indicates the ordinal at which the workload should be
+	// partitioned.
+	// Default value is 0.
+	// +optional
+	Partition *int32 `json:"partition,omitempty"`
+	// The maximum number of pods that can be unavailable during the update.
+	// Value can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%).
+	// Absolute number is calculated from percentage by rounding down.
+	// Also, maxUnavailable can just be allowed to work with Parallel podManagementPolicy.
+	// Defaults to 1.
+	// +optional
+	MaxUnavailable *intstr.IntOrString `json:"maxUnavailable,omitempty"`
+	// Paused indicates that the process is paused.
+	// Default value is false
+	// +optional
+	Paused bool `json:"paused,omitempty"`
 }
 
 // RolloutControlStatus defines the observed state of RolloutControl
 type RolloutControlStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// ObservedGeneration is the most recent generation observed for this resource. It corresponds to the
+	// resource's generation, which is updated on mutation by the API Server.
+	// +optional
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
+
+	// Replicas is the number of Pods created by the CR controller.
+	Replicas int32 `json:"replicas"`
+
+	// ReadyReplicas is the number of Pods created by the CR controller that have a Ready Condition.
+	ReadyReplicas int32 `json:"readyReplicas"`
+
+	// CurrentReplicas is the number of Pods created by the CR controller from the CR version
+	// indicated by currentRevision.
+	CurrentReplicas int32 `json:"currentReplicas"`
+
+	// UpdatedReplicas is the number of Pods created by the CR controller from the CR version
+	// indicated by updateRevision.
+	UpdatedReplicas int32 `json:"updatedReplicas"`
 }
 
 // +genclient

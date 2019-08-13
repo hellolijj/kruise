@@ -19,7 +19,7 @@ package kubernetes
 import (
 	"fmt"
 
-	"github.com/golang/glog"
+	glog "k8s.io/klog"
 
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/tools/cache"

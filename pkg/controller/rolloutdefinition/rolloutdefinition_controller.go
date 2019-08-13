@@ -125,12 +125,13 @@ func (r *ReconcileRolloutDefinition) Reconcile(request reconcile.Request) (recon
 		}
 	} else {
 		// TODO: create a new controller
+
 		klog.Infof("qwkLog：begin create a new controller for %v", rolloutDef.Spec.ControlResource)
 		/*resourceClient, err := r.dynClient.Resource(rolloutDef.Spec.ControlResource.APIVersion, rolloutDef.Spec.ControlResource.Resource)
 		if err != nil {
 			return reconcile.Result{}, err
 		}*/
-		resourceInformer, err := r.dynInformers.Resource(rolloutDef.Spec.ControlResource.APIVersion, rolloutDef.Spec.ControlResource.Resource)
+		/*resourceInformer, err := r.dynInformers.Resource(rolloutDef.Spec.ControlResource.APIVersion, rolloutDef.Spec.ControlResource.Resource)
 		if err != nil {
 			return reconcile.Result{}, err
 		}
@@ -146,7 +147,7 @@ func (r *ReconcileRolloutDefinition) Reconcile(request reconcile.Request) (recon
 		}
 		klog.Infof("qwkLog：dynamic resource spec object: %v", resource.Object["spec"])
 
-		klog.Infof("qwkLog：end create a new controller for %v", rolloutDef.Spec.ControlResource)
+		klog.Infof("qwkLog：end create a new controller for %v", rolloutDef.Spec.ControlResource)*/
 
 	}
 	// update pathTable

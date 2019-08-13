@@ -18,41 +18,48 @@ package rolloutcontrol
 
 import (
 	"context"
-	"reflect"
+
+	"k8s.io/klog"
+
+	"github.com/openkruise/kruise/pkg/dynamic"
 
 	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
-	appsv1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
+	dynamicclientset "github.com/openkruise/kruise/pkg/dynamic/clientset"
+	dynamicdiscovery "github.com/openkruise/kruise/pkg/dynamic/discovery"
+	dynamicinformer "github.com/openkruise/kruise/pkg/dynamic/informer"
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
-
-var log = logf.Log.WithName("controller")
-
-/**
-* USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
-* business logic.  Delete these comments after modifying this file.*
- */
 
 // Add creates a new RolloutControl Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
-	return add(mgr, newReconciler(mgr))
+	r, err := newReconciler(mgr)
+	if err != nil {
+		return err
+	}
+	return add(mgr, r)
 }
 
 // newReconciler returns a new reconcile.Reconciler
-func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileRolloutControl{Client: mgr.GetClient(), scheme: mgr.GetScheme()}
+func newReconciler(mgr manager.Manager) (reconcile.Reconciler, error) {
+	dynamic, err := dynamic.NewDynamic()
+	if err != nil {
+		return nil, err
+	}
+	return &ReconcileRolloutControl{
+		Client:       mgr.GetClient(),
+		scheme:       mgr.GetScheme(),
+		resources:    dynamic.Resources,
+		dynClient:    dynamic.DynClient,
+		dynInformers: dynamic.DynInformers,
+	}, nil
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -69,16 +76,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// TODO(user): Modify this to be the types you create
-	// Uncomment watch a Deployment created by RolloutControl - change this for objects you create
-	err = c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &appsv1alpha1.RolloutControl{},
-	})
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -87,13 +84,14 @@ var _ reconcile.Reconciler = &ReconcileRolloutControl{}
 // ReconcileRolloutControl reconciles a RolloutControl object
 type ReconcileRolloutControl struct {
 	client.Client
-	scheme *runtime.Scheme
+	scheme       *runtime.Scheme
+	resources    *dynamicdiscovery.ResourceMap
+	dynClient    *dynamicclientset.Clientset
+	dynInformers *dynamicinformer.SharedInformerFactory
 }
 
 // Reconcile reads that state of the cluster for a RolloutControl object and makes changes based on the state read
 // and what is in the RolloutControl.Spec
-// TODO(user): Modify this Reconcile function to implement your Controller logic.  The scaffolding writes
-// a Deployment as an example
 // Automatically generate RBAC rules to allow the Controller to read and write Deployments
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps,resources=deployments/status,verbs=get;update;patch
@@ -101,8 +99,8 @@ type ReconcileRolloutControl struct {
 // +kubebuilder:rbac:groups=apps.kruise.io,resources=rolloutcontrols/status,verbs=get;update;patch
 func (r *ReconcileRolloutControl) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	// Fetch the RolloutControl instance
-	instance := &appsv1alpha1.RolloutControl{}
-	err := r.Get(context.TODO(), request.NamespacedName, instance)
+	rolloutCtl := &appsv1alpha1.RolloutControl{}
+	err := r.Get(context.TODO(), request.NamespacedName, rolloutCtl)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Object not found, return.  Created objects are automatically garbage collected.
@@ -112,56 +110,26 @@ func (r *ReconcileRolloutControl) Reconcile(request reconcile.Request) (reconcil
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
-
-	// TODO(user): Change this to be the object type created by your controller
-	// Define the desired Deployment object
-	deploy := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      instance.Name + "-deployment",
-			Namespace: instance.Namespace,
-		},
-		Spec: appsv1.DeploymentSpec{
-			Selector: &metav1.LabelSelector{
-				MatchLabels: map[string]string{"deployment": instance.Name + "-deployment"},
-			},
-			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{"deployment": instance.Name + "-deployment"}},
-				Spec: corev1.PodSpec{
-					Containers: []corev1.Container{
-						{
-							Name:  "nginx",
-							Image: "nginx",
-						},
-					},
-				},
-			},
-		},
-	}
-	if err := controllerutil.SetControllerReference(instance, deploy, r.scheme); err != nil {
+	klog.Infof("qwkLog：begin RolloutControl for %v", rolloutCtl.Spec.Resource)
+	/*resourceClient, err := r.dynClient.Resource(rolloutCtl.Spec.Resource.APIVersion, rolloutCtl.Spec.Resource.Kind)
+	if err != nil {
+		return reconcile.Result{}, err
+	}*/
+	resourceInformer, err := r.dynInformers.Resource(rolloutCtl.Spec.Resource.APIVersion, rolloutCtl.Spec.Resource.Kind)
+	if err != nil {
 		return reconcile.Result{}, err
 	}
-
-	// TODO(user): Change this for the object type created by your controller
-	// Check if the Deployment already exists
-	found := &appsv1.Deployment{}
-	err = r.Get(context.TODO(), types.NamespacedName{Name: deploy.Name, Namespace: deploy.Namespace}, found)
-	if err != nil && errors.IsNotFound(err) {
-		log.Info("Creating Deployment", "namespace", deploy.Namespace, "name", deploy.Name)
-		err = r.Create(context.TODO(), deploy)
-		return reconcile.Result{}, err
-	} else if err != nil {
-		return reconcile.Result{}, err
-	}
-
-	// TODO(user): Change this for the object type created by your controller
-	// Update the found object and write the result back if there are any changes
-	if !reflect.DeepEqual(deploy.Spec, found.Spec) {
-		found.Spec = deploy.Spec
-		log.Info("Updating Deployment", "namespace", deploy.Namespace, "name", deploy.Name)
-		err = r.Update(context.TODO(), found)
-		if err != nil {
-			return reconcile.Result{}, err
+	klog.Infof("qwkLog：rolloutCtl:( %v + %v )", rolloutCtl.Spec.Resource.NameSpace, rolloutCtl.Spec.Resource.Name)
+	resource, err := resourceInformer.Lister().Get(rolloutCtl.Spec.Resource.NameSpace, rolloutCtl.Spec.Resource.Name)
+	klog.Infof("qwkLog：dynamic resource: %v", resource)
+	var val interface{} = resource.Object
+	if m, ok := val.(map[string]interface{}); ok {
+		val, ok = m["spec"]
+		if ok {
+			klog.Infof("qwkLog：spec val: %v", val)
 		}
 	}
+	klog.Infof("qwkLog：dynamic resource spec object: %v", resource.Object["spec"])
+
 	return reconcile.Result{}, nil
 }

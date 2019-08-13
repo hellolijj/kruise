@@ -5,5 +5,12 @@ metadata:
     controller-tools.k8s.io: "1.0"
   name: rolloutcontrol-sample
 spec:
-  # Add fields here
-  foo: bar
+  resource:
+    kind: StatefulSet
+    apiVersion: apps.kruise.io/v1alpha1
+    namespace: default
+    name: sample
+  rolloutstrategy:
+      paused: false
+      maxUnavailable: 3
+      partition: 5

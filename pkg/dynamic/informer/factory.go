@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/golang/glog"
+	glog "k8s.io/klog"
 
 	dynamicclientset "github.com/openkruise/kruise/pkg/dynamic/clientset"
 )
