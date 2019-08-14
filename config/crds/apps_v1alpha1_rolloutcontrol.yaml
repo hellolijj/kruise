@@ -27,8 +27,80 @@ spec:
         metadata:
           type: object
         spec:
+          properties:
+            resource:
+              properties:
+                apiVersion:
+                  type: string
+                kind:
+                  type: string
+                name:
+                  type: string
+                namespace:
+                  type: string
+              required:
+              - kind
+              - apiVersion
+              - namespace
+              - name
+              type: object
+            rolloutstrategy:
+              properties:
+                maxUnavailable:
+                  description: 'The maximum number of pods that can be unavailable
+                    during the update. Value can be an absolute number (ex: 5) or
+                    a percentage of desired pods (ex: 10%). Absolute number is calculated
+                    from percentage by rounding down. Also, maxUnavailable can just
+                    be allowed to work with Parallel podManagementPolicy. Defaults
+                    to 1.'
+                  oneOf:
+                  - type: string
+                  - type: integer
+                partition:
+                  description: Partition indicates the ordinal at which the workload
+                    should be partitioned. Default value is 0.
+                  format: int32
+                  type: integer
+                paused:
+                  description: Paused indicates that the process is paused. Default
+                    value is false
+                  type: boolean
+              type: object
+          required:
+          - resource
           type: object
         status:
+          properties:
+            currentReplicas:
+              description: CurrentReplicas is the number of Pods created by the CR
+                controller from the CR version indicated by currentRevision.
+              format: int32
+              type: integer
+            observedGeneration:
+              description: ObservedGeneration is the most recent generation observed
+                for this resource. It corresponds to the resource's generation, which
+                is updated on mutation by the API Server.
+              format: int64
+              type: integer
+            readyReplicas:
+              description: ReadyReplicas is the number of Pods created by the CR controller
+                that have a Ready Condition.
+              format: int32
+              type: integer
+            replicas:
+              description: Replicas is the number of Pods created by the CR controller.
+              format: int32
+              type: integer
+            updatedReplicas:
+              description: UpdatedReplicas is the number of Pods created by the CR
+                controller from the CR version indicated by updateRevision.
+              format: int32
+              type: integer
+          required:
+          - replicas
+          - readyReplicas
+          - currentReplicas
+          - updatedReplicas
           type: object
   version: v1alpha1
 status:

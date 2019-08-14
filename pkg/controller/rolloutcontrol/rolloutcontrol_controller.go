@@ -18,6 +18,11 @@ package rolloutcontrol
 
 import (
 	"context"
+	"strings"
+
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+
+	"github.com/openkruise/kruise/pkg/controller/rolloutdefinition"
 
 	"k8s.io/klog"
 
@@ -126,23 +131,46 @@ func (r *ReconcileRolloutControl) Reconcile(request reconcile.Request) (reconcil
 	if err != nil {
 		return reconcile.Result{}, err
 	}
-	//klog.Infof("qwkLog：rolloutCtl:( %v + %v )", rolloutCtl.Spec.Resource.NameSpace, rolloutCtl.Spec.Resource.Name)
+
 	resource, err := resourceInformer.Lister().Get(rolloutCtl.Spec.Resource.NameSpace, rolloutCtl.Spec.Resource.Name)
 	if err != nil {
 		klog.Infof("can't get resource : %v", err)
 	}
-
 	klog.Infof("qwkLog：get dynamic resource: %v", resource)
-	if resource != nil {
-		var val interface{} = resource.Object
-		if m, ok := val.(map[string]interface{}); ok {
-			val, ok = m["spec"]
-			if ok {
-				klog.Infof("qwkLog：spec val: %v", val)
-			}
-		}
-		klog.Infof("qwkLog：dynamic resource spec object: %v", resource.Object["spec"])
+	if resource == nil {
+		return reconcile.Result{}, nil
 	}
+	resourcePath := rolloutdefinition.ResourcePathTable.Get(rolloutCtl.Spec.Resource.APIVersion, rolloutCtl.Spec.Resource.Kind)
+	if resourcePath == nil {
+		klog.Info("qwkLog: have no resourcePath")
+		return reconcile.Result{}, nil
+	}
+	pausedPathArr := strings.Split(resourcePath.SpecPath.Paused, ".")
+	pausedV, b, err := unstructured.NestedFieldNoCopy(resource.Object, pausedPathArr...)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	if b == false {
+		klog.Info("can't get path field")
+		return reconcile.Result{}, nil
+	}
+	klog.Infof("qwkLog：get paused value: %v", pausedV)
+
+	klog.Info("qwkLog：begin set paused value")
+	err = unstructured.SetNestedField(resource.Object, rolloutCtl.Spec.RolloutStrategy.Paused, pausedPathArr...)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	klog.Info("qwkLog：end set paused value")
+	pausedV, b, err = unstructured.NestedFieldNoCopy(resource.Object, pausedPathArr...)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	if b == false {
+		klog.Info("can't get path field  after set")
+		return reconcile.Result{}, nil
+	}
+	klog.Infof("qwkLog：get paused value after set: %v", pausedV)
 
 	return reconcile.Result{}, nil
 }
