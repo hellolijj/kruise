@@ -98,6 +98,13 @@ type ReconcileRolloutControl struct {
 // +kubebuilder:rbac:groups=apps.kruise.io,resources=rolloutcontrols,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps.kruise.io,resources=rolloutcontrols/status,verbs=get;update;patch
 func (r *ReconcileRolloutControl) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+	/*
+		（OK）1、获得 RolloutControl 实例 rollourCtl，取得 spec 字段
+		（OK）2、利用 RolloutControl.spec 获得要操作的资源对象 resource
+		3、利用 RolloutControl.spec 去 RollourDefinition 中取得 resource 的 Path 路径
+		4、利用 Path 路径操作 resource.spec
+		5、更新 resource
+	*/
 	// Fetch the RolloutControl instance
 	rolloutCtl := &appsv1alpha1.RolloutControl{}
 	err := r.Get(context.TODO(), request.NamespacedName, rolloutCtl)
@@ -111,21 +118,21 @@ func (r *ReconcileRolloutControl) Reconcile(request reconcile.Request) (reconcil
 		return reconcile.Result{}, err
 	}
 	klog.Infof("qwkLog：begin RolloutControl for %v", rolloutCtl.Spec.Resource)
-	/*resourceClient, err := r.dynClient.Resource(rolloutCtl.Spec.Resource.APIVersion, rolloutCtl.Spec.Resource.Kind)
+	/* resourceClient, err := r.dynClient.Resource(rolloutCtl.Spec.Resource.APIVersion, rolloutCtl.Spec.Resource.Kind)
 	if err != nil {
 		return reconcile.Result{}, err
-	}*/
+	} */
 	resourceInformer, err := r.dynInformers.Resource(rolloutCtl.Spec.Resource.APIVersion, rolloutCtl.Spec.Resource.Kind)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
-	klog.Infof("qwkLog：rolloutCtl:( %v + %v )", rolloutCtl.Spec.Resource.NameSpace, rolloutCtl.Spec.Resource.Name)
+	//klog.Infof("qwkLog：rolloutCtl:( %v + %v )", rolloutCtl.Spec.Resource.NameSpace, rolloutCtl.Spec.Resource.Name)
 	resource, err := resourceInformer.Lister().Get(rolloutCtl.Spec.Resource.NameSpace, rolloutCtl.Spec.Resource.Name)
 	if err != nil {
-		klog.Infof("qwkLog: can't get resource : %v", err)
+		klog.Infof("can't get resource : %v", err)
 	}
 
-	klog.Infof("qwkLog：dynamic resource: %v", resource)
+	klog.Infof("qwkLog：get dynamic resource: %v", resource)
 	if resource != nil {
 		var val interface{} = resource.Object
 		if m, ok := val.(map[string]interface{}); ok {
