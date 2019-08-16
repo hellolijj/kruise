@@ -17,6 +17,8 @@ type Dynamic struct {
 	DynInformers *dynamicinformer.SharedInformerFactory
 }
 
+var DynamicGlobal *Dynamic
+
 func NewDynamic() (dynamic *Dynamic, err error) {
 	informerRelist := 30 * time.Second
 	discoveryInterval := 30 * time.Second
@@ -37,11 +39,18 @@ func NewDynamic() (dynamic *Dynamic, err error) {
 	// Create dynamic informer factory (for sharing dynamic informers).
 	dynInformers := dynamicinformer.NewSharedInformerFactory(dynClient, informerRelist)
 
-	dynamic = &Dynamic{
+	DynamicGlobal = &Dynamic{
 		Resources:    resources,
 		DynClient:    dynClient,
 		DynInformers: dynInformers,
 	}
 
-	return dynamic, nil
+	return DynamicGlobal, nil
+}
+
+func GetDynamic() (*Dynamic, error) {
+	if DynamicGlobal == nil {
+		return NewDynamic()
+	}
+	return DynamicGlobal, nil
 }

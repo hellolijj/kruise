@@ -39,14 +39,14 @@ type RolloutStrategy struct {
 	// partitioned.
 	// Default value is 0.
 	// +optional
-	Partition *int32 `json:"partition,omitempty"`
+	Partition int32 `json:"partition,omitempty"`
 	// The maximum number of pods that can be unavailable during the update.
 	// Value can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%).
 	// Absolute number is calculated from percentage by rounding down.
 	// Also, maxUnavailable can just be allowed to work with Parallel podManagementPolicy.
 	// Defaults to 1.
 	// +optional
-	MaxUnavailable *intstr.IntOrString `json:"maxUnavailable,omitempty"`
+	MaxUnavailable intstr.IntOrString `json:"maxUnavailable,omitempty"`
 	// Paused indicates that the process is paused.
 	// Default value is false
 	// +optional

@@ -20,20 +20,17 @@ import (
 	"context"
 	"strings"
 
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-
-	"github.com/openkruise/kruise/pkg/controller/rolloutdefinition"
-
-	"k8s.io/klog"
-
-	"github.com/openkruise/kruise/pkg/dynamic"
-
 	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
+	"github.com/openkruise/kruise/pkg/controller/rolloutdefinition"
+	"github.com/openkruise/kruise/pkg/dynamic"
 	dynamicclientset "github.com/openkruise/kruise/pkg/dynamic/clientset"
 	dynamicdiscovery "github.com/openkruise/kruise/pkg/dynamic/discovery"
 	dynamicinformer "github.com/openkruise/kruise/pkg/dynamic/informer"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -54,10 +51,12 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) (reconcile.Reconciler, error) {
-	dynamic, err := dynamic.NewDynamic()
+	dynamic, err := dynamic.GetDynamic()
 	if err != nil {
 		return nil, err
 	}
+	klog.Infof("qwkLog：Get dynamic resource in rolloutcontrol : %v", dynamic.Resources)
+
 	return &ReconcileRolloutControl{
 		Client:       mgr.GetClient(),
 		scheme:       mgr.GetScheme(),
@@ -123,10 +122,11 @@ func (r *ReconcileRolloutControl) Reconcile(request reconcile.Request) (reconcil
 		return reconcile.Result{}, err
 	}
 	klog.Infof("qwkLog：begin RolloutControl for %v", rolloutCtl.Spec.Resource)
-	/* resourceClient, err := r.dynClient.Resource(rolloutCtl.Spec.Resource.APIVersion, rolloutCtl.Spec.Resource.Kind)
-	if err != nil {
-		return reconcile.Result{}, err
-	} */
+	if r.dynInformers == nil {
+		klog.Info("qwkLog：r.dynInformers is nil")
+		return reconcile.Result{}, nil
+	}
+
 	resourceInformer, err := r.dynInformers.Resource(rolloutCtl.Spec.Resource.APIVersion, rolloutCtl.Spec.Resource.Kind)
 	if err != nil {
 		return reconcile.Result{}, err
@@ -145,32 +145,72 @@ func (r *ReconcileRolloutControl) Reconcile(request reconcile.Request) (reconcil
 		klog.Info("qwkLog: have no resourcePath")
 		return reconcile.Result{}, nil
 	}
+
+	// set paused field
 	pausedPathArr := strings.Split(resourcePath.SpecPath.Paused, ".")
 	pausedV, b, err := unstructured.NestedFieldNoCopy(resource.Object, pausedPathArr...)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
-	if b == false {
-		klog.Info("can't get path field")
-		return reconcile.Result{}, nil
+	if b == true {
+		klog.Infof("qwkLog：get paused value: %v", pausedV)
+		klog.Info("qwkLog：begin set paused value")
+		err = unstructured.SetNestedField(resource.Object, rolloutCtl.Spec.RolloutStrategy.Paused, pausedPathArr...)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+		klog.Info("qwkLog：end set paused value")
+	} else {
+		klog.Info("can't get path field of paused")
 	}
-	klog.Infof("qwkLog：get paused value: %v", pausedV)
 
-	klog.Info("qwkLog：begin set paused value")
-	err = unstructured.SetNestedField(resource.Object, rolloutCtl.Spec.RolloutStrategy.Paused, pausedPathArr...)
+	// set partition field
+	partitionPathArr := strings.Split(resourcePath.SpecPath.Partition, ".")
+	partitionV, b, err := unstructured.NestedFieldNoCopy(resource.Object, partitionPathArr...)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
-	klog.Info("qwkLog：end set paused value")
-	pausedV, b, err = unstructured.NestedFieldNoCopy(resource.Object, pausedPathArr...)
+	if b == true {
+		klog.Infof("qwkLog：get partition value: %v", partitionV)
+		klog.Info("qwkLog：begin set partition value")
+		err = SetNestedField(resource.Object, rolloutCtl.Spec.RolloutStrategy.Partition, partitionPathArr...)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+		klog.Info("qwkLog：end set partition value")
+	} else {
+		klog.Info("can't get path field of partition")
+	}
+
+	// set maxUnavailable field
+	maxUnavailablePathArr := strings.Split(resourcePath.SpecPath.Partition, ".")
+	maxUnavailableV, b, err := unstructured.NestedFieldNoCopy(resource.Object, maxUnavailablePathArr...)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
-	if b == false {
-		klog.Info("can't get path field  after set")
-		return reconcile.Result{}, nil
+	if b == true {
+		klog.Infof("qwkLog：get maxUnavailable value: %v", maxUnavailableV)
+		klog.Info("qwkLog：begin set maxUnavailable value")
+		err = SetNestedField(resource.Object, rolloutCtl.Spec.RolloutStrategy.MaxUnavailable, maxUnavailablePathArr...)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+		klog.Info("qwkLog：end set maxUnavailable value")
+	} else {
+		klog.Info("can't get path field of maxUnavailable")
 	}
-	klog.Infof("qwkLog：get paused value after set: %v", pausedV)
+
+	// update the spec of paused,partition,maxUnavailable by client
+	klog.Info("qwkLog：begin update value")
+	resourceClient, err := r.dynClient.Resource(rolloutCtl.Spec.Resource.APIVersion, rolloutCtl.Spec.Resource.Kind)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	_, err = resourceClient.Namespace(rolloutCtl.Spec.Resource.NameSpace).Update(resource, metav1.UpdateOptions{})
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	klog.Info("qwkLog：end update value")
 
 	return reconcile.Result{}, nil
 }
