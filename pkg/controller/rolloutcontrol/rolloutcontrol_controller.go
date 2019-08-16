@@ -145,14 +145,15 @@ func (r *ReconcileRolloutControl) Reconcile(request reconcile.Request) (reconcil
 		klog.Info("qwkLog: have no resourcePath")
 		return reconcile.Result{}, nil
 	}
+	// klog.Infof("qwkLog：resourcePath { %v : %v}", rolloutCtl.Spec.Resource, resourcePath)
 
 	// set paused field
-	pausedPathArr := strings.Split(resourcePath.SpecPath.Paused, ".")
-	pausedV, b, err := unstructured.NestedFieldNoCopy(resource.Object, pausedPathArr...)
-	if err != nil {
-		return reconcile.Result{}, err
-	}
-	if b == true {
+	if resourcePath.SpecPath.Paused != "" {
+		pausedPathArr := strings.Split(resourcePath.SpecPath.Paused, ".")
+		pausedV, _, err := unstructured.NestedFieldNoCopy(resource.Object, pausedPathArr...)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
 		klog.Infof("qwkLog：get paused value: %v", pausedV)
 		klog.Info("qwkLog：begin set paused value")
 		err = unstructured.SetNestedField(resource.Object, rolloutCtl.Spec.RolloutStrategy.Paused, pausedPathArr...)
@@ -161,43 +162,53 @@ func (r *ReconcileRolloutControl) Reconcile(request reconcile.Request) (reconcil
 		}
 		klog.Info("qwkLog：end set paused value")
 	} else {
-		klog.Info("can't get path field of paused")
+		klog.Info("paused is not supported")
 	}
 
 	// set partition field
-	partitionPathArr := strings.Split(resourcePath.SpecPath.Partition, ".")
-	partitionV, b, err := unstructured.NestedFieldNoCopy(resource.Object, partitionPathArr...)
-	if err != nil {
-		return reconcile.Result{}, err
-	}
-	if b == true {
-		klog.Infof("qwkLog：get partition value: %v", partitionV)
-		klog.Info("qwkLog：begin set partition value")
-		err = SetNestedField(resource.Object, rolloutCtl.Spec.RolloutStrategy.Partition, partitionPathArr...)
+	if resourcePath.SpecPath.Partition != "" {
+		partitionPathArr := strings.Split(resourcePath.SpecPath.Partition, ".")
+		partitionV, b, err := unstructured.NestedFieldNoCopy(resource.Object, partitionPathArr...)
 		if err != nil {
 			return reconcile.Result{}, err
 		}
-		klog.Info("qwkLog：end set partition value")
+		if b == true {
+			klog.Infof("qwkLog：get partition value: %v", partitionV)
+			klog.Info("qwkLog：begin set partition value")
+			err = SetNestedField(resource.Object, rolloutCtl.Spec.RolloutStrategy.Partition, partitionPathArr...)
+			if err != nil {
+				return reconcile.Result{}, err
+			}
+			klog.Info("qwkLog：end set partition value")
+		} else {
+			klog.Info("can't get path field of partition")
+		}
 	} else {
-		klog.Info("can't get path field of partition")
+		klog.Info("partition is not supported")
 	}
 
 	// set maxUnavailable field
-	maxUnavailablePathArr := strings.Split(resourcePath.SpecPath.Partition, ".")
-	maxUnavailableV, b, err := unstructured.NestedFieldNoCopy(resource.Object, maxUnavailablePathArr...)
-	if err != nil {
-		return reconcile.Result{}, err
-	}
-	if b == true {
-		klog.Infof("qwkLog：get maxUnavailable value: %v", maxUnavailableV)
-		klog.Info("qwkLog：begin set maxUnavailable value")
-		err = SetNestedField(resource.Object, rolloutCtl.Spec.RolloutStrategy.MaxUnavailable, maxUnavailablePathArr...)
+	if resourcePath.SpecPath.MaxUnavailable != "" {
+		maxUnavailablePathArr := strings.Split(resourcePath.SpecPath.MaxUnavailable, ".")
+		klog.Infof("qwkLog：resource.Object : %v", resource.Object)
+		klog.Infof("qwkLog：maxUnavailablePathArr : %v", maxUnavailablePathArr)
+		maxUnavailableV, b, err := unstructured.NestedFieldNoCopy(resource.Object, maxUnavailablePathArr...)
 		if err != nil {
 			return reconcile.Result{}, err
 		}
-		klog.Info("qwkLog：end set maxUnavailable value")
+		if b == true {
+			klog.Infof("qwkLog：get maxUnavailable value: %v", maxUnavailableV)
+			klog.Info("qwkLog：begin set maxUnavailable value")
+			err = SetNestedField(resource.Object, rolloutCtl.Spec.RolloutStrategy.MaxUnavailable, maxUnavailablePathArr...)
+			if err != nil {
+				return reconcile.Result{}, err
+			}
+			klog.Info("qwkLog：end set maxUnavailable value")
+		} else {
+			klog.Info("can't get path field of maxUnavailable")
+		}
 	} else {
-		klog.Info("can't get path field of maxUnavailable")
+		klog.Info("maxUnavailable is not supported")
 	}
 
 	// update the spec of paused,partition,maxUnavailable by client

@@ -20,7 +20,7 @@ type Dynamic struct {
 var DynamicGlobal *Dynamic
 
 func NewDynamic() (dynamic *Dynamic, err error) {
-	informerRelist := 30 * time.Second
+	informerRelist := 30 * time.Minute
 	discoveryInterval := 30 * time.Second
 	config, err := rest.InClusterConfig()
 	if err != nil {
