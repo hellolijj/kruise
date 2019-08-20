@@ -1,5 +1,5 @@
 /*
-Copyright The The Kruise Authors.
+Copyright The Kubernetes Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,6 +25,22 @@ type BroadcastJobListerExpansion interface{}
 // BroadcastJobNamespaceListerExpansion allows custom methods to be added to
 // BroadcastJobNamespaceLister.
 type BroadcastJobNamespaceListerExpansion interface{}
+
+// RolloutControlListerExpansion allows custom methods to be added to
+// RolloutControlLister.
+type RolloutControlListerExpansion interface{}
+
+// RolloutControlNamespaceListerExpansion allows custom methods to be added to
+// RolloutControlNamespaceLister.
+type RolloutControlNamespaceListerExpansion interface{}
+
+// RolloutDefinitionListerExpansion allows custom methods to be added to
+// RolloutDefinitionLister.
+type RolloutDefinitionListerExpansion interface{}
+
+// RolloutDefinitionNamespaceListerExpansion allows custom methods to be added to
+// RolloutDefinitionNamespaceLister.
+type RolloutDefinitionNamespaceListerExpansion interface{}
 
 // SidecarSetListerExpansion allows custom methods to be added to
 // SidecarSetLister.

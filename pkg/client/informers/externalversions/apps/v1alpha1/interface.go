@@ -1,5 +1,5 @@
 /*
-Copyright The The Kruise Authors.
+Copyright The Kubernetes Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,6 +26,10 @@ import (
 type Interface interface {
 	// BroadcastJobs returns a BroadcastJobInformer.
 	BroadcastJobs() BroadcastJobInformer
+	// RolloutControls returns a RolloutControlInformer.
+	RolloutControls() RolloutControlInformer
+	// RolloutDefinitions returns a RolloutDefinitionInformer.
+	RolloutDefinitions() RolloutDefinitionInformer
 	// SidecarSets returns a SidecarSetInformer.
 	SidecarSets() SidecarSetInformer
 	// StatefulSets returns a StatefulSetInformer.
@@ -46,6 +50,16 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 // BroadcastJobs returns a BroadcastJobInformer.
 func (v *version) BroadcastJobs() BroadcastJobInformer {
 	return &broadcastJobInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// RolloutControls returns a RolloutControlInformer.
+func (v *version) RolloutControls() RolloutControlInformer {
+	return &rolloutControlInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// RolloutDefinitions returns a RolloutDefinitionInformer.
+func (v *version) RolloutDefinitions() RolloutDefinitionInformer {
+	return &rolloutDefinitionInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // SidecarSets returns a SidecarSetInformer.

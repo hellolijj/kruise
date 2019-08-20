@@ -31,59 +31,59 @@ import (
 	cache "k8s.io/client-go/tools/cache"
 )
 
-// BroadcastJobInformer provides access to a shared informer and lister for
-// BroadcastJobs.
-type BroadcastJobInformer interface {
+// RolloutControlInformer provides access to a shared informer and lister for
+// RolloutControls.
+type RolloutControlInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1alpha1.BroadcastJobLister
+	Lister() v1alpha1.RolloutControlLister
 }
 
-type broadcastJobInformer struct {
+type rolloutControlInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
 	namespace        string
 }
 
-// NewBroadcastJobInformer constructs a new informer for BroadcastJob type.
+// NewRolloutControlInformer constructs a new informer for RolloutControl type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewBroadcastJobInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredBroadcastJobInformer(client, namespace, resyncPeriod, indexers, nil)
+func NewRolloutControlInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredRolloutControlInformer(client, namespace, resyncPeriod, indexers, nil)
 }
 
-// NewFilteredBroadcastJobInformer constructs a new informer for BroadcastJob type.
+// NewFilteredRolloutControlInformer constructs a new informer for RolloutControl type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFilteredBroadcastJobInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+func NewFilteredRolloutControlInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.AppsV1alpha1().BroadcastJobs(namespace).List(options)
+				return client.AppsV1alpha1().RolloutControls(namespace).List(options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.AppsV1alpha1().BroadcastJobs(namespace).Watch(options)
+				return client.AppsV1alpha1().RolloutControls(namespace).Watch(options)
 			},
 		},
-		&appsv1alpha1.BroadcastJob{},
+		&appsv1alpha1.RolloutControl{},
 		resyncPeriod,
 		indexers,
 	)
 }
 
-func (f *broadcastJobInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredBroadcastJobInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+func (f *rolloutControlInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+	return NewFilteredRolloutControlInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
-func (f *broadcastJobInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&appsv1alpha1.BroadcastJob{}, f.defaultInformer)
+func (f *rolloutControlInformer) Informer() cache.SharedIndexInformer {
+	return f.factory.InformerFor(&appsv1alpha1.RolloutControl{}, f.defaultInformer)
 }
 
-func (f *broadcastJobInformer) Lister() v1alpha1.BroadcastJobLister {
-	return v1alpha1.NewBroadcastJobLister(f.Informer().GetIndexer())
+func (f *rolloutControlInformer) Lister() v1alpha1.RolloutControlLister {
+	return v1alpha1.NewRolloutControlLister(f.Informer().GetIndexer())
 }

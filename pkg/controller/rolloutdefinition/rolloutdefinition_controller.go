@@ -113,7 +113,6 @@ func (r *ReconcileRolloutDefinition) Reconcile(request reconcile.Request) (recon
 
 	controlResource := rolloutDef.Spec.ControlResource
 	if ResourcePathTable.Get(controlResource.APIVersion, controlResource.Resource) == nil {
-		// TODO: create a new resource controller
 		klog.Info("qwkLog：create a new resource controller")
 		rc, err := newResourceController(&controlResource, r.dynClient, r.dynInformers)
 		if err != nil {
@@ -121,10 +120,6 @@ func (r *ReconcileRolloutDefinition) Reconcile(request reconcile.Request) (recon
 		}
 		rc.Start()
 		klog.Info("qwkLog：start a new resource controller end")
-		/*_, err := r.dynInformers.Resource(controlResource.APIVersion, controlResource.Resource)
-		if err != nil {
-			return reconcile.Result{}, err
-		}*/
 	}
 
 	// update pathTable

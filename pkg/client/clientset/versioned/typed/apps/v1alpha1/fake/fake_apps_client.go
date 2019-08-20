@@ -1,5 +1,5 @@
 /*
-Copyright The The Kruise Authors.
+Copyright The Kubernetes Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -30,6 +30,14 @@ type FakeAppsV1alpha1 struct {
 
 func (c *FakeAppsV1alpha1) BroadcastJobs(namespace string) v1alpha1.BroadcastJobInterface {
 	return &FakeBroadcastJobs{c, namespace}
+}
+
+func (c *FakeAppsV1alpha1) RolloutControls(namespace string) v1alpha1.RolloutControlInterface {
+	return &FakeRolloutControls{c, namespace}
+}
+
+func (c *FakeAppsV1alpha1) RolloutDefinitions(namespace string) v1alpha1.RolloutDefinitionInterface {
+	return &FakeRolloutDefinitions{c, namespace}
 }
 
 func (c *FakeAppsV1alpha1) SidecarSets() v1alpha1.SidecarSetInterface {

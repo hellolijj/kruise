@@ -1,5 +1,5 @@
 /*
-Copyright The The Kruise Authors.
+Copyright The Kubernetes Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import (
 type AppsV1alpha1Interface interface {
 	RESTClient() rest.Interface
 	BroadcastJobsGetter
+	RolloutControlsGetter
+	RolloutDefinitionsGetter
 	SidecarSetsGetter
 	StatefulSetsGetter
 }
@@ -39,6 +41,14 @@ type AppsV1alpha1Client struct {
 
 func (c *AppsV1alpha1Client) BroadcastJobs(namespace string) BroadcastJobInterface {
 	return newBroadcastJobs(c, namespace)
+}
+
+func (c *AppsV1alpha1Client) RolloutControls(namespace string) RolloutControlInterface {
+	return newRolloutControls(c, namespace)
+}
+
+func (c *AppsV1alpha1Client) RolloutDefinitions(namespace string) RolloutDefinitionInterface {
+	return newRolloutDefinitions(c, namespace)
 }
 
 func (c *AppsV1alpha1Client) SidecarSets() SidecarSetInterface {

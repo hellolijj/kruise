@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"strings"
 
+	"k8s.io/apimachinery/pkg/types"
+
 	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
 	"github.com/openkruise/kruise/pkg/controller/rolloutdefinition"
 	"github.com/openkruise/kruise/pkg/dynamic"
@@ -213,5 +215,28 @@ func (r *ReconcileRolloutControl) Reconcile(request reconcile.Request) (reconcil
 	}
 	klog.Info("qwkLog：end update value")
 
+	// update the ResourceCintrolTable
+	key := appsv1alpha1.ControlResource{
+		APIVersion: rolloutCtl.Spec.Resource.APIVersion,
+		Resource:   rolloutCtl.Spec.Resource.Kind,
+	}
+	value := types.NamespacedName{
+		Namespace: rolloutCtl.Namespace,
+		Name:      rolloutCtl.Name,
+	}
+	if !hasControl(rolloutdefinition.ResourceControlTable[key], rolloutCtl.Namespace, rolloutCtl.Name) {
+		rolloutdefinition.ResourceControlTable[key] = append(rolloutdefinition.ResourceControlTable[key], value)
+		klog.Infof("qwkLog：update ResourceControlTable[%v] : %v", key, rolloutdefinition.ResourceControlTable[key])
+	}
+
 	return reconcile.Result{}, nil
+}
+
+func hasControl(arr []types.NamespacedName, namespace string, name string) bool {
+	for i := 0; i < len(arr); i++ {
+		if arr[i].Namespace == namespace && arr[i].Name == name {
+			return true
+		}
+	}
+	return false
 }

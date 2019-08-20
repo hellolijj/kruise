@@ -143,7 +143,11 @@ func (rc *resourceController) sync(key string) error {
 	if err != nil {
 		return err
 	}
-	klog.Infof("qwkLog：get resource instance: %v", instance)
+	klog.Infof("qwkLog：get instance status: %v", instance.Object["status"])
+	err = UpdateStatusFromResource(*rc.resource, instance.Object)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
