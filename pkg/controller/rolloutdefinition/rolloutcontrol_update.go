@@ -28,20 +28,23 @@ import (
 )
 
 // ResourceControlTable records resource-related control instance
-var ResourceControlTable map[appsv1alpha1.ControlResource][]types.NamespacedName
+var ResourceControlTable map[appsv1alpha1.CompleteResource][]types.NamespacedName
 
 func init() {
-	ResourceControlTable = make(map[appsv1alpha1.ControlResource][]types.NamespacedName)
+	ResourceControlTable = make(map[appsv1alpha1.CompleteResource][]types.NamespacedName)
 }
 
 // UpdateStatusFromResource updates status of all related rolloutControls
-func UpdateStatusFromResource(controlResource appsv1alpha1.ControlResource, resource map[string]interface{}) error {
-	resourcePath := ResourcePathTable.Get(controlResource.APIVersion, controlResource.Resource)
+func UpdateStatusFromResource(controlResource appsv1alpha1.CompleteResource, resource map[string]interface{}) error {
+	resourcePath := ResourcePathTable.Get(controlResource.APIVersion, controlResource.Kind)
 	if resourcePath == nil {
 		klog.Info("have no resourcePath")
 		return nil
 	}
-	rollourControls := ResourceControlTable[controlResource]
+	rollourControls, ok := ResourceControlTable[controlResource]
+	if !ok {
+		return nil
+	}
 
 	// update all rolloutControl
 	for i := 0; i < len(rollourControls); i++ {

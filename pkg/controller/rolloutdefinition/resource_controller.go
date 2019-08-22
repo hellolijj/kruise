@@ -141,8 +141,16 @@ func (rc *resourceController) sync(key string) error {
 	if err != nil {
 		return err
 	}
+
+	resource := v1alpha1.CompleteResource{
+		Kind:       rc.resource.Resource,
+		APIVersion: rc.resource.APIVersion,
+		NameSpace:  namespace,
+		Name:       name,
+	}
+
 	// update status of related rolloutCrls
-	err = UpdateStatusFromResource(*rc.resource, instance.Object)
+	err = UpdateStatusFromResource(resource, instance.Object)
 	if err != nil {
 		return err
 	}

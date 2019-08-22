@@ -196,10 +196,7 @@ func (r *ReconcileRolloutControl) Reconcile(request reconcile.Request) (reconcil
 	}
 
 	// update the ResourceCintrolTable
-	key := appsv1alpha1.ControlResource{
-		APIVersion: rolloutCtl.Spec.Resource.APIVersion,
-		Resource:   rolloutCtl.Spec.Resource.Kind,
-	}
+	key := rolloutCtl.Spec.Resource
 	value := types.NamespacedName{
 		Namespace: rolloutCtl.Namespace,
 		Name:      rolloutCtl.Name,
