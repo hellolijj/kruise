@@ -109,22 +109,19 @@ func (r *ReconcileRolloutDefinition) Reconcile(request reconcile.Request) (recon
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
-	klog.Infof("qwkLog：Action rolloutDefinition reconcile %v", rolloutDef.Spec.ControlResource)
 
 	controlResource := rolloutDef.Spec.ControlResource
 	if ResourcePathTable.Get(controlResource.APIVersion, controlResource.Resource) == nil {
-		klog.Info("qwkLog：create a new resource controller")
+		klog.Infof("create a new resource controller for %v/%v", controlResource.APIVersion, controlResource.Resource)
 		rc, err := newResourceController(&controlResource, r.dynClient, r.dynInformers)
 		if err != nil {
 			return reconcile.Result{}, err
 		}
 		rc.Start()
-		klog.Info("qwkLog：start a new resource controller end")
 	}
 
 	// update pathTable
 	ResourcePathTable.Set(controlResource, &rolloutDef.Spec.Path)
-	klog.Infof("qwkLog：ResourcePathTable %v : %v", rolloutDef.Spec.ControlResource, ResourcePathTable.Get(controlResource.APIVersion, controlResource.Resource))
 
 	return reconcile.Result{}, nil
 }

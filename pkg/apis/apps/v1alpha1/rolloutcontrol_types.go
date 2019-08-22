@@ -27,6 +27,7 @@ type RolloutControlSpec struct {
 	RolloutStrategy RolloutStrategy  `json:"rolloutstrategy,omitempty"`
 }
 
+// CompleteResource is used to locate resource
 type CompleteResource struct {
 	Kind       string `json:"kind"`
 	APIVersion string `json:"apiVersion"`
@@ -34,6 +35,7 @@ type CompleteResource struct {
 	Name       string `json:"name"`
 }
 
+// RolloutStrategy indicates the strategy
 type RolloutStrategy struct {
 	// Partition indicates the ordinal at which the workload should be
 	// partitioned.

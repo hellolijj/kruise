@@ -23,14 +23,12 @@ import (
 
 	"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
 	dynamicclientset "github.com/openkruise/kruise/pkg/dynamic/clientset"
+	dynamicinformer "github.com/openkruise/kruise/pkg/dynamic/informer"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog"
-
-	// dynamicdiscovery "github.com/openkruise/kruise/pkg/dynamic/discovery"
-	dynamicinformer "github.com/openkruise/kruise/pkg/dynamic/informer"
 )
 
 var (
@@ -143,7 +141,7 @@ func (rc *resourceController) sync(key string) error {
 	if err != nil {
 		return err
 	}
-	klog.Infof("qwkLog：get instance status: %v", instance.Object["status"])
+	// update status of related rolloutCrls
 	err = UpdateStatusFromResource(*rc.resource, instance.Object)
 	if err != nil {
 		return err

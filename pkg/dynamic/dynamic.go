@@ -17,6 +17,7 @@ type Dynamic struct {
 	DynInformers *dynamicinformer.SharedInformerFactory
 }
 
+// DynamicGlobal is used to dynamically create client or informer for resources
 var DynamicGlobal *Dynamic
 
 func NewDynamic() (dynamic *Dynamic, err error) {

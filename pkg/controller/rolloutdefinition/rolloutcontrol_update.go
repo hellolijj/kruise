@@ -27,12 +27,14 @@ import (
 	"k8s.io/klog"
 )
 
+// ResourceControlTable records resource-related control instance
 var ResourceControlTable map[appsv1alpha1.ControlResource][]types.NamespacedName
 
 func init() {
 	ResourceControlTable = make(map[appsv1alpha1.ControlResource][]types.NamespacedName)
 }
 
+// UpdateStatusFromResource updates status of all related rolloutControls
 func UpdateStatusFromResource(controlResource appsv1alpha1.ControlResource, resource map[string]interface{}) error {
 	resourcePath := ResourcePathTable.Get(controlResource.APIVersion, controlResource.Resource)
 	if resourcePath == nil {
@@ -40,15 +42,13 @@ func UpdateStatusFromResource(controlResource appsv1alpha1.ControlResource, reso
 		return nil
 	}
 	rollourControls := ResourceControlTable[controlResource]
-	klog.Infof("qwkLog：UpdateStatusFromResource resource.Object : %v", resource)
 
 	// update all rolloutControl
 	for i := 0; i < len(rollourControls); i++ {
-		klog.Infof("qwkLog：begin UpdateStatusFromResource rollourControl : %v", rollourControls[i])
 
 		rolloutCtl, err := kuriseclient.GetGenericClient().KruiseClient.AppsV1alpha1().RolloutControls(rollourControls[i].Namespace).Get(rollourControls[i].Name, metav1.GetOptions{})
 		if err != nil {
-			klog.Info("qwkLog：failed to get rolloutControl")
+			klog.Info("failed to get rolloutControl")
 			return err
 		}
 		updateRC := rolloutCtl.DeepCopy()
@@ -56,15 +56,12 @@ func UpdateStatusFromResource(controlResource appsv1alpha1.ControlResource, reso
 		// set replicas
 		if resourcePath.StatusPath.Replicas != "" {
 			replicasPathArr := strings.Split(resourcePath.StatusPath.Replicas, ".")
-			klog.Infof("qwkLog：replicasPathArr : %v", replicasPathArr)
 			replicasV, b, err := unstructured.NestedFieldNoCopy(resource, replicasPathArr...)
 			if err != nil {
 				return err
 			}
 			if b == true {
-				klog.Infof("qwkLog：get replicas value: %v", replicasV)
 				updateRC.Status.Replicas = int32(replicasV.(int64))
-				klog.Infof("qwkLog：end set updateRC replicas value: %v", updateRC.Status.Replicas)
 			} else {
 				klog.Info("can't get path field of replicas")
 			}
@@ -79,9 +76,7 @@ func UpdateStatusFromResource(controlResource appsv1alpha1.ControlResource, reso
 				return err
 			}
 			if b == true {
-				klog.Infof("qwkLog：get readyReplicas value: %v", readyReplicasV)
 				updateRC.Status.ReadyReplicas = int32(readyReplicasV.(int64))
-				klog.Infof("qwkLog：end set updateRC readyReplicas value: %v", updateRC.Status.ReadyReplicas)
 			} else {
 				klog.Info("can't get path field of readyReplicas")
 			}
@@ -96,9 +91,7 @@ func UpdateStatusFromResource(controlResource appsv1alpha1.ControlResource, reso
 				return err
 			}
 			if b == true {
-				klog.Infof("qwkLog：get currentReplicas value: %v", currentReplicasV)
 				updateRC.Status.CurrentReplicas = int32(currentReplicasV.(int64))
-				klog.Infof("qwkLog：end set updateRC currentReplicas value: %v", updateRC.Status.CurrentReplicas)
 			} else {
 				klog.Info("can't get path field of currentReplicas")
 			}
@@ -113,9 +106,7 @@ func UpdateStatusFromResource(controlResource appsv1alpha1.ControlResource, reso
 				return err
 			}
 			if b == true {
-				klog.Infof("qwkLog：get updatedReplicas value: %v", updatedReplicasV)
 				updateRC.Status.UpdatedReplicas = int32(updatedReplicasV.(int64))
-				klog.Infof("qwkLog：end set updateRC updatedReplicas value: %v", updateRC.Status.UpdatedReplicas)
 			} else {
 				klog.Info("can't get path field of updatedReplicas")
 			}
@@ -131,9 +122,7 @@ func UpdateStatusFromResource(controlResource appsv1alpha1.ControlResource, reso
 				return err
 			}
 			if b == true {
-				klog.Infof("qwkLog：get observedGeneration value: %v", observedGenerationV)
 				updateRC.Status.ObservedGeneration = observedGenerationV.(int64)
-				klog.Infof("qwkLog：end set updateRC observedGeneration value: %v", updateRC.Status.ObservedGeneration)
 			} else {
 				klog.Info("can't get path field of observedGeneration")
 			}
@@ -141,13 +130,11 @@ func UpdateStatusFromResource(controlResource appsv1alpha1.ControlResource, reso
 			klog.Info("observedGeneration is not supported")
 		}
 
-		klog.Infof("qwkLog：begin update rolloutControl")
-		updated, err := kuriseclient.GetGenericClient().KruiseClient.AppsV1alpha1().RolloutControls(rollourControls[i].Namespace).Update(updateRC)
+		_, err = kuriseclient.GetGenericClient().KruiseClient.AppsV1alpha1().RolloutControls(rollourControls[i].Namespace).Update(updateRC)
 		if err != nil {
-			klog.Info("qwkLog：failed to update rolloutControl")
+			klog.Info("failed to update rolloutControl")
 			return err
 		}
-		klog.Infof("qwkLog：end update rolloutControl : %v", updated)
 	}
 
 	return nil

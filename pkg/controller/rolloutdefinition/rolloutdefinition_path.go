@@ -25,6 +25,7 @@ import (
 	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
 )
 
+// ResourcePathTable is used to map resource to path
 var ResourcePathTable ResourcePath
 
 func init() {
@@ -33,6 +34,7 @@ func init() {
 	}
 }
 
+// ResourcePath defines a map struct of resource and path
 type ResourcePath struct {
 	mutex     sync.RWMutex
 	pathTable map[appsv1alpha1.ControlResource]*appsv1alpha1.Path
