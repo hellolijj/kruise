@@ -18,6 +18,9 @@ Today, Kruise offers three workload controllers:
 
 - [SidecarSet](./docs/concepts/sidecarSet/README.md): A controller that injects sidecar containers into the Pod spec based on selectors and also is able to upgrade the sidecar containers.
 
+In addition, there are some other controllers that apply to the upgrade strategy:
+- [RolloutControl](./docs/concepts/rolloutcontrol/README.md)：A controller that can perform grayscale release control for different resource applications.
+
 Please see [documents](./docs/README.md) for more technical information.
 
 Please find the project **roadmap** [here](./docs/roadmap/README.md).
