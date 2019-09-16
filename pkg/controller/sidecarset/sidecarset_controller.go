@@ -18,12 +18,12 @@ package sidecarset
 
 import (
 	"context"
-	"k8s.io/klog"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/klog"
 	controllerutil "k8s.io/kubernetes/pkg/controller"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -31,13 +31,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
 )
-
-var log = logf.Log.WithName("controller")
 
 /**
 * USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
@@ -117,11 +114,15 @@ func (r *ReconcileSidecarSet) Reconcile(request reconcile.Request) (reconcile.Re
 		return reconcile.Result{}, err
 	}
 
-	// ignore inactive pods
+	// ignore inactive pods and pods are created before sidecarset creates
 	var filteredPods []*corev1.Pod
 	for i := range matchedPods.Items {
 		pod := &matchedPods.Items[i]
-		if controllerutil.IsPodActive(pod) && !isIgnoredPod(pod) {
+		podCreateBeforeSidecarSet, err := isPodCreatedBeforeSidecarSet(sidecarSet, pod)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+		if controllerutil.IsPodActive(pod) && !isIgnoredPod(pod) && !podCreateBeforeSidecarSet {
 			filteredPods = append(filteredPods, pod)
 		}
 	}
@@ -131,7 +132,54 @@ func (r *ReconcileSidecarSet) Reconcile(request reconcile.Request) (reconcile.Re
 		return reconcile.Result{}, err
 	}
 
-	// update sidecarset status
 	err = r.updateSidecarSetStatus(sidecarSet, status)
-	return reconcile.Result{}, err
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+
+	// update procedure:
+	// 1. check if sidecarset paused, if so, then quit
+	// 2. check if fields other than image in sidecarset had changed, if so, then quit
+	// 3. check unavailable pod number, if > 0, then quit(maxUnavailable=1)
+	// 4. find out pods need update
+	// 5. update one pod(maxUnavailable=1)
+	if sidecarSet.Spec.Paused {
+		klog.V(3).Infof("sidecarset %v is paused, skip update", sidecarSet.Name)
+		return reconcile.Result{}, nil
+	}
+
+	if len(filteredPods) == 0 {
+		return reconcile.Result{}, nil
+	}
+	otherFieldsChanged, err := otherFieldsInSidecarChanged(sidecarSet, filteredPods[0])
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	if otherFieldsChanged {
+		klog.V(3).Infof("fields other than image in sidecarset %v had changed, skip update", sidecarSet.Name)
+		return reconcile.Result{}, nil
+	}
+
+	unavailableNum, err := getUnavailableNumber(sidecarSet, filteredPods)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	maxUnavailableNum := getMaxUnavailable(sidecarSet)
+	if unavailableNum >= maxUnavailableNum {
+		klog.V(3).Infof("current unavailable pod number: %v(max: %v), skip update", unavailableNum, maxUnavailableNum)
+		return reconcile.Result{}, nil
+	}
+
+	var podsNeedUpdate []*corev1.Pod
+	for _, pod := range filteredPods {
+		isUpdated, err := isPodSidecarUpdated(sidecarSet, pod)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+		if !isUpdated {
+			podsNeedUpdate = append(podsNeedUpdate, pod)
+		}
+	}
+	updateNum := maxUnavailableNum - unavailableNum
+	return reconcile.Result{}, r.updateSidecarImageAndHash(sidecarSet, podsNeedUpdate, updateNum)
 }

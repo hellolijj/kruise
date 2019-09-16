@@ -36,14 +36,15 @@ import (
 	scaleclient "k8s.io/client-go/scale"
 	"k8s.io/kubernetes/pkg/api/legacyscheme"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"github.com/onsi/ginkgo"
+	"github.com/onsi/gomega"
 )
 
 const (
 	maxKubectlExecRetries = 5
+
+	// DefaultNamespaceDeletionTimeout ref https://github.com/kubernetes/kubernetes/issues/47135
 	// TODO(mikedanese): reset this to 5 minutes once #47135 is resolved.
-	// ref https://github.com/kubernetes/kubernetes/issues/47135
 	DefaultNamespaceDeletionTimeout = 10 * time.Minute
 )
 
@@ -76,44 +77,47 @@ type Framework struct {
 	cleanupHandle CleanupActionHandle
 
 	// configuration for framework's client
-	Options FrameworkOptions
+	Options Options
 
 	// Place where various additional data is stored during test run to be printed to ReportDir,
 	// or stdout if ReportDir is not set once test ends.
 	TestSummaries []TestDataSummary
 }
 
+// TestDataSummary defines a interface to test data summary
 type TestDataSummary interface {
 	SummaryKind() string
 	PrintHumanReadable() string
 	PrintJSON() string
 }
 
-type FrameworkOptions struct {
+// Options contains some options
+type Options struct {
 	ClientQPS    float32
 	ClientBurst  int
 	GroupVersion *schema.GroupVersion
 }
 
-// NewFramework makes a new framework and sets up a BeforeEach/AfterEach for
+// NewDefaultFramework makes a new framework and sets up a BeforeEach/AfterEach for
 // you (you can write additional before/after each functions).
 func NewDefaultFramework(baseName string) *Framework {
-	options := FrameworkOptions{
+	options := Options{
 		ClientQPS:   20,
 		ClientBurst: 50,
 	}
 	return NewFramework(baseName, options, nil)
 }
 
-func NewFramework(baseName string, options FrameworkOptions, client clientset.Interface) *Framework {
+// NewFramework makes a new framework and sets up a BeforeEach/AfterEach
+func NewFramework(baseName string, options Options, client clientset.Interface) *Framework {
 	f := &Framework{
 		BaseName:  baseName,
 		Options:   options,
 		ClientSet: client,
 	}
 
-	BeforeEach(f.BeforeEach)
-	AfterEach(f.AfterEach)
+	ginkgo.BeforeEach(f.BeforeEach)
+	ginkgo.AfterEach(f.AfterEach)
 
 	return f
 }
@@ -124,9 +128,9 @@ func (f *Framework) BeforeEach() {
 	// https://github.com/onsi/ginkgo/issues/222
 	f.cleanupHandle = AddCleanupAction(f.AfterEach)
 	if f.ClientSet == nil {
-		By("Creating a kubernetes client")
+		ginkgo.By("Creating a kubernetes client")
 		config, err := LoadConfig()
-		testDesc := CurrentGinkgoTestDescription()
+		testDesc := ginkgo.CurrentGinkgoTestDescription()
 		if len(testDesc.ComponentTexts) > 0 {
 			componentTexts := strings.Join(testDesc.ComponentTexts, " ")
 			config.UserAgent = fmt.Sprintf(
@@ -135,7 +139,7 @@ func (f *Framework) BeforeEach() {
 				componentTexts)
 		}
 
-		Expect(err).NotTo(HaveOccurred())
+		gomega.Expect(err).NotTo(gomega.HaveOccurred())
 		config.QPS = f.Options.ClientQPS
 		config.Burst = f.Options.ClientBurst
 		if f.Options.GroupVersion != nil {
@@ -145,11 +149,11 @@ func (f *Framework) BeforeEach() {
 			config.ContentType = TestContext.KubeAPIContentType
 		}
 		f.KruiseClientSet, err = kruiseclientset.NewForConfig(config)
-		Expect(err).NotTo(HaveOccurred())
+		gomega.Expect(err).NotTo(gomega.HaveOccurred())
 		f.ClientSet, err = clientset.NewForConfig(config)
-		Expect(err).NotTo(HaveOccurred())
+		gomega.Expect(err).NotTo(gomega.HaveOccurred())
 		f.DynamicClient, err = dynamic.NewForConfig(config)
-		Expect(err).NotTo(HaveOccurred())
+		gomega.Expect(err).NotTo(gomega.HaveOccurred())
 		// csi.storage.k8s.io is based on CRD, which is served only as JSON
 		jsonConfig := config
 		jsonConfig.ContentType = "application/json"
@@ -163,9 +167,9 @@ func (f *Framework) BeforeEach() {
 			config.NegotiatedSerializer = legacyscheme.Codecs
 		}
 		restClient, err := rest.RESTClientFor(config)
-		Expect(err).NotTo(HaveOccurred())
+		gomega.Expect(err).NotTo(gomega.HaveOccurred())
 		discoClient, err := discovery.NewDiscoveryClientForConfig(config)
-		Expect(err).NotTo(HaveOccurred())
+		gomega.Expect(err).NotTo(gomega.HaveOccurred())
 		cachedDiscoClient := cacheddiscovery.NewMemCacheClient(discoClient)
 		restMapper := restmapper.NewDeferredDiscoveryRESTMapper(cachedDiscoClient)
 		restMapper.Reset()
@@ -176,18 +180,18 @@ func (f *Framework) BeforeEach() {
 	}
 
 	if !f.SkipNamespaceCreation {
-		By(fmt.Sprintf("Building a namespace api object, basename %s", f.BaseName))
+		ginkgo.By(fmt.Sprintf("Building a namespace api object, basename %s", f.BaseName))
 		namespace, err := f.CreateNamespace(f.BaseName, map[string]string{
 			"e2e-framework": f.BaseName,
 		})
-		Expect(err).NotTo(HaveOccurred())
+		gomega.Expect(err).NotTo(gomega.HaveOccurred())
 
 		f.Namespace = namespace
 
 		if TestContext.VerifyServiceAccount {
-			By("Waiting for a default service account to be provisioned in namespace")
+			ginkgo.By("Waiting for a default service account to be provisioned in namespace")
 			err = WaitForDefaultServiceAccountInNamespace(f.ClientSet, namespace.Name)
-			Expect(err).NotTo(HaveOccurred())
+			gomega.Expect(err).NotTo(gomega.HaveOccurred())
 		} else {
 			Logf("Skipping waiting for service account")
 		}
@@ -209,9 +213,9 @@ func (f *Framework) AfterEach() {
 		// Whether to delete namespace is determined by 3 factors: delete-namespace flag, delete-namespace-on-failure flag and the test result
 		// if delete-namespace set to false, namespace will always be preserved.
 		// if delete-namespace is true and delete-namespace-on-failure is false, namespace will be preserved if test failed.
-		if TestContext.DeleteNamespace && (TestContext.DeleteNamespaceOnFailure || !CurrentGinkgoTestDescription().Failed) {
+		if TestContext.DeleteNamespace && (TestContext.DeleteNamespaceOnFailure || !ginkgo.CurrentGinkgoTestDescription().Failed) {
 			for _, ns := range f.namespacesToDelete {
-				By(fmt.Sprintf("Destroying namespace %q for this suite.", ns.Name))
+				ginkgo.By(fmt.Sprintf("Destroying namespace %q for this suite.", ns.Name))
 				timeout := DefaultNamespaceDeletionTimeout
 				if f.NamespaceDeletionTimeout != 0 {
 					timeout = f.NamespaceDeletionTimeout
@@ -249,7 +253,7 @@ func (f *Framework) AfterEach() {
 	}()
 
 	// Print events if the test failed.
-	if CurrentGinkgoTestDescription().Failed && TestContext.DumpLogsOnFailure {
+	if ginkgo.CurrentGinkgoTestDescription().Failed && TestContext.DumpLogsOnFailure {
 		// Pass both unversioned client and versioned clientset, till we have removed all uses of the unversioned client.
 		if !f.SkipNamespaceCreation {
 			DumpAllNamespaceInfo(f.ClientSet, f.Namespace.Name)
@@ -266,6 +270,7 @@ func (f *Framework) AfterEach() {
 	}
 }
 
+// CreateNamespace is used to create namespace
 func (f *Framework) CreateNamespace(baseName string, labels map[string]string) (*v1.Namespace, error) {
 	createTestingNS := TestContext.CreateTestingNS
 	if createTestingNS == nil {
@@ -296,12 +301,12 @@ func (f *Framework) WaitForPodRunning(podName string) error {
 	return WaitForPodNameRunningInNamespace(f.ClientSet, podName, f.Namespace.Name)
 }
 
-// Wrapper function for ginkgo describe.  Adds namespacing.
+// KruiseDescribe is a wrapper function for ginkgo describe.  Adds namespacing.
 func KruiseDescribe(text string, body func()) bool {
-	return Describe("[kruise.io] "+text, body)
+	return ginkgo.Describe("[kruise.io] "+text, body)
 }
 
-// Wrapper function for ginkgo It.  Adds "[Conformance]" tag and makes static analysis easier.
+// ConformanceIt is a wrapper function for ginkgo It.  Adds "[Conformance]" tag and makes static analysis easier.
 func ConformanceIt(text string, body interface{}, timeout ...float64) bool {
-	return It(text+" [Conformance]", body, timeout...)
+	return ginkgo.It(text+" [Conformance]", body, timeout...)
 }

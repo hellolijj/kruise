@@ -2,46 +2,44 @@
 
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![Go Report Card](https://goreportcard.com/badge/github.com/openkruise/kruise)](https://goreportcard.com/report/github.com/openkruise/kruise)
-[![codecov](https://codecov.io/gh/openkruise/kruise/branch/master/graph/badge.svg)](https://codecov.io/gh/openkruise/kruise)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2908/badge)](https://bestpractices.coreinfrastructure.org/en/projects/2908)
 
-Kruise is the core of the OpenKruise project. It is a set of controllers which extends and complements 
-[Kubernetes core controllers](https://kubernetes.io/docs/concepts/overview/what-is-kubernetes/)
-on workload management.
+|![notification](docs/img/bell-outline-badge.svg)Community Meeting|
+|------------------|
+|The Kruise Project holds bi-weekly community calls. To join us and watch previous meeting notes and recordings, please see [meeting schedule](https://github.com/openkruise/project/blob/master/MEETING_SCHEDULE.md).|
+
+Kruise is the core of the OpenKruise project. It is a set of controllers which extends and complements [Kubernetes core controllers](https://kubernetes.io/docs/concepts/overview/what-is-kubernetes/) on workload management.
 
 Today, Kruise offers three workload controllers:
 
-* [Advanced StatefulSet](./docs/concepts/astatefulset/README.md): An enhanced version of default [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/) with extra functionalities such as `inplace-update`.
+- [Advanced StatefulSet](./docs/concepts/astatefulset/README.md): An enhanced version of default [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/) with extra functionalities such as `inplace-update`, `pasue` and `MaxUnavailable`.
 
-* [BroadcastJob](./docs/concepts/broadcastJob/README.md): A job that runs Pods to completion across all the nodes in the cluster.
+- [BroadcastJob](./docs/concepts/broadcastJob/README.md): A job that runs Pods to completion across all the nodes in the cluster.
 
-* [SidecarSet](./docs/concepts/sidecarSet/README.md): A controller that injects sidecar containers into the Pod spec based on selectors.
+- [SidecarSet](./docs/concepts/sidecarSet/README.md): A controller that injects sidecar containers into the Pod spec based on selectors and also is able to upgrade the sidecar containers.
 
 Please see [documents](./docs/README.md) for more technical information.
 
-Please find the project **roadmap** [here](./docs/roadmap/README.md).
+The project **roadmap** is actively updated in [here](https://github.com/openkruise/kruise/projects).
 
 Several [tutorials](./docs/tutorial/README.md) are provided to demonstrate how to use the workload controllers.
+A [video](https://www.youtube.com/watch?v=elB7reZ6eAQ) by [Lachlan Evenson](https://github.com/lachie83) is also provided for demonstrating the controllers.
 
 ## Getting started
 
 ### Install with YAML files
 
-##### Install CRDs
+#### Install CRDs
 
 ```
 kubectl apply -f https://raw.githubusercontent.com/kruiseio/kruise/master/config/crds/apps_v1alpha1_broadcastjob.yaml
 kubectl apply -f https://raw.githubusercontent.com/kruiseio/kruise/master/config/crds/apps_v1alpha1_sidecarset.yaml
 kubectl apply -f https://raw.githubusercontent.com/kruiseio/kruise/master/config/crds/apps_v1alpha1_statefulset.yaml
 ```
-Note that ALL three CRDs need to be installed for kruise-controller to run properly.
 
-##### Install kruise-controller-manager
+#### Install kruise-controller-manager
 
 `kubectl apply -f https://raw.githubusercontent.com/kruiseio/kruise/master/config/manager/all_in_one.yaml`
-
-**Note that default memory limit of kruise-controller-manager is `1Gi`,
- you should update the resources in [all_in_one.yaml](https://raw.githubusercontent.com/kruiseio/kruise/master/config/manager/all_in_one.yaml) before apply it into large-scale clusters.**
 
 Or run from the repo root directory:
 
@@ -56,6 +54,7 @@ The official kruise-controller-manager image is hosted under [docker hub](https:
 ## Usage examples
 
 ### Advanced StatefulSet
+
 ```yaml
 apiVersion: apps.kruise.io/v1alpha1
 kind: StatefulSet
@@ -74,7 +73,7 @@ spec:
     spec:
       readinessGates:
         # A new condition must be added to ensure the pod remain at NotReady state while the in-place update is happening
-      - conditionType: InPlaceUpdateReady 
+      - conditionType: InPlaceUpdateReady
       containers:
       - name: main
         image: nginx:alpine
@@ -87,7 +86,9 @@ spec:
       # Allow parallel updates with max number of unavailable instances equals to 2
       maxUnavailable: 2
 ```
+
 ### Broadcast Job
+
 Run a BroadcastJob that each Pod computes pi, with `ttlSecondsAfterFinished` set to 30. The job
 will be deleted in 30 seconds after the job is finished.
 
@@ -108,6 +109,7 @@ spec:
     type: Always
     ttlSecondsAfterFinished: 30
 ```
+
 ### SidecarSet
 
 The yaml file below describes a SidecarSet that contains a sidecar container named `sidecar1`
@@ -125,7 +127,7 @@ spec:
   containers:
   - name: sidecar1
     image: centos:7
-    command: ["sleep", "999d"] # do nothing at all 
+    command: ["sleep", "999d"] # do nothing at all
 ```
 
 ## Developer Guide
@@ -150,16 +152,37 @@ Push the image
 or just
 `docker push <your_image_name>`
 
-Generate manifests e.g. CRD, RBAC etc.
+Generate manifests e.g. CRD, RBAC YAML files etc.
 
-`make manifests` 
+`make manifests`
+
+To develop/debug kruise controller manager locally, please check the [debug guide](./docs/debug/README.md).
+
+## Uninstall
+
+To uninstall kruise from a Kubernetes cluster:
+
+```bash
+export KUBECONFIG=PATH_TO_CONFIG
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/kruiseio/kruise/master/scripts/uninstall.sh)"
+```
+
+Note that this will lead to all resources created by Kruise, including webhook configurations, services, namespace, CRDs, CR instances and Pods managed by Kruise controller, to be deleted! 
+Please do this **ONLY** when you fully understand the consequence.
 
 ## Community
 
-If you have any questions or want to contribute, you are welcome to join our
-[slack channel](https://join.slack.com/t/kruise-workspace/shared_invite/enQtNjU5NzQ0ODcyNjYzLWMzZDI5NTM3ZjM1MGY2Mjg1NzU4ZjBjMDJmNjZmZTEwYTZkMzk4ZTAzNmY5NTczODhkZDU2NzVhM2I2MzNmODc).
+If you have any questions or want to contribute, you are welcome to communicate most things via GitHub issues or pull requests.
 
-Mailing List: todo
+Other active communication channels:
+
+- Slack: [channel address](https://join.slack.com/t/kruise-workspace/shared_invite/enQtNjU5NzQ0ODcyNjYzLWMzZDI5NTM3ZjM1MGY2Mjg1NzU4ZjBjMDJmNjZmZTEwYTZkMzk4ZTAzNmY5NTczODhkZDU2NzVhM2I2MzNmODc)
+- Mailing List: todo
+- Dingtalk Group(钉钉讨论群)
+
+<div align="center">
+  <img src="docs/img/openkruise-dev-group.JPG" width="250" title="dingtalk">
+</div>
 
 ## Copyright
 

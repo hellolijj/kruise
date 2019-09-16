@@ -51,21 +51,41 @@ spec:
         spec:
           properties:
             containers:
-              description: 'containers contains two pieces of information: 1. normal
-                container info that should be injected into pod 2. custom fields to
-                control insert behavior(currently empty)'
+              description: Containers is the list of sidecar containers to be injected
+                into the selected pod
               items:
                 type: object
               type: array
+            paused:
+              description: Paused indicates that the sidecarset is paused and will
+                not be processed by the sidecarset controller.
+              type: boolean
             selector:
               description: selector is a label query over pods that should be injected
               type: object
+            strategy:
+              description: The sidecarset strategy to use to replace existing pods
+                with new ones.
+              properties:
+                rollingUpdate:
+                  properties:
+                    maxUnavailable:
+                      oneOf:
+                      - type: string
+                      - type: integer
+                  type: object
+              type: object
+            volumes:
+              description: List of volumes that can be mounted by sidecar containers
+              items:
+                type: object
+              type: array
           type: object
         status:
           properties:
             matchedPods:
               description: matchedPods is the number of Pods whose labels are matched
-                with this SidecarSet's selector
+                with this SidecarSet's selector and are created after sidecarset creates
               format: int32
               type: integer
             observedGeneration:

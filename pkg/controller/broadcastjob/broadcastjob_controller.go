@@ -20,6 +20,7 @@ package broadcastjob
 import (
 	"context"
 	"fmt"
+	"math"
 	"sync"
 	"time"
 
@@ -30,12 +31,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/retry"
 	"k8s.io/klog"
 	kubecontroller "k8s.io/kubernetes/pkg/controller"
-	"k8s.io/kubernetes/pkg/controller/daemon/util"
+	"k8s.io/kubernetes/pkg/scheduler/algorithm"
 	"k8s.io/kubernetes/pkg/scheduler/algorithm/predicates"
 	schedulercache "k8s.io/kubernetes/pkg/scheduler/cache"
 	"k8s.io/utils/integer"
@@ -44,11 +46,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
-
-var log = logf.Log.WithName("controller")
 
 var controllerKind = appsv1alpha1.SchemeGroupVersion.WithKind("BroadcastJob")
 
@@ -91,6 +90,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
+	// Watch for changes to Pod
+	if err = c.Watch(&source.Kind{Type: &corev1.Node{}}, &enqueueBroadcastJobForNode{client: mgr.GetClient()}); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -109,6 +112,7 @@ type ReconcileBroadcastJob struct {
 // and what is in the BroadcastJob.Spec
 // Automatically generate RBAC rules to allow the Controller to read and write Deployments
 // +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=core,resources=nodes,verbs=get;list;watch
 // +kubebuilder:rbac:groups=core,resources=pods/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=apps.kruise.io,resources=broadcastjobs,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps.kruise.io,resources=broadcastjobs/status,verbs=get;update;patch
@@ -166,7 +170,7 @@ func (r *ReconcileBroadcastJob) Reconcile(request reconcile.Request) (reconcile.
 
 	// convert pod list to a slice of pointers
 	var pods []*corev1.Pod
-	for i, _ := range podList.Items {
+	for i := range podList.Items {
 		pods = append(pods, &podList.Items[i])
 	}
 
@@ -191,6 +195,7 @@ func (r *ReconcileBroadcastJob) Reconcile(request reconcile.Request) (reconcile.
 	desiredNodes, restNodesToRunPod, podsToDelete := getNodesToRunPod(nodes, job, existingNodeToPodMap)
 	desired = int32(len(desiredNodes))
 	klog.Infof("%s/%s has %d/%d nodes remaining to schedule pods", job.Namespace, job.Name, len(restNodesToRunPod), desired)
+	klog.Infof("Before broadcastjob reconcile %s/%s, desired=%d, active=%d, failed=%d", job.Namespace, job.Name, desired, active, failed)
 
 	jobFailed, failureReason, failureMessage := isJobFailed(job, pods)
 	// Job is failed. For keepAlive type, the job will never fail.
@@ -215,7 +220,7 @@ func (r *ReconcileBroadcastJob) Reconcile(request reconcile.Request) (reconcile.
 
 		// DeletionTimestamp is not set and more nodes to run pod
 		if job.DeletionTimestamp == nil && len(restNodesToRunPod) > 0 {
-			active, err = r.reconcilePods(job, restNodesToRunPod, active)
+			active, err = r.reconcilePods(job, restNodesToRunPod, active, desired)
 			if err != nil {
 				klog.Errorf("failed to reconcilePods for job %s,", job.Name)
 			}
@@ -228,6 +233,7 @@ func (r *ReconcileBroadcastJob) Reconcile(request reconcile.Request) (reconcile.
 				fmt.Sprintf("Job %s/%s is completed, %d pods succeeded, %d pods failed", job.Namespace, job.Name, succeeded, failed))
 		}
 	}
+	klog.Infof("After broadcastjob reconcile %s/%s, desired=%d, active=%d, failed=%d", job.Namespace, job.Name, desired, active, failed)
 
 	// no need to update the job if the status hasn't changed since last time
 	if job.Status.Active != active || job.Status.Succeeded != succeeded ||
@@ -296,7 +302,7 @@ func addLabelToPodTemplate(job *appsv1alpha1.BroadcastJob) {
 }
 
 func (r *ReconcileBroadcastJob) reconcilePods(job *appsv1alpha1.BroadcastJob,
-	restNodesToRunPod []*corev1.Node, active int32) (int32, error) {
+	restNodesToRunPod []*corev1.Node, active, desired int32) (int32, error) {
 
 	// max concurrent running pods
 	var parallelism int32
@@ -304,7 +310,16 @@ func (r *ReconcileBroadcastJob) reconcilePods(job *appsv1alpha1.BroadcastJob,
 		// not specify,take the max int
 		parallelism = int32(1<<31 - 1)
 	} else {
-		parallelism = *job.Spec.Parallelism
+		parallelismIntStr := *job.Spec.Parallelism
+		if parallelismIntStr.Type == intstr.String {
+			absolute, err := percentageToAbsolute(parallelismIntStr.StrVal)
+			if err != nil {
+				return active, err
+			}
+			parallelism = int32(math.Ceil(float64(int32(absolute)*desired) / 100))
+		} else {
+			parallelism = parallelismIntStr.IntVal
+		}
 	}
 
 	// The rest pods to run
@@ -391,6 +406,11 @@ func isJobComplete(job *appsv1alpha1.BroadcastJob, desiredNodes map[string]*core
 		// the job will not terminate, if the the completion policy is never
 		return false
 	}
+	// if no desiredNodes, job pending
+	if len(desiredNodes) == 0 {
+		klog.Info("Num desiredNodes is 0")
+		return false
+	}
 	for _, pod := range desiredNodes {
 		if pod == nil || kubecontroller.IsPodActive(pod) {
 			// the job is incomplete if there exits any pod not yet created OR  still active
@@ -442,7 +462,9 @@ func getNodesToRunPod(nodes *corev1.NodeList, job *appsv1alpha1.BroadcastJob,
 				continue
 			}
 			if !canFit {
-				podsToDelete = append(podsToDelete, pod)
+				if pod.DeletionTimestamp == nil {
+					podsToDelete = append(podsToDelete, pod)
+				}
 				continue
 			}
 			desiredNodes[node.Name] = pod
@@ -495,26 +517,44 @@ func labelsAsMap(job *appsv1alpha1.BroadcastJob) map[string]string {
 //   - PodFitsHost: checks pod's NodeName against node
 //   - PodMatchNodeSelector: checks pod's NodeSelector and NodeAffinity against node
 //   - PodToleratesNodeTaints: exclude tainted node unless pod has specific toleration
+//   - CheckNodeUnschedulablePredicate: check if the pod can tolerate node unschedulable
 func checkNodeFitness(pod *corev1.Pod, node *corev1.Node) (bool, error) {
 	nodeInfo := schedulercache.NewNodeInfo()
 	_ = nodeInfo.SetNode(node)
 
-	fit, _, err := predicates.PodFitsHost(pod, nil, nodeInfo)
+	fit, reasons, err := predicates.PodFitsHost(pod, nil, nodeInfo)
 	if err != nil || !fit {
+		logPredicateFailedReason(reasons, node)
 		return false, err
 	}
 
-	fit, _, err = predicates.PodMatchNodeSelector(pod, nil, nodeInfo)
+	fit, reasons, err = predicates.PodMatchNodeSelector(pod, nil, nodeInfo)
 	if err != nil || !fit {
+		logPredicateFailedReason(reasons, node)
 		return false, err
 	}
 
-	fit, _, err = predicates.PodToleratesNodeTaints(pod, nil, nodeInfo)
+	fit, reasons, err = predicates.PodToleratesNodeTaints(pod, nil, nodeInfo)
 	if err != nil || !fit {
+		logPredicateFailedReason(reasons, node)
 		return false, err
 	}
 
+	fit, reasons, err = predicates.CheckNodeUnschedulablePredicate(pod, nil, nodeInfo)
+	if err != nil || !fit {
+		logPredicateFailedReason(reasons, node)
+		return false, err
+	}
 	return true, nil
+}
+
+func logPredicateFailedReason(reasons []algorithm.PredicateFailureReason, node *corev1.Node) {
+	if len(reasons) == 0 {
+		return
+	}
+	for _, reason := range reasons {
+		klog.Errorf("Failed predicate on node %s : %s ", node.Name, reason.GetReason())
+	}
 }
 
 // NewPod creates a new pod
@@ -522,10 +562,6 @@ func NewPod(job *appsv1alpha1.BroadcastJob, nodeName string) *corev1.Pod {
 	newPod := &corev1.Pod{Spec: job.Spec.Template.Spec, ObjectMeta: job.Spec.Template.ObjectMeta}
 	newPod.Namespace = job.Namespace
 	newPod.Spec.NodeName = nodeName
-
-	// Added default tolerations for the pods.
-	util.AddOrUpdateDaemonPodTolerations(&newPod.Spec, false)
-
 	return newPod
 }
 
@@ -547,6 +583,7 @@ func (r *ReconcileBroadcastJob) deleteJobPods(job *appsv1alpha1.BroadcastJob, po
 				failedLock.Lock()
 				failed++
 				active--
+				r.recorder.Eventf(job, corev1.EventTypeNormal, kubecontroller.SuccessfulDeletePodReason, "Delete pod: %v", pods[ix].Name)
 				failedLock.Unlock()
 			}
 		}(i)
@@ -587,14 +624,15 @@ func (r *ReconcileBroadcastJob) createPods(nodeName, namespace string, template 
 	if err := r.Client.Create(context.TODO(), pod); err != nil {
 		r.recorder.Eventf(object, corev1.EventTypeWarning, kubecontroller.FailedCreatePodReason, "Error creating: %v", err)
 		return err
-	} else {
-		accessor, err := meta.Accessor(object)
-		if err != nil {
-			klog.Errorf("parentObject does not have ObjectMeta, %v", err)
-			return nil
-		}
-		klog.Infof("Controller %v created pod %v", accessor.GetName(), pod.Name)
-		r.recorder.Eventf(object, corev1.EventTypeNormal, kubecontroller.SuccessfulCreatePodReason, "Created pod: %v", pod.Name)
 	}
+
+	accessor, err := meta.Accessor(object)
+	if err != nil {
+		klog.Errorf("parentObject does not have ObjectMeta, %v", err)
+		return nil
+	}
+	klog.Infof("Controller %v created pod %v", accessor.GetName(), pod.Name)
+	r.recorder.Eventf(object, corev1.EventTypeNormal, kubecontroller.SuccessfulCreatePodReason, "Created pod: %v", pod.Name)
+
 	return nil
 }

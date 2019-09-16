@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 // SidecarSetSpec defines the desired state of SidecarSet
@@ -26,14 +27,34 @@ type SidecarSetSpec struct {
 	// selector is a label query over pods that should be injected
 	Selector *metav1.LabelSelector `json:"selector,omitempty"`
 
-	// containers contains two pieces of information:
-	// 1. normal container info that should be injected into pod
-	// 2. custom fields to control insert behavior(currently empty)
+	// Containers is the list of sidecar containers to be injected into the selected pod
 	Containers []SidecarContainer `json:"containers,omitempty"`
+
+	// List of volumes that can be mounted by sidecar containers
+	Volumes []corev1.Volume `json:"volumes,omitempty"`
+
+	// Paused indicates that the sidecarset is paused and will not be processed by the sidecarset controller.
+	Paused bool `json:"paused,omitempty"`
+
+	// The sidecarset strategy to use to replace existing pods with new ones.
+	Strategy SidecarSetUpdateStrategy `json:"strategy,omitempty"`
 }
 
+// SidecarContainer defines the container of Sidecar
 type SidecarContainer struct {
 	corev1.Container
+}
+
+// SidecarSetUpdateStrategy indicates the strategy that the SidecarSet
+// controller will use to perform updates. It includes any additional parameters
+// necessary to perform the update for the indicated strategy.
+type SidecarSetUpdateStrategy struct {
+	RollingUpdate *RollingUpdateSidecarSet `json:"rollingUpdate,omitempty"`
+}
+
+// RollingUpdateSidecarSet is used to communicate parameter
+type RollingUpdateSidecarSet struct {
+	MaxUnavailable *intstr.IntOrString `json:"maxUnavailable,omitempty"`
 }
 
 // SidecarSetStatus defines the observed state of SidecarSet
@@ -42,7 +63,7 @@ type SidecarSetStatus struct {
 	// SidecarSet's generation, which is updated on mutation by the API Server.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 
-	// matchedPods is the number of Pods whose labels are matched with this SidecarSet's selector
+	// matchedPods is the number of Pods whose labels are matched with this SidecarSet's selector and are created after sidecarset creates
 	MatchedPods int32 `json:"matchedPods"`
 
 	// updatedPods is the number of matched Pods that are injected with the latest SidecarSet's containers

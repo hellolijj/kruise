@@ -55,6 +55,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
+const statefulSetResyncPeriod = 30 * time.Second
+
 func alwaysReady() bool { return true }
 
 func TestStatefulSetControllerCreates(t *testing.T) {
@@ -116,11 +118,11 @@ func TestStatefulSetControllerRespectsTermination(t *testing.T) {
 	if set.Status.Replicas != 3 {
 		t.Errorf("set.Status.Replicas = %v; want 3", set.Status.Replicas)
 	}
-	pods, err := spc.addTerminatingPod(set, 3)
+	_, err := spc.addTerminatingPod(set, 3)
 	if err != nil {
 		t.Error(err)
 	}
-	pods, err = spc.addTerminatingPod(set, 4)
+	pods, err := spc.addTerminatingPod(set, 4)
 	if err != nil {
 		t.Error(err)
 	}
@@ -170,7 +172,7 @@ func TestStatefulSetControllerBlocksScaling(t *testing.T) {
 	*set.Spec.Replicas = 5
 	fakeResourceVersion(set)
 	spc.setsIndexer.Update(set)
-	pods, err := spc.setPodTerminated(set, 0)
+	_, err := spc.setPodTerminated(set, 0)
 	if err != nil {
 		t.Error("Failed to set pod terminated at ordinal 0")
 	}
@@ -180,7 +182,7 @@ func TestStatefulSetControllerBlocksScaling(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	pods, err = spc.podsLister.Pods(set.Namespace).List(selector)
+	pods, err := spc.podsLister.Pods(set.Namespace).List(selector)
 	if err != nil {
 		t.Error(err)
 	}
@@ -662,11 +664,10 @@ func scaleUpStatefulSetController(set *appsv1alpha1.StatefulSet, ssc *StatefulSe
 			return err
 		}
 		ord := len(pods) - 1
-		pod := getPodAtOrdinal(pods, ord)
 		if pods, err = spc.setPodPending(set, ord); err != nil {
 			return err
 		}
-		pod = getPodAtOrdinal(pods, ord)
+		pod := getPodAtOrdinal(pods, ord)
 		ssc.addPod(pod)
 		fakeWorker(ssc)
 		pod = getPodAtOrdinal(pods, ord)
@@ -688,12 +689,11 @@ func scaleUpStatefulSetController(set *appsv1alpha1.StatefulSet, ssc *StatefulSe
 		if err := assertMonotonicInvariants(set, spc); err != nil {
 			return err
 		}
-		if obj, _, err := spc.setsIndexer.Get(set); err != nil {
+		obj, _, err := spc.setsIndexer.Get(set)
+		if err != nil {
 			return err
-		} else {
-			set = obj.(*appsv1alpha1.StatefulSet)
 		}
-
+		set = obj.(*appsv1alpha1.StatefulSet)
 	}
 	return assertMonotonicInvariants(set, spc)
 }
@@ -741,11 +741,11 @@ func scaleDownStatefulSetController(set *appsv1alpha1.StatefulSet, ssc *Stateful
 		spc.DeleteStatefulPod(set, pod)
 		ssc.deletePod(pod)
 		fakeWorker(ssc)
-		if obj, _, err := spc.setsIndexer.Get(set); err != nil {
+		obj, _, err := spc.setsIndexer.Get(set)
+		if err != nil {
 			return err
-		} else {
-			set = obj.(*appsv1alpha1.StatefulSet)
 		}
+		set = obj.(*appsv1alpha1.StatefulSet)
 	}
 	return assertMonotonicInvariants(set, spc)
 }

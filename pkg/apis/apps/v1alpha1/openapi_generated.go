@@ -43,12 +43,14 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.PodProbeMarkerList":               schema_pkg_apis_apps_v1alpha1_PodProbeMarkerList(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.PodProbeMarkerSpec":               schema_pkg_apis_apps_v1alpha1_PodProbeMarkerSpec(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.PodProbeMarkerStatus":             schema_pkg_apis_apps_v1alpha1_PodProbeMarkerStatus(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RollingUpdateSidecarSet":          schema_pkg_apis_apps_v1alpha1_RollingUpdateSidecarSet(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RollingUpdateStatefulSetStrategy": schema_pkg_apis_apps_v1alpha1_RollingUpdateStatefulSetStrategy(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarContainer":                 schema_pkg_apis_apps_v1alpha1_SidecarContainer(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarSet":                       schema_pkg_apis_apps_v1alpha1_SidecarSet(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarSetList":                   schema_pkg_apis_apps_v1alpha1_SidecarSetList(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarSetSpec":                   schema_pkg_apis_apps_v1alpha1_SidecarSetSpec(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarSetStatus":                 schema_pkg_apis_apps_v1alpha1_SidecarSetStatus(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarSetUpdateStrategy":         schema_pkg_apis_apps_v1alpha1_SidecarSetUpdateStrategy(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatefulSet":                      schema_pkg_apis_apps_v1alpha1_StatefulSet(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatefulSetList":                  schema_pkg_apis_apps_v1alpha1_StatefulSetList(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatefulSetSpec":                  schema_pkg_apis_apps_v1alpha1_StatefulSetSpec(ref),
@@ -157,14 +159,13 @@ func schema_pkg_apis_apps_v1alpha1_BroadcastJobSpec(ref common.ReferenceCallback
 				Properties: map[string]spec.Schema{
 					"parallelism": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Specifies the maximum desired number of pods the job should run at any given time. The actual number of pods running in steady state will be less than this number when the work left to do is less than max parallelism. Not setting this value means no limit.",
-							Type:        []string{"integer"},
-							Format:      "int32",
+							Description: "Parallelism specifies the maximum desired number of pods the job should run at any given time. The actual number of pods running in steady state will be less than this number when the work left to do is less than max parallelism. Not setting this value means no limit.",
+							Ref:         ref("k8s.io/apimachinery/pkg/util/intstr.IntOrString"),
 						},
 					},
 					"template": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Describes the pod that will be created when executing a job.",
+							Description: "Template describes the pod that will be created when executing a job.",
 							Ref:         ref("k8s.io/api/core/v1.PodTemplateSpec"),
 						},
 					},
@@ -179,7 +180,7 @@ func schema_pkg_apis_apps_v1alpha1_BroadcastJobSpec(ref common.ReferenceCallback
 			},
 		},
 		Dependencies: []string{
-			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CompletionPolicy", "k8s.io/api/core/v1.PodTemplateSpec"},
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CompletionPolicy", "k8s.io/api/core/v1.PodTemplateSpec", "k8s.io/apimachinery/pkg/util/intstr.IntOrString"},
 	}
 }
 
@@ -273,14 +274,14 @@ func schema_pkg_apis_apps_v1alpha1_CompletionPolicy(ref common.ReferenceCallback
 					},
 					"activeDeadlineSeconds": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Specifies the duration in seconds relative to the startTime that the job may be active before the system tries to terminate it; value must be positive integer. Only works for Always type",
+							Description: "ActiveDeadlineSeconds specifies the duration in seconds relative to the startTime that the job may be active before the system tries to terminate it; value must be positive integer. Only works for Always type.",
 							Type:        []string{"integer"},
 							Format:      "int64",
 						},
 					},
 					"backoffLimit": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Specifies the number of retries before marking this job failed. Not setting value means no limit. Only works for Always type",
+							Description: "BackoffLimit specifies the number of retries before marking this job failed. Not setting value means no limit. Only works for Always type.",
 							Type:        []string{"integer"},
 							Format:      "int32",
 						},
@@ -363,7 +364,7 @@ func schema_pkg_apis_apps_v1alpha1_InPlaceUpdateContainerStatus(ref common.Refer
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "InPlaceUpdateContainerStatus records container status in current pod.",
+				Description: "InPlaceUpdateContainerStatus records the statuses of the container that are mainly used to determine whether the InPlaceUpdate is completed.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"imageID": {
@@ -387,18 +388,21 @@ func schema_pkg_apis_apps_v1alpha1_InPlaceUpdateState(ref common.ReferenceCallba
 				Properties: map[string]spec.Schema{
 					"revision": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Description: "Revision is the updated statefulset revision hash.",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"updateTimestamp": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
+							Description: "UpdateTimestamp is the time when the in-place update happens.",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
 						},
 					},
 					"lastContainerStatuses": {
 						SchemaProps: spec.SchemaProps{
-							Type: []string{"object"},
+							Description: "LastContainerStatuses records the before-in-place-update container statuses. It is a map from ContainerName to InPlaceUpdateContainerStatus",
+							Type:        []string{"object"},
 							AdditionalProperties: &spec.SchemaOrBool{
 								Allows: true,
 								Schema: &spec.Schema{
@@ -681,6 +685,26 @@ func schema_pkg_apis_apps_v1alpha1_PodProbeMarkerStatus(ref common.ReferenceCall
 	}
 }
 
+func schema_pkg_apis_apps_v1alpha1_RollingUpdateSidecarSet(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "RollingUpdateSidecarSet is used to communicate parameter",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"maxUnavailable": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/util/intstr.IntOrString"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/util/intstr.IntOrString"},
+	}
+}
+
 func schema_pkg_apis_apps_v1alpha1_RollingUpdateStatefulSetStrategy(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -708,6 +732,13 @@ func schema_pkg_apis_apps_v1alpha1_RollingUpdateStatefulSetStrategy(ref common.R
 							Format:      "",
 						},
 					},
+					"paused": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Paused indicates that the StatefulSet is paused. Default value is false",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 				},
 			},
 		},
@@ -720,7 +751,8 @@ func schema_pkg_apis_apps_v1alpha1_SidecarContainer(ref common.ReferenceCallback
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
+				Description: "SidecarContainer defines the container of Sidecar",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"Container": {
 						SchemaProps: spec.SchemaProps{
@@ -842,7 +874,7 @@ func schema_pkg_apis_apps_v1alpha1_SidecarSetSpec(ref common.ReferenceCallback) 
 					},
 					"containers": {
 						SchemaProps: spec.SchemaProps{
-							Description: "containers contains two pieces of information: 1. normal container info that should be injected into pod 2. custom fields to control insert behavior(currently empty)",
+							Description: "Containers is the list of sidecar containers to be injected into the selected pod",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -853,11 +885,37 @@ func schema_pkg_apis_apps_v1alpha1_SidecarSetSpec(ref common.ReferenceCallback) 
 							},
 						},
 					},
+					"volumes": {
+						SchemaProps: spec.SchemaProps{
+							Description: "List of volumes that can be mounted by sidecar containers",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("k8s.io/api/core/v1.Volume"),
+									},
+								},
+							},
+						},
+					},
+					"paused": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Paused indicates that the sidecarset is paused and will not be processed by the sidecarset controller.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"strategy": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The sidecarset strategy to use to replace existing pods with new ones.",
+							Ref:         ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarSetUpdateStrategy"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarContainer", "k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector"},
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarContainer", "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarSetUpdateStrategy", "k8s.io/api/core/v1.Volume", "k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector"},
 	}
 }
 
@@ -877,7 +935,7 @@ func schema_pkg_apis_apps_v1alpha1_SidecarSetStatus(ref common.ReferenceCallback
 					},
 					"matchedPods": {
 						SchemaProps: spec.SchemaProps{
-							Description: "matchedPods is the number of Pods whose labels are matched with this SidecarSet's selector",
+							Description: "matchedPods is the number of Pods whose labels are matched with this SidecarSet's selector and are created after sidecarset creates",
 							Type:        []string{"integer"},
 							Format:      "int32",
 						},
@@ -900,6 +958,26 @@ func schema_pkg_apis_apps_v1alpha1_SidecarSetStatus(ref common.ReferenceCallback
 				Required: []string{"matchedPods", "updatedPods", "readyPods"},
 			},
 		},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_SidecarSetUpdateStrategy(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SidecarSetUpdateStrategy indicates the strategy that the SidecarSet controller will use to perform updates. It includes any additional parameters necessary to perform the update for the indicated strategy.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"rollingUpdate": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RollingUpdateSidecarSet"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RollingUpdateSidecarSet"},
 	}
 }
 

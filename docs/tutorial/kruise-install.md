@@ -1,9 +1,11 @@
 # Install Kruise Controller Manager
+
 Below steps assume you have an existing kubernetes cluster running properly.
 
 ## Install with YAML files
 
 ### Install Kruise CRDs
+
 ```
 kubectl apply -f https://raw.githubusercontent.com/kruiseio/kruise/master/config/crds/apps_v1alpha1_broadcastjob.yaml
 kubectl apply -f https://raw.githubusercontent.com/kruiseio/kruise/master/config/crds/apps_v1alpha1_sidecarset.yaml
@@ -14,12 +16,10 @@ kubectl apply -f https://raw.githubusercontent.com/kruiseio/kruise/master/config
 
 `kubectl apply -f https://raw.githubusercontent.com/kruiseio/kruise/master/config/manager/all_in_one.yaml`
 
-**Note that default memory limit of kruise-controller-manager is `1Gi`,
- you should update the resources in [all_in_one.yaml](https://raw.githubusercontent.com/kruiseio/kruise/master/config/manager/all_in_one.yaml) before apply it into large-scale clusters.**
-
 ## Verify Kruise-manager is running
 
 Check the kruise-manager pod is running
+
 ```
 kubectl get pods -n kruise-system
 

@@ -82,13 +82,14 @@ func (h *StatefulSetCreateUpdateHandler) Handle(ctx context.Context, req types.R
 	if err != nil {
 		return admission.ErrorResponse(http.StatusInternalServerError, err)
 	}
-	resp := patchutil.PatchResponseFromRaw(req.AdmissionRequest.Object.Raw, marshaledPod)
+	resp := patchutil.ResponseFromRaw(req.AdmissionRequest.Object.Raw, marshaledPod)
 	if len(resp.Patches) > 0 {
-		klog.V(5).Infof("Admit StatefulSet %s/%s patches: %v", obj.Namespace, obj.Name, util.DumpJson(resp.Patches))
+		klog.V(5).Infof("Admit StatefulSet %s/%s patches: %v", obj.Namespace, obj.Name, util.DumpJSON(resp.Patches))
 	}
 	return resp
 }
 
+// SetObjectDefaults sets object by default
 func SetObjectDefaults(in *appsv1alpha1.StatefulSet) {
 	setDefaults(in)
 	utils.SetDefaultPodTemplate(&in.Spec.Template.Spec)

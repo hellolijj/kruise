@@ -19,6 +19,8 @@ package broadcastjob
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
@@ -27,6 +29,7 @@ import (
 	"k8s.io/klog"
 )
 
+// IsJobFinished returns true when finishing job
 func IsJobFinished(j *appsv1alpha1.BroadcastJob) bool {
 	if j.Spec.CompletionPolicy.Type == appsv1alpha1.Never {
 		return false
@@ -40,7 +43,7 @@ func IsJobFinished(j *appsv1alpha1.BroadcastJob) bool {
 	return false
 }
 
-// filterPods returns list of activePods and number of failed pods, number of succceeded pods
+// filterPods returns list of activePods and number of failed pods, number of succeeded pods
 func filterPods(pods []*v1.Pod) ([]*v1.Pod, []*v1.Pod, []*v1.Pod) {
 	var activePods, succeededPods, failedPods []*v1.Pod
 	for _, p := range pods {
@@ -143,4 +146,12 @@ func validateControllerRef(controllerRef *metav1.OwnerReference) error {
 		return fmt.Errorf("controllerRef.BlockOwnerDeletion is not set")
 	}
 	return nil
+}
+
+func percentageToAbsolute(percentage string) (int, error) {
+	absolute, err := strconv.Atoi(strings.TrimSuffix(percentage, "%"))
+	if err != nil {
+		return 0, err
+	}
+	return absolute, nil
 }

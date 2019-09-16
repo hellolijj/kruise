@@ -24,10 +24,11 @@ import (
 	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/context"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/uuid"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/klog"
@@ -49,12 +50,12 @@ func init() {
 // 2 nodes without pod running
 // parallelism = 2
 // 1 new pod created on 1 node
-func TestReconcileJobCreatePod(t *testing.T) {
+func TestReconcileJobCreatePodAbsolute(t *testing.T) {
 	scheme := runtime.NewScheme()
 	_ = appsv1alpha1.AddToScheme(scheme)
 	_ = v1.AddToScheme(scheme)
 
-	p := int32(2)
+	p := intstr.FromInt(2)
 	// A job
 	job1 := createJob("job1", p)
 
@@ -81,10 +82,12 @@ func TestReconcileJobCreatePod(t *testing.T) {
 	assert.NoError(t, err)
 	retrievedJob := &appsv1alpha1.BroadcastJob{}
 	err = reconcileJob.Get(context.TODO(), request.NamespacedName, retrievedJob)
+	assert.NoError(t, err)
 
 	podList := &v1.PodList{}
 	listOptions := client.InNamespace(request.Namespace)
 	err = reconcileJob.List(context.TODO(), listOptions, podList)
+	assert.NoError(t, err)
 
 	// 2 pods active
 	assert.Equal(t, int32(2), retrievedJob.Status.Active)
@@ -98,6 +101,110 @@ func TestReconcileJobCreatePod(t *testing.T) {
 }
 
 // Test scenario:
+// 1 node with 1 pod running
+// 4 nodes without pod running
+// parallelism = 40%
+// 1 new pod created on 1 node
+func TestReconcileJobCreatePodPercentage(t *testing.T) {
+	scheme := runtime.NewScheme()
+	_ = appsv1alpha1.AddToScheme(scheme)
+	_ = v1.AddToScheme(scheme)
+
+	p := intstr.FromString("40%")
+	// A job
+	job1 := createJob("job1", p)
+
+	// A POD for job1 running on node1
+	job1Pod1onNode1 := createPod(job1, "job1pod1node1", "node1", v1.PodRunning)
+
+	// Node1 has 1 pod running
+	node1 := createNode("node1")
+	// Node2 does not have pod running
+	node2 := createNode("node2")
+	// Node3 does not have pod running
+	node3 := createNode("node3")
+	// Node3 does not have pod running
+	node4 := createNode("node4")
+	// Node3 does not have pod running
+	node5 := createNode("node5")
+
+	reconcileJob := createReconcileJob(scheme, job1, job1Pod1onNode1, node1, node2, node3, node4, node5)
+
+	request := reconcile.Request{
+		NamespacedName: types.NamespacedName{
+			Name:      "job1",
+			Namespace: "default",
+		},
+	}
+
+	_, err := reconcileJob.Reconcile(request)
+	assert.NoError(t, err)
+	retrievedJob := &appsv1alpha1.BroadcastJob{}
+	err = reconcileJob.Get(context.TODO(), request.NamespacedName, retrievedJob)
+	assert.NoError(t, err)
+
+	podList := &v1.PodList{}
+	listOptions := client.InNamespace(request.Namespace)
+	err = reconcileJob.List(context.TODO(), listOptions, podList)
+	assert.NoError(t, err)
+
+	// 2 pods active
+	assert.Equal(t, int32(2), retrievedJob.Status.Active)
+	// 1 new pod created, because parallelism is 2,
+	assert.Equal(t, 2, len(podList.Items))
+	// The new pod has the job-name label
+	assert.Equal(t, "job1", podList.Items[0].Labels["job-name"])
+	// 3 desired pods, one for each node
+	assert.Equal(t, int32(5), retrievedJob.Status.Desired)
+	assert.NotNil(t, retrievedJob.Status.StartTime)
+}
+
+// Test scenario:
+// 1 job, 1 normal node, 1 unschedulable node
+// Check only 1 pod is created because the other node is unschedulable
+func TestPodsOnUnschedulableNodes(t *testing.T) {
+	scheme := runtime.NewScheme()
+	_ = appsv1alpha1.AddToScheme(scheme)
+	_ = v1.AddToScheme(scheme)
+
+	p := intstr.FromInt(2)
+	// A job
+	job1 := createJob("job1", p)
+
+	// Create Node1 with Unschedulable to true
+	node1 := createNode("node1")
+	node1.Spec.Unschedulable = true
+
+	// Create node2
+	node2 := createNode("node2")
+
+	reconcileJob := createReconcileJob(scheme, job1, node1, node2)
+	request := reconcile.Request{
+		NamespacedName: types.NamespacedName{
+			Name:      "job1",
+			Namespace: "default",
+		},
+	}
+
+	_, err := reconcileJob.Reconcile(request)
+	assert.NoError(t, err)
+	retrievedJob := &appsv1alpha1.BroadcastJob{}
+	// assert Job exists
+	err = reconcileJob.Get(context.TODO(), request.NamespacedName, retrievedJob)
+	assert.NoError(t, err)
+
+	podList := &v1.PodList{}
+	listOptions := client.InNamespace(request.Namespace)
+	err = reconcileJob.List(context.TODO(), listOptions, podList)
+	assert.NoError(t, err)
+
+	// 1 pod active on node2,  node1 is unschedulable hence no pod
+	assert.Equal(t, int32(1), retrievedJob.Status.Active)
+	assert.Equal(t, int32(1), retrievedJob.Status.Desired)
+	assert.Equal(t, 1, len(podList.Items))
+}
+
+// Test scenario:
 // 10 nodes without pods
 // 10 pods created with slow start
 func TestReconcileJobMultipleBatches(t *testing.T) {
@@ -105,7 +212,7 @@ func TestReconcileJobMultipleBatches(t *testing.T) {
 	_ = appsv1alpha1.AddToScheme(scheme)
 	_ = v1.AddToScheme(scheme)
 
-	p := int32(20)
+	p := intstr.FromInt(20)
 	// A job
 	job1 := createJob("job1", p)
 
@@ -126,6 +233,7 @@ func TestReconcileJobMultipleBatches(t *testing.T) {
 	assert.NoError(t, err)
 	retrievedJob := &appsv1alpha1.BroadcastJob{}
 	err = reconcileJob.Get(context.TODO(), request.NamespacedName, retrievedJob)
+	assert.NoError(t, err)
 
 	// 10 pods active
 	assert.Equal(t, int32(10), retrievedJob.Status.Active)
@@ -134,6 +242,8 @@ func TestReconcileJobMultipleBatches(t *testing.T) {
 	listOptions := client.InNamespace(request.Namespace)
 	listOptions.MatchingLabels(labelsAsMap(job1))
 	err = reconcileJob.List(context.TODO(), listOptions, podList)
+	assert.NoError(t, err)
+
 	// 10 new pods created
 	assert.Equal(t, 10, len(podList.Items))
 }
@@ -146,7 +256,7 @@ func TestJobComplete(t *testing.T) {
 	_ = v1.AddToScheme(scheme)
 
 	// A job
-	p := int32(10)
+	p := intstr.FromInt(10)
 	job1 := createJob("job1", p)
 
 	// Create 3 nodes
@@ -175,6 +285,7 @@ func TestJobComplete(t *testing.T) {
 	assert.NoError(t, err)
 	retrievedJob := &appsv1alpha1.BroadcastJob{}
 	err = reconcileJob.Get(context.TODO(), request.NamespacedName, retrievedJob)
+	assert.NoError(t, err)
 
 	// completionTime is set
 	assert.NotNil(t, retrievedJob.Status.CompletionTime)
@@ -193,7 +304,7 @@ func TestJobFailed(t *testing.T) {
 	_ = v1.AddToScheme(scheme)
 
 	// A job
-	p := int32(10)
+	p := intstr.FromInt(10)
 	// activeDeadline is set 0, to make job fail
 	activeDeadline := int64(0)
 	now := metav1.Now()
@@ -234,6 +345,7 @@ func TestJobFailed(t *testing.T) {
 	assert.NoError(t, err)
 	retrievedJob := &appsv1alpha1.BroadcastJob{}
 	err = reconcileJob.Get(context.TODO(), request.NamespacedName, retrievedJob)
+	assert.NoError(t, err)
 
 	// The job is failed
 	assert.True(t, len(retrievedJob.Status.Conditions) > 0)
@@ -271,7 +383,7 @@ func createNode(nodeName string) *v1.Node {
 	return node3
 }
 
-func createJob(jobName string, parallelism int32) *appsv1alpha1.BroadcastJob {
+func createJob(jobName string, parallelism intstr.IntOrString) *appsv1alpha1.BroadcastJob {
 	job1 := &appsv1alpha1.BroadcastJob{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      jobName,

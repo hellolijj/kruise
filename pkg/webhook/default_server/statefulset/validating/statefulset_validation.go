@@ -149,7 +149,7 @@ func validateStatefulSet(statefulSet *appsv1alpha1.StatefulSet) field.ErrorList 
 	return allErrs
 }
 
-// validateStatefulSetUpdate tests if required fields in the StatefulSet are set.
+// ValidateStatefulSetUpdate tests if required fields in the StatefulSet are set.
 func ValidateStatefulSetUpdate(statefulSet, oldStatefulSet *appsv1alpha1.StatefulSet) field.ErrorList {
 	allErrs := apivalidation.ValidateObjectMetaUpdate(&statefulSet.ObjectMeta, &oldStatefulSet.ObjectMeta, field.NewPath("metadata"))
 
@@ -182,9 +182,9 @@ func convertPodTemplateSpec(template *v1.PodTemplateSpec) (*core.PodTemplateSpec
 }
 
 func validateTemplateInPlaceOnly(oldTemp, newTemp *v1.PodTemplateSpec) error {
-	oldTempJson, _ := json.Marshal(oldTemp.Spec)
-	newTempJson, _ := json.Marshal(newTemp.Spec)
-	patches, err := jsonpatch.CreatePatch(oldTempJson, newTempJson)
+	oldTempJSON, _ := json.Marshal(oldTemp.Spec)
+	newTempJSON, _ := json.Marshal(newTemp.Spec)
+	patches, err := jsonpatch.CreatePatch(oldTempJSON, newTempJSON)
 	if err != nil {
 		return fmt.Errorf("failed calculate patches between old/new template spec")
 	}

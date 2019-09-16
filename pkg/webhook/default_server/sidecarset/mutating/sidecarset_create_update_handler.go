@@ -18,19 +18,32 @@ package mutating
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
-	v1 "k8s.io/kubernetes/pkg/apis/core/v1"
+	"k8s.io/api/admission/v1beta1"
+	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/klog"
+	"k8s.io/kubernetes/pkg/apis/core/v1"
 
 	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/types"
 
 	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
+	"github.com/openkruise/kruise/pkg/util"
+	patchutil "github.com/openkruise/kruise/pkg/util/patch"
+)
+
+const (
+	// SidecarSetHashAnnotation represents the key of a sidecarset hash
+	SidecarSetHashAnnotation = "kruise.io/sidecarset-hash"
+	// SidecarSetHashWithoutImageAnnotation represents the key of a sidecarset hash without images of sidecar
+	SidecarSetHashWithoutImageAnnotation = "kruise.io/sidecarset-hash-without-image"
 )
 
 func init() {
-	webhookName := "mutating-create-sidecarset"
+	webhookName := "mutating-create-update-sidecarset"
 	if HandlerMap[webhookName] == nil {
 		HandlerMap[webhookName] = []admission.Handler{}
 	}
@@ -49,14 +62,24 @@ type SidecarSetCreateHandler struct {
 	Decoder types.Decoder
 }
 
-func (h *SidecarSetCreateHandler) mutatingSidecarSetFn(ctx context.Context, obj *appsv1alpha1.SidecarSet) error {
-	setDefaultSidecarSet(obj)
-	return nil
-}
-
 func setDefaultSidecarSet(sidecarset *appsv1alpha1.SidecarSet) {
+	setSidecarSetUpdateStratety(&sidecarset.Spec.Strategy)
+
 	for i := range sidecarset.Spec.Containers {
 		setDefaultContainer(&sidecarset.Spec.Containers[i])
+	}
+
+	klog.V(3).Infof("sidecarset after mutating: %v", util.DumpJSON(sidecarset))
+}
+
+func setSidecarSetUpdateStratety(strategy *appsv1alpha1.SidecarSetUpdateStrategy) {
+	if strategy.RollingUpdate == nil {
+		rollingUpdate := appsv1alpha1.RollingUpdateSidecarSet{}
+		strategy.RollingUpdate = &rollingUpdate
+	}
+	if strategy.RollingUpdate.MaxUnavailable == nil {
+		maxUnavailable := intstr.FromInt(1)
+		strategy.RollingUpdate.MaxUnavailable = &maxUnavailable
 	}
 }
 
@@ -103,6 +126,26 @@ func setDefaultContainer(sidecarContainer *appsv1alpha1.SidecarContainer) {
 	}
 }
 
+func setHashSidecarSet(sidecarset *appsv1alpha1.SidecarSet) error {
+	if sidecarset.Annotations == nil {
+		sidecarset.Annotations = make(map[string]string)
+	}
+
+	hash, err := SidecarSetHash(sidecarset)
+	if err != nil {
+		return err
+	}
+	sidecarset.Annotations[SidecarSetHashAnnotation] = hash
+
+	hash, err = SidecarSetHashWithoutImage(sidecarset)
+	if err != nil {
+		return err
+	}
+	sidecarset.Annotations[SidecarSetHashWithoutImageAnnotation] = hash
+
+	return nil
+}
+
 var _ admission.Handler = &SidecarSetCreateHandler{}
 
 // Handle handles admission requests.
@@ -115,11 +158,20 @@ func (h *SidecarSetCreateHandler) Handle(ctx context.Context, req types.Request)
 	}
 	copy := obj.DeepCopy()
 
-	err = h.mutatingSidecarSetFn(ctx, copy)
+	switch req.AdmissionRequest.Operation {
+	case v1beta1.Create, v1beta1.Update:
+		setDefaultSidecarSet(copy)
+		if err := setHashSidecarSet(copy); err != nil {
+			return admission.ErrorResponse(http.StatusInternalServerError, err)
+		}
+	}
+
+	// related issue: https://github.com/kubernetes-sigs/kubebuilder/issues/510
+	marshaledSidecarSet, err := json.Marshal(copy)
 	if err != nil {
 		return admission.ErrorResponse(http.StatusInternalServerError, err)
 	}
-	return admission.PatchResponse(obj, copy)
+	return patchutil.ResponseFromRaw(req.AdmissionRequest.Object.Raw, marshaledSidecarSet)
 }
 
 //var _ inject.Client = &SidecarSetCreateHandler{}

@@ -33,6 +33,7 @@ import (
 
 	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
 	"github.com/openkruise/kruise/pkg/util"
+	"github.com/openkruise/kruise/pkg/webhook/default_server/sidecarset/mutating"
 )
 
 func init() {
@@ -44,9 +45,10 @@ func init() {
 }
 
 var (
-	SidecarIgnoredNamespaces       = []string{"kube-system", "kube-public"}
-	SidecarSetGenerationAnnotation = "kruise.io/sidecarset-generation"
-	SidecarEnvKey                  = "IS_INJECTED"
+	// SidecarIgnoredNamespaces specifies the namespaces where Pods won't get injected
+	SidecarIgnoredNamespaces = []string{"kube-system", "kube-public"}
+	// SidecarEnvKey specifies the environment variable which marks a container as injected
+	SidecarEnvKey = "IS_INJECTED"
 )
 
 // PodCreateHandler handles Pod
@@ -80,7 +82,9 @@ func (h *PodCreateHandler) sidecarsetMutatingPod(ctx context.Context, pod *corev
 	}
 
 	var sidecarContainers []corev1.Container
-	sidecarSetGeneration := make(map[string]int64)
+	var sidecarVolumes []corev1.Volume
+	sidecarSetHash := make(map[string]string)
+	sidecarSetHashWithoutImage := make(map[string]string)
 	matchNothing := true
 	for _, sidecarSet := range sidecarSets.Items {
 		needInject, err := PodMatchSidecarSet(pod, sidecarSet)
@@ -92,9 +96,10 @@ func (h *PodCreateHandler) sidecarsetMutatingPod(ctx context.Context, pod *corev
 		}
 		matchNothing = false
 
-		sidecarSetGeneration[sidecarSet.Name] = sidecarSet.Generation
+		sidecarSetHash[sidecarSet.Name] = sidecarSet.Annotations[mutating.SidecarSetHashAnnotation]
+		sidecarSetHashWithoutImage[sidecarSet.Name] = sidecarSet.Annotations[mutating.SidecarSetHashWithoutImageAnnotation]
 
-		for i, _ := range sidecarSet.Spec.Containers {
+		for i := range sidecarSet.Spec.Containers {
 			sidecarContainer := &sidecarSet.Spec.Containers[i]
 
 			// add env to container
@@ -102,31 +107,42 @@ func (h *PodCreateHandler) sidecarsetMutatingPod(ctx context.Context, pod *corev
 
 			sidecarContainers = append(sidecarContainers, sidecarContainer.Container)
 		}
+
+		sidecarVolumes = append(sidecarVolumes, sidecarSet.Spec.Volumes...)
 	}
 	if matchNothing {
 		return nil
 	}
 
-	klog.V(4).Infof("[sidecar inject] before mutating: %v", util.DumpJson(pod))
+	klog.V(4).Infof("[sidecar inject] before mutating: %v", util.DumpJSON(pod))
 	// apply sidecar info into pod
 	// 1. apply containers
 	pod.Spec.Containers = append(pod.Spec.Containers, sidecarContainers...)
-	// 2. apply annotations
-	if len(sidecarSetGeneration) != 0 {
-		encodedStr, err := json.Marshal(sidecarSetGeneration)
+	// 2. apply volumes
+	pod.Spec.Volumes = append(pod.Spec.Volumes, sidecarVolumes...)
+	// 3. apply annotations
+	if pod.Annotations == nil {
+		pod.Annotations = make(map[string]string)
+	}
+	if len(sidecarSetHash) != 0 {
+		encodedStr, err := json.Marshal(sidecarSetHash)
 		if err != nil {
 			return err
 		}
-		if pod.Annotations == nil {
-			pod.Annotations = make(map[string]string)
+		pod.Annotations[mutating.SidecarSetHashAnnotation] = string(encodedStr)
+
+		encodedStr, err = json.Marshal(sidecarSetHashWithoutImage)
+		if err != nil {
+			return err
 		}
-		pod.Annotations[SidecarSetGenerationAnnotation] = string(encodedStr)
+		pod.Annotations[mutating.SidecarSetHashWithoutImageAnnotation] = string(encodedStr)
 	}
-	klog.V(4).Infof("[sidecar inject] after mutating: %v", util.DumpJson(pod))
+	klog.V(4).Infof("[sidecar inject] after mutating: %v", util.DumpJSON(pod))
 
 	return nil
 }
 
+// PodMatchSidecarSet determines if pod match Selector of sidecar.
 func PodMatchSidecarSet(pod *corev1.Pod, sidecarSet appsv1alpha1.SidecarSet) (bool, error) {
 	selector, err := metav1.LabelSelectorAsSelector(sidecarSet.Spec.Selector)
 	if err != nil {

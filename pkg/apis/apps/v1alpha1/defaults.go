@@ -16,21 +16,24 @@ limitations under the License.
 
 package v1alpha1
 
-import "k8s.io/apimachinery/pkg/runtime"
+import (
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/intstr"
+)
 
 func addDefaultingFuncs(scheme *runtime.Scheme) error {
 	return RegisterDefaults(scheme)
 }
 
-// SetDefaults_BroadcastJob sets any unspecified values to defaults.
-func SetDefaults_BroadcastJob(job *BroadcastJob) {
+// SetDefaultsBroadcastJob sets any unspecified values to defaults.
+func SetDefaultsBroadcastJob(job *BroadcastJob) {
 	if job.Spec.CompletionPolicy.Type == "" {
 		job.Spec.CompletionPolicy.Type = Always
 	}
 
 	if job.Spec.Parallelism == nil {
 		parallelism := int32(1<<31 - 1)
-		job.Spec.Parallelism = &parallelism
+		parallelismIntStr := intstr.FromInt(int(parallelism))
+		job.Spec.Parallelism = &parallelismIntStr
 	}
-
 }

@@ -67,12 +67,11 @@
           "$ref": "#/definitions/kruise.apps.v1alpha1.CompletionPolicy"
         },
         "parallelism": {
-          "description": "Specifies the maximum desired number of pods the job should run at any given time. The actual number of pods running in steady state will be less than this number when the work left to do is less than max parallelism. Not setting this value means no limit.",
-          "type": "integer",
-          "format": "int32"
+          "description": "Parallelism specifies the maximum desired number of pods the job should run at any given time. The actual number of pods running in steady state will be less than this number when the work left to do is less than max parallelism. Not setting this value means no limit.",
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.util.intstr.IntOrString"
         },
         "template": {
-          "description": "Describes the pod that will be created when executing a job.",
+          "description": "Template describes the pod that will be created when executing a job.",
           "$ref": "#/definitions/io.k8s.api.core.v1.PodTemplateSpec"
         }
       }
@@ -125,12 +124,12 @@
       "type": "object",
       "properties": {
         "activeDeadlineSeconds": {
-          "description": "Specifies the duration in seconds relative to the startTime that the job may be active before the system tries to terminate it; value must be positive integer. Only works for Always type",
+          "description": "ActiveDeadlineSeconds specifies the duration in seconds relative to the startTime that the job may be active before the system tries to terminate it; value must be positive integer. Only works for Always type.",
           "type": "integer",
           "format": "int64"
         },
         "backoffLimit": {
-          "description": "Specifies the number of retries before marking this job failed. Not setting value means no limit. Only works for Always type",
+          "description": "BackoffLimit specifies the number of retries before marking this job failed. Not setting value means no limit. Only works for Always type.",
           "type": "integer",
           "format": "int32"
         },
@@ -179,7 +178,7 @@
       }
     },
     "kruise.apps.v1alpha1.InPlaceUpdateContainerStatus": {
-      "description": "InPlaceUpdateContainerStatus records container status in current pod.",
+      "description": "InPlaceUpdateContainerStatus records the statuses of the container that are mainly used to determine whether the InPlaceUpdate is completed.",
       "type": "object",
       "properties": {
         "imageID": {
@@ -197,15 +196,18 @@
       ],
       "properties": {
         "lastContainerStatuses": {
+          "description": "LastContainerStatuses records the before-in-place-update container statuses. It is a map from ContainerName to InPlaceUpdateContainerStatus",
           "type": "object",
           "additionalProperties": {
             "$ref": "#/definitions/kruise.apps.v1alpha1.InPlaceUpdateContainerStatus"
           }
         },
         "revision": {
+          "description": "Revision is the updated statefulset revision hash.",
           "type": "string"
         },
         "updateTimestamp": {
+          "description": "UpdateTimestamp is the time when the in-place update happens.",
           "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.Time"
         }
       }
@@ -361,6 +363,12 @@
           "description": "readyReplicas is the number of Pods created by the StatefulSet controller that have a Ready Condition.",
           "type": "integer",
           "format": "int32"
+    "kruise.apps.v1alpha1.RollingUpdateSidecarSet": {
+      "description": "RollingUpdateSidecarSet is used to communicate parameter",
+      "type": "object",
+      "properties": {
+        "maxUnavailable": {
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.util.intstr.IntOrString"
         }
       }
     },
@@ -377,6 +385,10 @@
           "type": "integer",
           "format": "int32"
         },
+        "paused": {
+          "description": "Paused indicates that the StatefulSet is paused. Default value is false",
+          "type": "boolean"
+        },
         "podUpdatePolicy": {
           "description": "PodUpdatePolicy indicates how pods should be updated Default value is \"ReCreate\"",
           "type": "string"
@@ -384,6 +396,7 @@
       }
     },
     "kruise.apps.v1alpha1.SidecarContainer": {
+      "description": "SidecarContainer defines the container of Sidecar",
       "type": "object",
       "required": [
         "Container"
@@ -448,15 +461,30 @@
       "type": "object",
       "properties": {
         "containers": {
-          "description": "containers contains two pieces of information: 1. normal container info that should be injected into pod 2. custom fields to control insert behavior(currently empty)",
+          "description": "Containers is the list of sidecar containers to be injected into the selected pod",
           "type": "array",
           "items": {
             "$ref": "#/definitions/kruise.apps.v1alpha1.SidecarContainer"
           }
         },
+        "paused": {
+          "description": "Paused indicates that the sidecarset is paused and will not be processed by the sidecarset controller.",
+          "type": "boolean"
+        },
         "selector": {
           "description": "selector is a label query over pods that should be injected",
           "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector"
+        },
+        "strategy": {
+          "description": "The sidecarset strategy to use to replace existing pods with new ones.",
+          "$ref": "#/definitions/kruise.apps.v1alpha1.SidecarSetUpdateStrategy"
+        },
+        "volumes": {
+          "description": "List of volumes that can be mounted by sidecar containers",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.k8s.api.core.v1.Volume"
+          }
         }
       }
     },
@@ -470,7 +498,7 @@
       ],
       "properties": {
         "matchedPods": {
-          "description": "matchedPods is the number of Pods whose labels are matched with this SidecarSet's selector",
+          "description": "matchedPods is the number of Pods whose labels are matched with this SidecarSet's selector and are created after sidecarset creates",
           "type": "integer",
           "format": "int32"
         },
@@ -488,6 +516,15 @@
           "description": "updatedPods is the number of matched Pods that are injected with the latest SidecarSet's containers",
           "type": "integer",
           "format": "int32"
+        }
+      }
+    },
+    "kruise.apps.v1alpha1.SidecarSetUpdateStrategy": {
+      "description": "SidecarSetUpdateStrategy indicates the strategy that the SidecarSet controller will use to perform updates. It includes any additional parameters necessary to perform the update for the indicated strategy.",
+      "type": "object",
+      "properties": {
+        "rollingUpdate": {
+          "$ref": "#/definitions/kruise.apps.v1alpha1.RollingUpdateSidecarSet"
         }
       }
     },

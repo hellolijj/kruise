@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 
+	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -46,27 +47,32 @@ func Add(mgr manager.Manager) error {
 		secretName = "kruise-webhook-server-secret"
 	}
 
+	bootstrapOptions := &webhook.BootstrapOptions{
+		MutatingWebhookConfigName:   "kruise-mutating-webhook-configuration",
+		ValidatingWebhookConfigName: "kruise-validating-webhook-configuration",
+	}
+
+	if webhookHost := os.Getenv("WEBHOOK_HOST"); len(webhookHost) > 0 {
+		bootstrapOptions.Host = &webhookHost
+	} else {
+		bootstrapOptions.Service = &webhook.Service{
+			Namespace: ns,
+			Name:      "kruise-webhook-server-service",
+			// Selectors should select the pods that runs this webhook server.
+			Selectors: map[string]string{
+				"control-plane": "controller-manager",
+			},
+		}
+		bootstrapOptions.Secret = &types.NamespacedName{
+			Namespace: ns,
+			Name:      secretName,
+		}
+	}
+
 	svr, err := webhook.NewServer("kruise-admission-server", mgr, webhook.ServerOptions{
-		Port:    9876,
-		CertDir: "/tmp/cert",
-		BootstrapOptions: &webhook.BootstrapOptions{
-			MutatingWebhookConfigName:   "kruise-mutating-webhook-configuration",
-			ValidatingWebhookConfigName: "kruise-validating-webhook-configuration",
-
-			Secret: &types.NamespacedName{
-				Namespace: ns,
-				Name:      secretName,
-			},
-
-			Service: &webhook.Service{
-				Namespace: ns,
-				Name:      "kruise-webhook-server-service",
-				// Selectors should select the pods that runs this webhook server.
-				Selectors: map[string]string{
-					"control-plane": "controller-manager",
-				},
-			},
-		},
+		Port:             9876,
+		CertDir:          "/tmp/cert",
+		BootstrapOptions: bootstrapOptions,
 	})
 	if err != nil {
 		return err
@@ -84,10 +90,14 @@ func Add(mgr manager.Manager) error {
 			WithManager(mgr).
 			Build()
 		if err != nil {
+			if kindMatchErr, ok := err.(*meta.NoKindMatchError); ok {
+				log.Info(fmt.Sprintf("CRD %v is not installed,  webhook %v registration is ignored",
+					kindMatchErr.GroupKind, k))
+				continue
+			}
 			return err
 		}
 		webhooks = append(webhooks, wh)
 	}
-
 	return svr.Register(webhooks...)
 }

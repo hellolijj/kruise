@@ -51,10 +51,19 @@ spec:
   selector:
     matchLabels:
       app: nginx
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 2
   containers:
   - name: sidecar1
-    image: centos:7
-    command: ["sleep", "999d"] # do nothing at all 
+    image: centos:6.7
+    command: ["sleep", "999d"] # do nothing at all
+    volumeMounts:
+    - name: log-volume
+      mountPath: /var/log
+  volumes: # this field will be merged into pod.spec.volumes
+  - name: log-volume
+    emptyDir: {}
 ```
 
 Create a SidecarSet based on the YAML file:
@@ -91,13 +100,30 @@ test-pod   2/2     Running   0          118s
 In the meantime, the SidecarSet status updated:
 
 ```
+
 # kubectl get sidecarset test-sidecarset -o yaml | grep -A4 status
+
 status:
   matchedPods: 1
   observedGeneration: 1
   readyPods: 1
   updatedPods: 1
 ```
+
+### Update a SidecarSet
+
+Use ```kubectl edit sidecarset test-sidecarset``` to modify SidecarSet image from `centos:6.7` to `centos:6.8`. You
+should find that the matched pods will be updated in-place sequentially similar to Advanced StatefulSet.
+.spec.strategy.rollingUpdate.maxUnavailable is an optional field that specifies the maximum number of Pods that can be unavailable during the update process.
+The value can be an absolute number (for example, 5) or a percentage of desired Pods (for example, 10%). The absolute number is calculated from percentage by rounding down.
+When this value is set to 10%, it means 10% * 'matched pods number', default value is 1.
+
+You could use ```kubectl patch sidecarset test-sidecarset --type merge -p '{"spec":{"paused":true}}'``` to pause the update procedure.
+
+If user modifies fields other than image in sidecarSet, pod won't get updated until pod is recreated by workload(e.g. deployment), which we called "lazy update".
+
 ## Tutorial
+
 A more sophisticated tutorial is provided:
--  [Use SidecarSet to inject a sidecar container into the Guestbook application](../../tutorial/sidecarset.md)
+
+- [Use SidecarSet to inject a sidecar container into the Guestbook application](../../tutorial/sidecarset.md)
