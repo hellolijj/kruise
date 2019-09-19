@@ -18,10 +18,12 @@ jobs:
         pwd
         ls
         go env | grep GOPATH
-        mkdir -p ~/go/src/github.com/openkruise/kruise
-        cp -r ./ ~/go/src/github.com/openkruise/kruise
-        cd ~/go/src/github.com/openkruise/kruise
+        mkdir -p /home/runner/go/src/github.com/openkruise/kruise
+        cp -r ./ /home/runner/go/src/github.com/openkruise/kruise
+        cd /home/runner/go/src/github.com/openkruise/kruise
+        pwd
     - name: e2e-test
       run: |
-        go env | grep GOPATH
-        go test ./test/e2e/ -v -args "-kubeconfig=/home/runner/work/kruise/kruise"
+        pwd
+        ls
+        go test ./test/e2e/ -v -args "-kubeconfig=/home/runner/.kube/kind-config-kind"
