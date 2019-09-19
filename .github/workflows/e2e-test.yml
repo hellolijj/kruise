@@ -14,6 +14,10 @@ jobs:
         kubectl cluster-info
         kubectl get pods -n kube-system
     - name: pwd
-      run: pwd
+      run: |
+        pwd
+        ls
     - name: e2e-test
-      run: go test ./test/e2e/ -v -args "-kubeconfig=KUBECONFIG"
+      run: |
+        export PATH=$PATH:$(go env GOPATH)
+        go test ./test/e2e/ -v -args "-kubeconfig=/home/runner/work/kruise/kruise"
