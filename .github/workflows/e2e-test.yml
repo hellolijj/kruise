@@ -17,7 +17,10 @@ jobs:
       run: |
         pwd
         ls
+        mkdir -p /go/src/github.com/openkruise/kruise
+        cp -r ./ /go/src/github.com/openkruise/kruise
+        cd /go/src/github.com/openkruise/kruise
     - name: e2e-test
       run: |
-        export PATH=$PATH:$(go env GOPATH)
+        go env | grep GOPATH
         go test ./test/e2e/ -v -args "-kubeconfig=/home/runner/work/kruise/kruise"
