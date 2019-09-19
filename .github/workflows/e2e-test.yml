@@ -1,5 +1,5 @@
 name: "Create cluster using KinD"
-on: [pull_request, push]
+on: push
 
 jobs:
   kind:
@@ -7,8 +7,13 @@ jobs:
     steps:
     - uses: actions/checkout@master
     - uses: engineerd/setup-kind@v0.1.0
-    - name: Testing
+    - name: setup-k8s
       run: |
         export KUBECONFIG="$(kind get kubeconfig-path)"
+        echo $KUBECONFIG
         kubectl cluster-info
         kubectl get pods -n kube-system
+    - name: pwd
+      run: pwd
+    - name: e2e-test
+      run: go test ./test/e2e/ -v -args "-kubeconfig=KUBECONFIG"
