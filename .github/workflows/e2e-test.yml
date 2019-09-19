@@ -17,9 +17,10 @@ jobs:
       run: |
         pwd
         ls
-        mkdir -p /go/src/github.com/openkruise/kruise
-        cp -r ./ /go/src/github.com/openkruise/kruise
-        cd /go/src/github.com/openkruise/kruise
+        go env | grep GOPATH
+        mkdir -p ~/go/src/github.com/openkruise/kruise
+        cp -r ./ ~/go/src/github.com/openkruise/kruise
+        cd ~/go/src/github.com/openkruise/kruise
     - name: e2e-test
       run: |
         go env | grep GOPATH
