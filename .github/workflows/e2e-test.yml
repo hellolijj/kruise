@@ -13,17 +13,13 @@ jobs:
         echo $KUBECONFIG
         kubectl cluster-info
         kubectl get pods -n kube-system
-    - name: pwd
+    - name: e2e-test
       run: |
         pwd
         ls
-        go env | grep GOPATH
         mkdir -p /home/runner/go/src/github.com/openkruise/kruise
         cp -r ./ /home/runner/go/src/github.com/openkruise/kruise
         cd /home/runner/go/src/github.com/openkruise/kruise
-        pwd
-    - name: e2e-test
-      run: |
         pwd
         ls
         go test ./test/e2e/ -v -args "-kubeconfig=/home/runner/.kube/kind-config-kind"
