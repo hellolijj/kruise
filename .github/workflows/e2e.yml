@@ -21,4 +21,4 @@ jobs:
         mkdir -p $APP_PATH
         cp -r ./ $APP_PATH
         cd $APP_PATH
-        go test ./test/e2e/ -v -args "-kubeconfig=/home/runner/.kube/kind-config-kind"
+        go test ./test/e2e/ -timeout 30m -v -args "-kubeconfig=/home/runner/.kube/kind-config-kind"
