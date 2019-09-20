@@ -7,14 +7,12 @@ jobs:
     steps:
     - uses: actions/checkout@master
     - uses: engineerd/setup-kind@v0.1.0
-    - name: setup-k8s
+    - name: setup-k8s and install kruise
       run: |
         export KUBECONFIG="$(kind get kubeconfig-path)"
         echo $KUBECONFIG
         kubectl cluster-info
         kubectl get pods -n kube-system
-    - name: install-kruise
-      run: |
         kubectl apply -f ./config/crds/
         kubectl apply -f ./config/manager/all_in_one.yaml
     - name: e2e-test
