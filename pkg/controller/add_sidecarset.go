@@ -17,7 +17,7 @@ limitations under the License.
 package controller
 
 import (
-	"github.com/openkruise/kruise/pkg/controller/sidecarset"
+	"github.com/hellolijj/kruise/pkg/controller/sidecarset"
 )
 
 func init() {

@@ -5,7 +5,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"testing"
 
-	"github.com/openkruise/kruise/pkg/webhook/default_server/sidecarset/mutating"
+	"github.com/hellolijj/kruise/pkg/webhook/default_server/sidecarset/mutating"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -15,7 +15,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
+	appsv1alpha1 "github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1"
 )
 
 var (

@@ -24,7 +24,7 @@ import (
 	"testing"
 
 	"github.com/onsi/gomega"
-	"github.com/openkruise/kruise/pkg/apis"
+	"github.com/hellolijj/kruise/pkg/apis"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"

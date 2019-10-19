@@ -23,7 +23,7 @@ import (
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/ginkgo/config"
 	"github.com/onsi/gomega"
-	"github.com/openkruise/kruise/test/e2e/framework"
+	"github.com/hellolijj/kruise/test/e2e/framework"
 	"k8s.io/klog"
 
 	runtimeutils "k8s.io/apimachinery/pkg/util/runtime"

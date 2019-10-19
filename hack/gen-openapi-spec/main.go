@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/go-openapi/spec"
-	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
+	appsv1alpha1 "github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1"
 	"k8s.io/kube-openapi/pkg/common"
 )
 
@@ -54,11 +54,11 @@ func generateSwaggerJSON() {
 
 // swaggify converts the github package
 // e.g.:
-// github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarSet
+// github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.SidecarSet
 // to:
 // kruise.apps.v1alpha1.SidecarSet
 func swaggify(name string) string {
-	name = strings.Replace(name, "github.com/openkruise/kruise/pkg/apis", "kruise", -1)
+	name = strings.Replace(name, "github.com/hellolijj/kruise/pkg/apis", "kruise", -1)
 	parts := strings.Split(name, "/")
 	hostParts := strings.Split(parts[0], ".")
 	// reverses something like k8s.io to io.k8s

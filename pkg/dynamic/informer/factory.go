@@ -7,7 +7,7 @@ import (
 
 	glog "k8s.io/klog"
 
-	dynamicclientset "github.com/openkruise/kruise/pkg/dynamic/clientset"
+	dynamicclientset "github.com/hellolijj/kruise/pkg/dynamic/clientset"
 )
 
 // SharedInformerFactory is a factory for requesting dynamic informers from a

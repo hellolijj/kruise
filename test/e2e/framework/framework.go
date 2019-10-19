@@ -23,7 +23,7 @@ import (
 	"strings"
 	"time"
 
-	kruiseclientset "github.com/openkruise/kruise/pkg/client/clientset/versioned"
+	kruiseclientset "github.com/hellolijj/kruise/pkg/client/clientset/versioned"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"

@@ -17,8 +17,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
-	"github.com/openkruise/kruise/pkg/webhook/default_server/pod/mutating"
+	appsv1alpha1 "github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1"
+	"github.com/hellolijj/kruise/pkg/webhook/default_server/pod/mutating"
 )
 
 var _ handler.EventHandler = &enqueueRequestForPod{}

@@ -17,7 +17,7 @@ limitations under the License.
 package webhook
 
 import (
-	server "github.com/openkruise/kruise/pkg/webhook/default_server"
+	server "github.com/hellolijj/kruise/pkg/webhook/default_server"
 )
 
 func init() {

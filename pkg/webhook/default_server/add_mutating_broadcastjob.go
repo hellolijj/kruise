@@ -19,7 +19,7 @@ package defaultserver
 import (
 	"fmt"
 
-	"github.com/openkruise/kruise/pkg/webhook/default_server/broadcastjob/mutating"
+	"github.com/hellolijj/kruise/pkg/webhook/default_server/broadcastjob/mutating"
 )
 
 func init() {

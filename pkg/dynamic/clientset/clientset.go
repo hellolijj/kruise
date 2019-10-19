@@ -3,7 +3,7 @@ package clientset
 import (
 	"fmt"
 
-	dynamicdiscovery "github.com/openkruise/kruise/pkg/dynamic/discovery"
+	dynamicdiscovery "github.com/hellolijj/kruise/pkg/dynamic/discovery"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
 )

@@ -5,7 +5,7 @@
 Kubebuilder default `make run` does not work for webhooks since its scaffolding code starts webhook server
 using kubernetes service and the service usually does not work in local dev environment.
 
-PR [#103](https://github.com/openkruise/kruise/pull/103) workarounds this problem by allowing to start
+PR [#103](https://github.com/hellolijj/kruise/pull/103) workarounds this problem by allowing to start
 webbook server in local host directly. With this fix, one can start/debug kruise-manager process locally
 which connects to a local or remote Kubernetes cluster. Several extra steps are needed to make it work:
 

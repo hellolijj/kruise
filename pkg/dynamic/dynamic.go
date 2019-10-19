@@ -6,9 +6,9 @@ import (
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/rest"
 
-	dynamicclientset "github.com/openkruise/kruise/pkg/dynamic/clientset"
-	dynamicdiscovery "github.com/openkruise/kruise/pkg/dynamic/discovery"
-	dynamicinformer "github.com/openkruise/kruise/pkg/dynamic/informer"
+	dynamicclientset "github.com/hellolijj/kruise/pkg/dynamic/clientset"
+	dynamicdiscovery "github.com/hellolijj/kruise/pkg/dynamic/discovery"
+	dynamicinformer "github.com/hellolijj/kruise/pkg/dynamic/informer"
 )
 
 type Dynamic struct {

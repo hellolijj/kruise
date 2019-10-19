@@ -21,8 +21,8 @@ package v1alpha1
 import (
 	"time"
 
-	v1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
-	scheme "github.com/openkruise/kruise/pkg/client/clientset/versioned/scheme"
+	v1alpha1 "github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1"
+	scheme "github.com/hellolijj/kruise/pkg/client/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"

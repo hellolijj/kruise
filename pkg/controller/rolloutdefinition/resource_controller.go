@@ -21,9 +21,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
-	dynamicclientset "github.com/openkruise/kruise/pkg/dynamic/clientset"
-	dynamicinformer "github.com/openkruise/kruise/pkg/dynamic/informer"
+	"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1"
+	dynamicclientset "github.com/hellolijj/kruise/pkg/dynamic/clientset"
+	dynamicinformer "github.com/hellolijj/kruise/pkg/dynamic/informer"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"

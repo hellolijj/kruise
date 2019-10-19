@@ -21,11 +21,11 @@ import (
 
 	"k8s.io/klog"
 
-	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
-	"github.com/openkruise/kruise/pkg/dynamic"
-	dynamicclientset "github.com/openkruise/kruise/pkg/dynamic/clientset"
-	dynamicdiscovery "github.com/openkruise/kruise/pkg/dynamic/discovery"
-	dynamicinformer "github.com/openkruise/kruise/pkg/dynamic/informer"
+	appsv1alpha1 "github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1"
+	"github.com/hellolijj/kruise/pkg/dynamic"
+	dynamicclientset "github.com/hellolijj/kruise/pkg/dynamic/clientset"
+	dynamicdiscovery "github.com/hellolijj/kruise/pkg/dynamic/discovery"
+	dynamicinformer "github.com/hellolijj/kruise/pkg/dynamic/informer"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"

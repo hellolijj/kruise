@@ -19,8 +19,8 @@ package rolloutdefinition
 import (
 	"strings"
 
-	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
-	kuriseclient "github.com/openkruise/kruise/pkg/client"
+	appsv1alpha1 "github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1"
+	kuriseclient "github.com/hellolijj/kruise/pkg/client"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"

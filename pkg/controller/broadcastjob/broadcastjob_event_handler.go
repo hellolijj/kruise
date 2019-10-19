@@ -3,7 +3,7 @@ package broadcastjob
 import (
 	"context"
 
-	"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
+	"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1"
 	v1 "k8s.io/api/core/v1"
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/runtime"

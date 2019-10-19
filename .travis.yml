@@ -3,7 +3,7 @@ language: go
 go:
   - "1.12"
 
-go_import_path: github.com/openkruise/kruise
+go_import_path: github.com/hellolijj/kruise
 
 script:
   - make all

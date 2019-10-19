@@ -9,7 +9,7 @@ jobs:
       # this image is build from Dockerfile 
       # https://github.com/pouchcontainer/pouchlinter/blob/master/Dockerfile
       - image: pouchcontainer/pouchlinter:v0.1.2
-    working_directory: /go/src/github.com/openkruise/kruise
+    working_directory: /go/src/github.com/hellolijj/kruise
     steps:
       - checkout
       - run:
@@ -40,7 +40,7 @@ jobs:
   code-check:
     docker: 
       - image: pouchcontainer/pouchlinter:v0.1.2
-    working_directory: /go/src/github.com/openkruise/kruise
+    working_directory: /go/src/github.com/hellolijj/kruise
     steps:
       - checkout
       - run: 

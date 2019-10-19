@@ -2,16 +2,16 @@
 FROM golang:1.10.3 as builder
 
 # Copy in the go src
-WORKDIR /go/src/github.com/openkruise/kruise
+WORKDIR /go/src/github.com/hellolijj/kruise
 COPY pkg/    pkg/
 COPY cmd/    cmd/
 COPY vendor/ vendor/
 
 # Build
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o manager github.com/openkruise/kruise/cmd/manager
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o manager github.com/hellolijj/kruise/cmd/manager
 
 # Copy the controller-manager into a thin image
 FROM ubuntu:latest
 WORKDIR /
-COPY --from=builder /go/src/github.com/openkruise/kruise/manager .
+COPY --from=builder /go/src/github.com/hellolijj/kruise/manager .
 ENTRYPOINT ["/manager"]

@@ -28,37 +28,37 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.BroadcastJob":                     schema_pkg_apis_apps_v1alpha1_BroadcastJob(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.BroadcastJobList":                 schema_pkg_apis_apps_v1alpha1_BroadcastJobList(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.BroadcastJobSpec":                 schema_pkg_apis_apps_v1alpha1_BroadcastJobSpec(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.BroadcastJobStatus":               schema_pkg_apis_apps_v1alpha1_BroadcastJobStatus(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CompletionPolicy":                 schema_pkg_apis_apps_v1alpha1_CompletionPolicy(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.ControlResource":                  schema_pkg_apis_apps_v1alpha1_ControlResource(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.InPlaceUpdateContainerStatus":     schema_pkg_apis_apps_v1alpha1_InPlaceUpdateContainerStatus(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.InPlaceUpdateState":               schema_pkg_apis_apps_v1alpha1_InPlaceUpdateState(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.JobCondition":                     schema_pkg_apis_apps_v1alpha1_JobCondition(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.Path":                             schema_pkg_apis_apps_v1alpha1_Path(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RollingUpdateStatefulSetStrategy": schema_pkg_apis_apps_v1alpha1_RollingUpdateStatefulSetStrategy(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RolloutControl":                   schema_pkg_apis_apps_v1alpha1_RolloutControl(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RolloutControlList":               schema_pkg_apis_apps_v1alpha1_RolloutControlList(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RolloutControlSpec":               schema_pkg_apis_apps_v1alpha1_RolloutControlSpec(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RolloutControlStatus":             schema_pkg_apis_apps_v1alpha1_RolloutControlStatus(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RolloutDefinition":                schema_pkg_apis_apps_v1alpha1_RolloutDefinition(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RolloutDefinitionList":            schema_pkg_apis_apps_v1alpha1_RolloutDefinitionList(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RolloutDefinitionSpec":            schema_pkg_apis_apps_v1alpha1_RolloutDefinitionSpec(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RolloutDefinitionStatus":          schema_pkg_apis_apps_v1alpha1_RolloutDefinitionStatus(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarContainer":                 schema_pkg_apis_apps_v1alpha1_SidecarContainer(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarSet":                       schema_pkg_apis_apps_v1alpha1_SidecarSet(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarSetList":                   schema_pkg_apis_apps_v1alpha1_SidecarSetList(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarSetSpec":                   schema_pkg_apis_apps_v1alpha1_SidecarSetSpec(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarSetStatus":                 schema_pkg_apis_apps_v1alpha1_SidecarSetStatus(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SpecPath":                         schema_pkg_apis_apps_v1alpha1_SpecPath(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatefulSet":                      schema_pkg_apis_apps_v1alpha1_StatefulSet(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatefulSetList":                  schema_pkg_apis_apps_v1alpha1_StatefulSetList(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatefulSetSpec":                  schema_pkg_apis_apps_v1alpha1_StatefulSetSpec(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatefulSetStatus":                schema_pkg_apis_apps_v1alpha1_StatefulSetStatus(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatefulSetUpdateStrategy":        schema_pkg_apis_apps_v1alpha1_StatefulSetUpdateStrategy(ref),
-		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatusPath":                       schema_pkg_apis_apps_v1alpha1_StatusPath(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.BroadcastJob":                     schema_pkg_apis_apps_v1alpha1_BroadcastJob(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.BroadcastJobList":                 schema_pkg_apis_apps_v1alpha1_BroadcastJobList(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.BroadcastJobSpec":                 schema_pkg_apis_apps_v1alpha1_BroadcastJobSpec(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.BroadcastJobStatus":               schema_pkg_apis_apps_v1alpha1_BroadcastJobStatus(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.CompletionPolicy":                 schema_pkg_apis_apps_v1alpha1_CompletionPolicy(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.ControlResource":                  schema_pkg_apis_apps_v1alpha1_ControlResource(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.InPlaceUpdateContainerStatus":     schema_pkg_apis_apps_v1alpha1_InPlaceUpdateContainerStatus(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.InPlaceUpdateState":               schema_pkg_apis_apps_v1alpha1_InPlaceUpdateState(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.JobCondition":                     schema_pkg_apis_apps_v1alpha1_JobCondition(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.Path":                             schema_pkg_apis_apps_v1alpha1_Path(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.RollingUpdateStatefulSetStrategy": schema_pkg_apis_apps_v1alpha1_RollingUpdateStatefulSetStrategy(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.RolloutControl":                   schema_pkg_apis_apps_v1alpha1_RolloutControl(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.RolloutControlList":               schema_pkg_apis_apps_v1alpha1_RolloutControlList(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.RolloutControlSpec":               schema_pkg_apis_apps_v1alpha1_RolloutControlSpec(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.RolloutControlStatus":             schema_pkg_apis_apps_v1alpha1_RolloutControlStatus(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.RolloutDefinition":                schema_pkg_apis_apps_v1alpha1_RolloutDefinition(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.RolloutDefinitionList":            schema_pkg_apis_apps_v1alpha1_RolloutDefinitionList(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.RolloutDefinitionSpec":            schema_pkg_apis_apps_v1alpha1_RolloutDefinitionSpec(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.RolloutDefinitionStatus":          schema_pkg_apis_apps_v1alpha1_RolloutDefinitionStatus(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.SidecarContainer":                 schema_pkg_apis_apps_v1alpha1_SidecarContainer(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.SidecarSet":                       schema_pkg_apis_apps_v1alpha1_SidecarSet(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.SidecarSetList":                   schema_pkg_apis_apps_v1alpha1_SidecarSetList(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.SidecarSetSpec":                   schema_pkg_apis_apps_v1alpha1_SidecarSetSpec(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.SidecarSetStatus":                 schema_pkg_apis_apps_v1alpha1_SidecarSetStatus(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.SpecPath":                         schema_pkg_apis_apps_v1alpha1_SpecPath(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.StatefulSet":                      schema_pkg_apis_apps_v1alpha1_StatefulSet(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.StatefulSetList":                  schema_pkg_apis_apps_v1alpha1_StatefulSetList(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.StatefulSetSpec":                  schema_pkg_apis_apps_v1alpha1_StatefulSetSpec(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.StatefulSetStatus":                schema_pkg_apis_apps_v1alpha1_StatefulSetStatus(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.StatefulSetUpdateStrategy":        schema_pkg_apis_apps_v1alpha1_StatefulSetUpdateStrategy(ref),
+		"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.StatusPath":                       schema_pkg_apis_apps_v1alpha1_StatusPath(ref),
 	}
 }
 
@@ -90,19 +90,19 @@ func schema_pkg_apis_apps_v1alpha1_BroadcastJob(ref common.ReferenceCallback) co
 					},
 					"spec": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.BroadcastJobSpec"),
+							Ref: ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.BroadcastJobSpec"),
 						},
 					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.BroadcastJobStatus"),
+							Ref: ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.BroadcastJobStatus"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.BroadcastJobSpec", "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.BroadcastJobStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+			"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.BroadcastJobSpec", "github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.BroadcastJobStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
 	}
 }
 
@@ -138,7 +138,7 @@ func schema_pkg_apis_apps_v1alpha1_BroadcastJobList(ref common.ReferenceCallback
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.BroadcastJob"),
+										Ref: ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.BroadcastJob"),
 									},
 								},
 							},
@@ -149,7 +149,7 @@ func schema_pkg_apis_apps_v1alpha1_BroadcastJobList(ref common.ReferenceCallback
 			},
 		},
 		Dependencies: []string{
-			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.BroadcastJob", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
+			"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.BroadcastJob", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
 	}
 }
 
@@ -176,7 +176,7 @@ func schema_pkg_apis_apps_v1alpha1_BroadcastJobSpec(ref common.ReferenceCallback
 					"completionPolicy": {
 						SchemaProps: spec.SchemaProps{
 							Description: "CompletionPolicy indicates the completion policy of the job. Default is Always CompletionPolicyType",
-							Ref:         ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CompletionPolicy"),
+							Ref:         ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.CompletionPolicy"),
 						},
 					},
 				},
@@ -184,7 +184,7 @@ func schema_pkg_apis_apps_v1alpha1_BroadcastJobSpec(ref common.ReferenceCallback
 			},
 		},
 		Dependencies: []string{
-			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CompletionPolicy", "k8s.io/api/core/v1.PodTemplateSpec"},
+			"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.CompletionPolicy", "k8s.io/api/core/v1.PodTemplateSpec"},
 	}
 }
 
@@ -208,7 +208,7 @@ func schema_pkg_apis_apps_v1alpha1_BroadcastJobStatus(ref common.ReferenceCallba
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.JobCondition"),
+										Ref: ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.JobCondition"),
 									},
 								},
 							},
@@ -258,7 +258,7 @@ func schema_pkg_apis_apps_v1alpha1_BroadcastJobStatus(ref common.ReferenceCallba
 			},
 		},
 		Dependencies: []string{
-			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.JobCondition", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+			"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.JobCondition", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
 	}
 }
 
@@ -376,7 +376,7 @@ func schema_pkg_apis_apps_v1alpha1_InPlaceUpdateState(ref common.ReferenceCallba
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.InPlaceUpdateContainerStatus"),
+										Ref: ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.InPlaceUpdateContainerStatus"),
 									},
 								},
 							},
@@ -387,7 +387,7 @@ func schema_pkg_apis_apps_v1alpha1_InPlaceUpdateState(ref common.ReferenceCallba
 			},
 		},
 		Dependencies: []string{
-			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.InPlaceUpdateContainerStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+			"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.InPlaceUpdateContainerStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
 	}
 }
 
@@ -456,19 +456,19 @@ func schema_pkg_apis_apps_v1alpha1_Path(ref common.ReferenceCallback) common.Ope
 				Properties: map[string]spec.Schema{
 					"specPath": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SpecPath"),
+							Ref: ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.SpecPath"),
 						},
 					},
 					"statusPath": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatusPath"),
+							Ref: ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.StatusPath"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SpecPath", "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatusPath"},
+			"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.SpecPath", "github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.StatusPath"},
 	}
 }
 
@@ -542,19 +542,19 @@ func schema_pkg_apis_apps_v1alpha1_RolloutControl(ref common.ReferenceCallback) 
 					},
 					"spec": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RolloutControlSpec"),
+							Ref: ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.RolloutControlSpec"),
 						},
 					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RolloutControlStatus"),
+							Ref: ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.RolloutControlStatus"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RolloutControlSpec", "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RolloutControlStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+			"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.RolloutControlSpec", "github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.RolloutControlStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
 	}
 }
 
@@ -590,7 +590,7 @@ func schema_pkg_apis_apps_v1alpha1_RolloutControlList(ref common.ReferenceCallba
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RolloutControl"),
+										Ref: ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.RolloutControl"),
 									},
 								},
 							},
@@ -601,7 +601,7 @@ func schema_pkg_apis_apps_v1alpha1_RolloutControlList(ref common.ReferenceCallba
 			},
 		},
 		Dependencies: []string{
-			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RolloutControl", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
+			"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.RolloutControl", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
 	}
 }
 
@@ -655,19 +655,19 @@ func schema_pkg_apis_apps_v1alpha1_RolloutDefinition(ref common.ReferenceCallbac
 					},
 					"spec": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RolloutDefinitionSpec"),
+							Ref: ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.RolloutDefinitionSpec"),
 						},
 					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RolloutDefinitionStatus"),
+							Ref: ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.RolloutDefinitionStatus"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RolloutDefinitionSpec", "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RolloutDefinitionStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+			"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.RolloutDefinitionSpec", "github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.RolloutDefinitionStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
 	}
 }
 
@@ -703,7 +703,7 @@ func schema_pkg_apis_apps_v1alpha1_RolloutDefinitionList(ref common.ReferenceCal
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RolloutDefinition"),
+										Ref: ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.RolloutDefinition"),
 									},
 								},
 							},
@@ -714,7 +714,7 @@ func schema_pkg_apis_apps_v1alpha1_RolloutDefinitionList(ref common.ReferenceCal
 			},
 		},
 		Dependencies: []string{
-			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RolloutDefinition", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
+			"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.RolloutDefinition", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
 	}
 }
 
@@ -727,12 +727,12 @@ func schema_pkg_apis_apps_v1alpha1_RolloutDefinitionSpec(ref common.ReferenceCal
 				Properties: map[string]spec.Schema{
 					"controlResource": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.ControlResource"),
+							Ref: ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.ControlResource"),
 						},
 					},
 					"path": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.Path"),
+							Ref: ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.Path"),
 						},
 					},
 				},
@@ -740,7 +740,7 @@ func schema_pkg_apis_apps_v1alpha1_RolloutDefinitionSpec(ref common.ReferenceCal
 			},
 		},
 		Dependencies: []string{
-			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.ControlResource", "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.Path"},
+			"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.ControlResource", "github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.Path"},
 	}
 }
 
@@ -804,19 +804,19 @@ func schema_pkg_apis_apps_v1alpha1_SidecarSet(ref common.ReferenceCallback) comm
 					},
 					"spec": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarSetSpec"),
+							Ref: ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.SidecarSetSpec"),
 						},
 					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarSetStatus"),
+							Ref: ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.SidecarSetStatus"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarSetSpec", "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarSetStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+			"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.SidecarSetSpec", "github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.SidecarSetStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
 	}
 }
 
@@ -852,7 +852,7 @@ func schema_pkg_apis_apps_v1alpha1_SidecarSetList(ref common.ReferenceCallback) 
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarSet"),
+										Ref: ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.SidecarSet"),
 									},
 								},
 							},
@@ -863,7 +863,7 @@ func schema_pkg_apis_apps_v1alpha1_SidecarSetList(ref common.ReferenceCallback) 
 			},
 		},
 		Dependencies: []string{
-			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarSet", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
+			"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.SidecarSet", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
 	}
 }
 
@@ -887,7 +887,7 @@ func schema_pkg_apis_apps_v1alpha1_SidecarSetSpec(ref common.ReferenceCallback) 
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarContainer"),
+										Ref: ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.SidecarContainer"),
 									},
 								},
 							},
@@ -904,7 +904,7 @@ func schema_pkg_apis_apps_v1alpha1_SidecarSetSpec(ref common.ReferenceCallback) 
 			},
 		},
 		Dependencies: []string{
-			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarContainer", "k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector"},
+			"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.SidecarContainer", "k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector"},
 	}
 }
 
@@ -1012,19 +1012,19 @@ func schema_pkg_apis_apps_v1alpha1_StatefulSet(ref common.ReferenceCallback) com
 					},
 					"spec": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatefulSetSpec"),
+							Ref: ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.StatefulSetSpec"),
 						},
 					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatefulSetStatus"),
+							Ref: ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.StatefulSetStatus"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatefulSetSpec", "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatefulSetStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+			"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.StatefulSetSpec", "github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.StatefulSetStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
 	}
 }
 
@@ -1060,7 +1060,7 @@ func schema_pkg_apis_apps_v1alpha1_StatefulSetList(ref common.ReferenceCallback)
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatefulSet"),
+										Ref: ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.StatefulSet"),
 									},
 								},
 							},
@@ -1071,7 +1071,7 @@ func schema_pkg_apis_apps_v1alpha1_StatefulSetList(ref common.ReferenceCallback)
 			},
 		},
 		Dependencies: []string{
-			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatefulSet", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
+			"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.StatefulSet", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
 	}
 }
 
@@ -1131,7 +1131,7 @@ func schema_pkg_apis_apps_v1alpha1_StatefulSetSpec(ref common.ReferenceCallback)
 					"updateStrategy": {
 						SchemaProps: spec.SchemaProps{
 							Description: "updateStrategy indicates the StatefulSetUpdateStrategy that will be employed to update Pods in the StatefulSet when a revision is made to Template.",
-							Ref:         ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatefulSetUpdateStrategy"),
+							Ref:         ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.StatefulSetUpdateStrategy"),
 						},
 					},
 					"revisionHistoryLimit": {
@@ -1146,7 +1146,7 @@ func schema_pkg_apis_apps_v1alpha1_StatefulSetSpec(ref common.ReferenceCallback)
 			},
 		},
 		Dependencies: []string{
-			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatefulSetUpdateStrategy", "k8s.io/api/core/v1.PersistentVolumeClaim", "k8s.io/api/core/v1.PodTemplateSpec", "k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector"},
+			"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.StatefulSetUpdateStrategy", "k8s.io/api/core/v1.PersistentVolumeClaim", "k8s.io/api/core/v1.PodTemplateSpec", "k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector"},
 	}
 }
 
@@ -1258,14 +1258,14 @@ func schema_pkg_apis_apps_v1alpha1_StatefulSetUpdateStrategy(ref common.Referenc
 					"rollingUpdate": {
 						SchemaProps: spec.SchemaProps{
 							Description: "RollingUpdate is used to communicate parameters when Type is RollingUpdateStatefulSetStrategyType.",
-							Ref:         ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RollingUpdateStatefulSetStrategy"),
+							Ref:         ref("github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.RollingUpdateStatefulSetStrategy"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RollingUpdateStatefulSetStrategy"},
+			"github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1.RollingUpdateStatefulSetStrategy"},
 	}
 }
 

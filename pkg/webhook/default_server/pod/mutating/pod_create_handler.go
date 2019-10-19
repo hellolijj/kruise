@@ -31,9 +31,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/types"
 
-	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
-	"github.com/openkruise/kruise/pkg/util"
-	"github.com/openkruise/kruise/pkg/webhook/default_server/sidecarset/mutating"
+	appsv1alpha1 "github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1"
+	"github.com/hellolijj/kruise/pkg/util"
+	"github.com/hellolijj/kruise/pkg/webhook/default_server/sidecarset/mutating"
 )
 
 func init() {

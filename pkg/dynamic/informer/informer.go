@@ -12,8 +12,8 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/tools/cache"
 
-	dynamicclientset "github.com/openkruise/kruise/pkg/dynamic/clientset"
-	dynamiclister "github.com/openkruise/kruise/pkg/dynamic/lister"
+	dynamicclientset "github.com/hellolijj/kruise/pkg/dynamic/clientset"
+	dynamiclister "github.com/hellolijj/kruise/pkg/dynamic/lister"
 )
 
 // SharedIndexInformer is an extension of the standard interface of the same

@@ -20,11 +20,11 @@ package e2e
 import (
 	"testing"
 
-	kruiseapis "github.com/openkruise/kruise/pkg/apis"
-	"github.com/openkruise/kruise/test/e2e/framework"
+	kruiseapis "github.com/hellolijj/kruise/pkg/apis"
+	"github.com/hellolijj/kruise/test/e2e/framework"
 	"k8s.io/client-go/kubernetes/scheme"
 	// test sources
-	_ "github.com/openkruise/kruise/test/e2e/apps"
+	_ "github.com/hellolijj/kruise/test/e2e/apps"
 )
 
 func init() {

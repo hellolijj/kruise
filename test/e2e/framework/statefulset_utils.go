@@ -29,9 +29,9 @@ import (
 
 	"github.com/onsi/gomega"
 
-	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
-	kruiseclientset "github.com/openkruise/kruise/pkg/client/clientset/versioned"
-	"github.com/openkruise/kruise/test/e2e/manifest"
+	appsv1alpha1 "github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1"
+	kruiseclientset "github.com/hellolijj/kruise/pkg/client/clientset/versioned"
+	"github.com/hellolijj/kruise/test/e2e/manifest"
 	apps "k8s.io/api/apps/v1"
 	appsV1beta2 "k8s.io/api/apps/v1beta2"
 	"k8s.io/api/core/v1"

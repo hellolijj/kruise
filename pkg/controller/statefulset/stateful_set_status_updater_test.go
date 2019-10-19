@@ -21,9 +21,9 @@ import (
 	"errors"
 	"testing"
 
-	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
-	"github.com/openkruise/kruise/pkg/client/clientset/versioned/fake"
-	kruiseappslisters "github.com/openkruise/kruise/pkg/client/listers/apps/v1alpha1"
+	appsv1alpha1 "github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1"
+	"github.com/hellolijj/kruise/pkg/client/clientset/versioned/fake"
+	kruiseappslisters "github.com/hellolijj/kruise/pkg/client/listers/apps/v1alpha1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	core "k8s.io/client-go/testing"

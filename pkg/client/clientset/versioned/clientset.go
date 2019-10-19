@@ -19,7 +19,7 @@ limitations under the License.
 package versioned
 
 import (
-	appsv1alpha1 "github.com/openkruise/kruise/pkg/client/clientset/versioned/typed/apps/v1alpha1"
+	appsv1alpha1 "github.com/hellolijj/kruise/pkg/client/clientset/versioned/typed/apps/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"

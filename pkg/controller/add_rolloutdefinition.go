@@ -17,7 +17,7 @@ limitations under the License.
 package controller
 
 import (
-	"github.com/openkruise/kruise/pkg/controller/rolloutdefinition"
+	"github.com/hellolijj/kruise/pkg/controller/rolloutdefinition"
 )
 
 func init() {

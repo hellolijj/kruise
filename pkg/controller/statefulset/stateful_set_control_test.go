@@ -31,12 +31,12 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
-	kruiseclientset "github.com/openkruise/kruise/pkg/client/clientset/versioned"
-	kruisefake "github.com/openkruise/kruise/pkg/client/clientset/versioned/fake"
-	kruiseinformers "github.com/openkruise/kruise/pkg/client/informers/externalversions"
-	kruiseappsinformers "github.com/openkruise/kruise/pkg/client/informers/externalversions/apps/v1alpha1"
-	kruiseappslisters "github.com/openkruise/kruise/pkg/client/listers/apps/v1alpha1"
+	appsv1alpha1 "github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1"
+	kruiseclientset "github.com/hellolijj/kruise/pkg/client/clientset/versioned"
+	kruisefake "github.com/hellolijj/kruise/pkg/client/clientset/versioned/fake"
+	kruiseinformers "github.com/hellolijj/kruise/pkg/client/informers/externalversions"
+	kruiseappsinformers "github.com/hellolijj/kruise/pkg/client/informers/externalversions/apps/v1alpha1"
+	kruiseappslisters "github.com/hellolijj/kruise/pkg/client/listers/apps/v1alpha1"
 	apps "k8s.io/api/apps/v1"
 	"k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"

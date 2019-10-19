@@ -23,7 +23,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/rand"
 
-	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
+	appsv1alpha1 "github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1"
 )
 
 // SidecarSetHash returns a hash of the SidecarSet.

@@ -1,6 +1,6 @@
 <!-- 
 Please make sure you have read and understood the contributing guidelines;
-https://github.com/openkruise/kruise/blob/master/CONTRIBUTING.md -->
+https://github.com/hellolijj/kruise/blob/master/CONTRIBUTING.md -->
 
 ### Ⅰ. Describe what this PR does
 

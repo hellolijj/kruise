@@ -15,9 +15,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
-	"github.com/openkruise/kruise/pkg/apis"
-	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
-	"github.com/openkruise/kruise/pkg/webhook/default_server/sidecarset/mutating"
+	"github.com/hellolijj/kruise/pkg/apis"
+	appsv1alpha1 "github.com/hellolijj/kruise/pkg/apis/apps/v1alpha1"
+	"github.com/hellolijj/kruise/pkg/webhook/default_server/sidecarset/mutating"
 )
 
 func TestMain(m *testing.M) {

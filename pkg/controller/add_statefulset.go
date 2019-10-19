@@ -17,7 +17,7 @@ limitations under the License.
 package controller
 
 import (
-	"github.com/openkruise/kruise/pkg/controller/statefulset"
+	"github.com/hellolijj/kruise/pkg/controller/statefulset"
 )
 
 func init() {

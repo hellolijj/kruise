@@ -1,7 +1,7 @@
 package client
 
 import (
-	kruiseclientset "github.com/openkruise/kruise/pkg/client/clientset/versioned"
+	kruiseclientset "github.com/hellolijj/kruise/pkg/client/clientset/versioned"
 	kubeclientset "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
