@@ -103,7 +103,7 @@
           "items": {
             "$ref": "#/definitions/kruise.apps.v1alpha1.JobCondition"
           },
-          "x-kubernetes-patch-merge-key": "type",
+          "x-kubernetes-patch-merge-key": "types",
           "x-kubernetes-patch-strategy": "merge"
         },
         "desired": {
@@ -158,7 +158,7 @@
       "description": "CloneSetCondition describes the state of a CloneSet at a certain point.",
       "type": "object",
       "required": [
-        "type",
+        "types",
         "status"
       ],
       "properties": {
@@ -178,7 +178,7 @@
           "description": "Status of the condition, one of True, False, Unknown.",
           "type": "string"
         },
-        "type": {
+        "types": {
           "description": "Type of CloneSet condition.",
           "type": "string"
         }
@@ -371,8 +371,8 @@
             "$ref": "#/definitions/kruise.apps.v1alpha1.CloneSetUpdatePriorityTerm"
           }
         },
-        "type": {
-          "description": "Type indicates the type of the CloneSetUpdateStrategy. Default is ReCreate.",
+        "types": {
+          "description": "Type indicates the types of the CloneSetUpdateStrategy. Default is ReCreate.",
           "type": "string"
         }
       }
@@ -382,17 +382,17 @@
       "type": "object",
       "properties": {
         "activeDeadlineSeconds": {
-          "description": "ActiveDeadlineSeconds specifies the duration in seconds relative to the startTime that the job may be active before the system tries to terminate it; value must be positive integer. Only works for Always type.",
+          "description": "ActiveDeadlineSeconds specifies the duration in seconds relative to the startTime that the job may be active before the system tries to terminate it; value must be positive integer. Only works for Always types.",
           "type": "integer",
           "format": "int64"
         },
         "ttlSecondsAfterFinished": {
-          "description": "ttlSecondsAfterFinished limits the lifetime of a Job that has finished execution (either Complete or Failed). If this field is set, ttlSecondsAfterFinished after the Job finishes, it is eligible to be automatically deleted. When the Job is being deleted, its lifecycle guarantees (e.g. finalizers) will be honored. If this field is unset, the Job won't be automatically deleted. If this field is set to zero, the Job becomes eligible to be deleted immediately after it finishes. This field is alpha-level and is only honored by servers that enable the TTLAfterFinished feature. Only works for Always type",
+          "description": "ttlSecondsAfterFinished limits the lifetime of a Job that has finished execution (either Complete or Failed). If this field is set, ttlSecondsAfterFinished after the Job finishes, it is eligible to be automatically deleted. When the Job is being deleted, its lifecycle guarantees (e.g. finalizers) will be honored. If this field is unset, the Job won't be automatically deleted. If this field is set to zero, the Job becomes eligible to be deleted immediately after it finishes. This field is alpha-level and is only honored by servers that enable the TTLAfterFinished feature. Only works for Always types",
           "type": "integer",
           "format": "int32"
         },
-        "type": {
-          "description": "Type indicates the type of the CompletionPolicy Default is Always",
+        "types": {
+          "description": "Type indicates the types of the CompletionPolicy Default is Always",
           "type": "string"
         }
       }
@@ -406,8 +406,8 @@
           "type": "integer",
           "format": "int32"
         },
-        "type": {
-          "description": "Type indicates the type of FailurePolicyType.",
+        "types": {
+          "description": "Type indicates the types of FailurePolicyType.",
           "type": "string"
         }
       }
@@ -451,7 +451,7 @@
       "description": "JobCondition describes current state of a job.",
       "type": "object",
       "required": [
-        "type",
+        "types",
         "status"
       ],
       "properties": {
@@ -475,8 +475,250 @@
           "description": "Status of the condition, one of True, False, Unknown.",
           "type": "string"
         },
-        "type": {
+        "types": {
           "description": "Type of job condition, Complete or Failed.",
+          "type": "string"
+        }
+      }
+    },
+    "kruise.apps.v1alpha1.KanaryAnalysis": {
+      "description": "KanaryAnalysis is the Schema for the kanaryanalyses API",
+      "type": "object",
+      "properties": {
+        "apiVersion": {
+          "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+          "type": "string"
+        },
+        "kind": {
+          "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta"
+        },
+        "spec": {
+          "$ref": "#/definitions/kruise.apps.v1alpha1.KanaryAnalysisSpec"
+        },
+        "status": {
+          "$ref": "#/definitions/kruise.apps.v1alpha1.KanaryAnalysisStatus"
+        }
+      }
+    },
+    "kruise.apps.v1alpha1.KanaryAnalysisCondition": {
+      "description": "KanaryDeploymentCondition describes the state of a deployment at a certain point.",
+      "type": "object",
+      "required": [
+        "types",
+        "status"
+      ],
+      "properties": {
+        "lastTransitionTime": {
+          "description": "Last time the condition transitioned from one status to another.",
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.Time"
+        },
+        "lastUpdateTime": {
+          "description": "The last time this condition was updated.",
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.Time"
+        },
+        "message": {
+          "description": "A human readable message indicating details about the transition.",
+          "type": "string"
+        },
+        "reason": {
+          "description": "The reason for the condition's last transition.",
+          "type": "string"
+        },
+        "status": {
+          "description": "Status of the condition, one of True, False, Unknown.",
+          "type": "string"
+        },
+        "types": {
+          "description": "Type of deployment condition.",
+          "type": "string"
+        }
+      }
+    },
+    "kruise.apps.v1alpha1.KanaryAnalysisList": {
+      "description": "KanaryAnalysisList contains a list of KanaryAnalysis",
+      "type": "object",
+      "required": [
+        "items"
+      ],
+      "properties": {
+        "apiVersion": {
+          "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/kruise.apps.v1alpha1.KanaryAnalysis"
+          }
+        },
+        "kind": {
+          "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ListMeta"
+        }
+      }
+    },
+    "kruise.apps.v1alpha1.KanaryAnalysisSpec": {
+      "description": "KanaryAnalysisSpec defines the desired state of KanaryAnalysis",
+      "type": "object",
+      "required": [
+        "workload",
+        "selectedDeployedPodMethod",
+        "validation"
+      ],
+      "properties": {
+        "selectedDeployedPodMethod": {
+          "type": "string"
+        },
+        "validation": {
+          "$ref": "#/definitions/kruise.apps.v1alpha1.KanaryValidation"
+        },
+        "workload": {
+          "description": "INSERT ADDITIONAL SPEC FIELDS - desired state of cluster Important: Run \"make\" to regenerate code after modifying this file",
+          "$ref": "#/definitions/kruise.apps.v1alpha1.KanaryWorkload"
+        }
+      }
+    },
+    "kruise.apps.v1alpha1.KanaryAnalysisStatus": {
+      "description": "KanaryAnalysisStatus defines the observed state of KanaryAnalysis",
+      "type": "object",
+      "properties": {
+        "conditions": {
+          "description": "Represents the latest available observations of a kanarydeployment's current state.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/kruise.apps.v1alpha1.KanaryAnalysisCondition"
+          }
+        },
+        "currentHash": {
+          "description": "CurrentHash represents the current MD5 spec deployment template hash",
+          "type": "string"
+        },
+        "report": {
+          "description": "Report",
+          "$ref": "#/definitions/kruise.apps.v1alpha1.KanaryAnalysisStatusReport"
+        }
+      }
+    },
+    "kruise.apps.v1alpha1.KanaryAnalysisStatusReport": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "validation": {
+          "type": "string"
+        },
+        "workload": {
+          "type": "string"
+        }
+      }
+    },
+    "kruise.apps.v1alpha1.KanaryValidation": {
+      "description": "KanaryValidation define the analysis configuration for workload",
+      "type": "object",
+      "required": [
+        "items"
+      ],
+      "properties": {
+        "initialDelay": {
+          "description": "InitialDelay duration after the KanaryDeployment has started before validation checks is started.",
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.Duration"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/kruise.apps.v1alpha1.KanaryValidationItem"
+          }
+        },
+        "validationPeriod": {
+          "description": "ValidationPeriod validation checks duration.",
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.Duration"
+        }
+      }
+    },
+    "kruise.apps.v1alpha1.KanaryValidationItem": {
+      "description": "KanaryValidationItem define item of KanaryValidation",
+      "type": "object",
+      "properties": {
+        "labelWatch": {
+          "$ref": "#/definitions/kruise.apps.v1alpha1.KanaryValidationLabelWatch"
+        },
+        "manual": {
+          "$ref": "#/definitions/kruise.apps.v1alpha1.KanaryValidationManual"
+        },
+        "promQL": {
+          "$ref": "#/definitions/kruise.apps.v1alpha1.KanaryValidationPromQL"
+        }
+      }
+    },
+    "kruise.apps.v1alpha1.KanaryValidationLabelWatch": {
+      "type": "object",
+      "properties": {
+        "podInvalidationLabels": {
+          "description": "it means that label should be present on the workload pods.",
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector"
+        },
+        "workloadInvalidationLabels": {
+          "description": "it means that label should be present on the workload.",
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector"
+        }
+      }
+    },
+    "kruise.apps.v1alpha1.KanaryValidationManual": {
+      "description": "KanaryValidationManual define workload validation status in case of manual.",
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+    "kruise.apps.v1alpha1.KanaryValidationPromQL": {
+      "description": "KanaryValidationPromQL define the promql validation configuration",
+      "type": "object",
+      "required": [
+        "prometheusService",
+        "query"
+      ],
+      "properties": {
+        "prometheusService": {
+          "type": "string"
+        },
+        "query": {
+          "type": "string"
+        },
+        "valueInRange": {
+          "$ref": "#/definitions/kruise.apps.v1alpha1.ValueInRange"
+        }
+      }
+    },
+    "kruise.apps.v1alpha1.KanaryWorkload": {
+      "description": "Workload defines the analysis the workload",
+      "type": "object",
+      "required": [
+        "kind",
+        "apiVersion",
+        "namespace",
+        "name"
+      ],
+      "properties": {
+        "apiVersion": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "namespace": {
           "type": "string"
         }
       }
@@ -777,7 +1019,7 @@
           "items": {
             "$ref": "#/definitions/io.k8s.api.apps.v1.StatefulSetCondition"
           },
-          "x-kubernetes-patch-merge-key": "type",
+          "x-kubernetes-patch-merge-key": "types",
           "x-kubernetes-patch-strategy": "merge"
         },
         "currentReplicas": {
@@ -838,8 +1080,8 @@
           "description": "RollingUpdate is used to communicate parameters when Type is RollingUpdateStatefulSetStrategyType.",
           "$ref": "#/definitions/kruise.apps.v1alpha1.RollingUpdateStatefulSetStrategy"
         },
-        "type": {
-          "description": "Type indicates the type of the StatefulSetUpdateStrategy. Default is RollingUpdate.",
+        "types": {
+          "description": "Type indicates the types of the StatefulSetUpdateStrategy. Default is RollingUpdate.",
           "type": "string"
         }
       }
@@ -931,7 +1173,7 @@
           "description": "Status of the condition, one of True, False, Unknown.",
           "type": "string"
         },
-        "type": {
+        "types": {
           "description": "Type of in place set condition.",
           "type": "string"
         }
@@ -1070,7 +1312,7 @@
           "description": "Indicate the partition of each subset.",
           "$ref": "#/definitions/kruise.apps.v1alpha1.ManualUpdate"
         },
-        "type": {
+        "types": {
           "description": "Type of UnitedDeployment update. Default is Manual.",
           "type": "string"
         }
@@ -1091,6 +1333,23 @@
         "updatedRevision": {
           "description": "Records the latest revision.",
           "type": "string"
+        }
+      }
+    },
+    "kruise.apps.v1alpha1.ValueInRange": {
+      "type": "object",
+      "required": [
+        "min",
+        "max"
+      ],
+      "properties": {
+        "max": {
+          "type": "number",
+          "format": "double"
+        },
+        "min": {
+          "type": "number",
+          "format": "double"
         }
       }
     }

@@ -225,6 +225,132 @@ rules:
   - update
   - patch
   - delete
+- apiGroups:
+    - apps.kruise.io
+  resources:
+    - kanaryanalyses
+  verbs:
+    - get
+    - list
+    - watch
+    - create
+    - update
+    - patch
+    - delete
+- apiGroups:
+    - apps.kruise.io
+  resources:
+    - kanaryanalyses/status
+  verbs:
+    - get
+    - update
+    - patch
+
+- apiGroups:
+    - apps.kruise.io
+  resources:
+    - clonesets
+  verbs:
+    - get
+    - list
+    - watch
+    - create
+    - update
+    - patch
+    - delete
+- apiGroups:
+    - apps.kruise.io
+  resources:
+    - clonesets/status
+  verbs:
+    - get
+    - update
+    - patch
+
+- apiGroups:
+    - apps.kruise.io
+  resources:
+    - statefulsets
+  verbs:
+    - get
+    - list
+    - watch
+    - create
+    - update
+    - patch
+    - delete
+- apiGroups:
+    - apps.kruise.io
+  resources:
+    - statefulsets/status
+  verbs:
+    - get
+    - update
+    - patch
+
+- apiGroups:
+    - apps
+  resources:
+    - statefulsets
+  verbs:
+    - get
+    - list
+    - watch
+    - create
+    - update
+    - patch
+    - delete
+- apiGroups:
+    - apps
+  resources:
+    - statefulsets/status
+  verbs:
+    - get
+    - update
+    - patch
+
+- apiGroups:
+    - apps
+  resources:
+    - deployments
+  verbs:
+    - get
+    - list
+    - watch
+    - create
+    - update
+    - patch
+    - delete
+- apiGroups:
+    - apps
+  resources:
+    - deployments/status
+  verbs:
+    - get
+    - update
+    - patch
+
+- apiGroups:
+    - apps
+  resources:
+    - replicasets
+  verbs:
+    - get
+    - list
+    - watch
+    - create
+    - update
+    - patch
+    - delete
+- apiGroups:
+    - apps
+  resources:
+    - replicasets/status
+  verbs:
+    - get
+    - update
+    - patch
+
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
@@ -396,8 +522,8 @@ spec:
                   fieldPath: metadata.namespace
             - name: SECRET_NAME
               value: kruise-webhook-server-secret
-          image: openkruise/kruise-manager:daily
-          imagePullPolicy: Always
+          image: kruise:lijj
+          imagePullPolicy: Never
           name: manager
           ports:
             - containerPort: 8080

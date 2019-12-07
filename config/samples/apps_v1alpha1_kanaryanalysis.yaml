@@ -1,0 +1,22 @@
+apiVersion: apps.kruise.io/v1alpha1
+kind: KanaryAnalysis
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: kanaryanalysis-sample
+spec:
+  workload:
+    apiVersion:  apps/v1
+    kind: deployments
+    namespace: default
+    name: nginx-deployment
+  validation:
+    items:
+      - promQL:
+          prometheusService: prometheus-prometheus-server.default
+          query: avg(rate(container_network_receive_bytes_total{namespace="test", pod_name=~"myapp-[3-4]"}[2m])) by (job)
+          valueInRange:
+            max: 850
+            min: 150
+    validationPeriod: 5m    # 观测时间 5m
+    initialDelay: 1m      # 延迟 1m 再进行金丝雀发布

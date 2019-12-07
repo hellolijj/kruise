@@ -46,6 +46,18 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.InPlaceUpdateContainerStatus":     schema_pkg_apis_apps_v1alpha1_InPlaceUpdateContainerStatus(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.InPlaceUpdateState":               schema_pkg_apis_apps_v1alpha1_InPlaceUpdateState(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.JobCondition":                     schema_pkg_apis_apps_v1alpha1_JobCondition(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryAnalysis":                   schema_pkg_apis_apps_v1alpha1_KanaryAnalysis(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryAnalysisCondition":          schema_pkg_apis_apps_v1alpha1_KanaryAnalysisCondition(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryAnalysisList":               schema_pkg_apis_apps_v1alpha1_KanaryAnalysisList(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryAnalysisSpec":               schema_pkg_apis_apps_v1alpha1_KanaryAnalysisSpec(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryAnalysisStatus":             schema_pkg_apis_apps_v1alpha1_KanaryAnalysisStatus(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryAnalysisStatusReport":       schema_pkg_apis_apps_v1alpha1_KanaryAnalysisStatusReport(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryValidation":                 schema_pkg_apis_apps_v1alpha1_KanaryValidation(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryValidationItem":             schema_pkg_apis_apps_v1alpha1_KanaryValidationItem(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryValidationLabelWatch":       schema_pkg_apis_apps_v1alpha1_KanaryValidationLabelWatch(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryValidationManual":           schema_pkg_apis_apps_v1alpha1_KanaryValidationManual(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryValidationPromQL":           schema_pkg_apis_apps_v1alpha1_KanaryValidationPromQL(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryWorkload":                   schema_pkg_apis_apps_v1alpha1_KanaryWorkload(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.ManualUpdate":                     schema_pkg_apis_apps_v1alpha1_ManualUpdate(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RollingUpdateSidecarSet":          schema_pkg_apis_apps_v1alpha1_RollingUpdateSidecarSet(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RollingUpdateStatefulSetStrategy": schema_pkg_apis_apps_v1alpha1_RollingUpdateStatefulSetStrategy(ref),
@@ -71,6 +83,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UnitedDeploymentStatus":           schema_pkg_apis_apps_v1alpha1_UnitedDeploymentStatus(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UnitedDeploymentUpdateStrategy":   schema_pkg_apis_apps_v1alpha1_UnitedDeploymentUpdateStrategy(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UpdateStatus":                     schema_pkg_apis_apps_v1alpha1_UpdateStatus(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.ValueInRange":                     schema_pkg_apis_apps_v1alpha1_ValueInRange(ref),
 	}
 }
 
@@ -222,7 +235,7 @@ func schema_pkg_apis_apps_v1alpha1_BroadcastJobStatus(ref common.ReferenceCallba
 					"conditions": {
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
-								"x-kubernetes-patch-merge-key": "type",
+								"x-kubernetes-patch-merge-key": "types",
 								"x-kubernetes-patch-strategy":  "merge",
 							},
 						},
@@ -344,7 +357,7 @@ func schema_pkg_apis_apps_v1alpha1_CloneSetCondition(ref common.ReferenceCallbac
 				Description: "CloneSetCondition describes the state of a CloneSet at a certain point.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"type": {
+					"types": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Type of CloneSet condition.",
 							Type:        []string{"string"},
@@ -379,7 +392,7 @@ func schema_pkg_apis_apps_v1alpha1_CloneSetCondition(ref common.ReferenceCallbac
 						},
 					},
 				},
-				Required: []string{"type", "status"},
+				Required: []string{"types", "status"},
 			},
 		},
 		Dependencies: []string{
@@ -653,9 +666,9 @@ func schema_pkg_apis_apps_v1alpha1_CloneSetUpdateStrategy(ref common.ReferenceCa
 				Description: "CloneSetUpdateStrategy defines strategies for pods update.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"type": {
+					"types": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Type indicates the type of the CloneSetUpdateStrategy. Default is ReCreate.",
+							Description: "Type indicates the types of the CloneSetUpdateStrategy. Default is ReCreate.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -714,23 +727,23 @@ func schema_pkg_apis_apps_v1alpha1_CompletionPolicy(ref common.ReferenceCallback
 				Description: "CompletionPolicy indicates the completion policy for the job",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"type": {
+					"types": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Type indicates the type of the CompletionPolicy Default is Always",
+							Description: "Type indicates the types of the CompletionPolicy Default is Always",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"activeDeadlineSeconds": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ActiveDeadlineSeconds specifies the duration in seconds relative to the startTime that the job may be active before the system tries to terminate it; value must be positive integer. Only works for Always type.",
+							Description: "ActiveDeadlineSeconds specifies the duration in seconds relative to the startTime that the job may be active before the system tries to terminate it; value must be positive integer. Only works for Always types.",
 							Type:        []string{"integer"},
 							Format:      "int64",
 						},
 					},
 					"ttlSecondsAfterFinished": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ttlSecondsAfterFinished limits the lifetime of a Job that has finished execution (either Complete or Failed). If this field is set, ttlSecondsAfterFinished after the Job finishes, it is eligible to be automatically deleted. When the Job is being deleted, its lifecycle guarantees (e.g. finalizers) will be honored. If this field is unset, the Job won't be automatically deleted. If this field is set to zero, the Job becomes eligible to be deleted immediately after it finishes. This field is alpha-level and is only honored by servers that enable the TTLAfterFinished feature. Only works for Always type",
+							Description: "ttlSecondsAfterFinished limits the lifetime of a Job that has finished execution (either Complete or Failed). If this field is set, ttlSecondsAfterFinished after the Job finishes, it is eligible to be automatically deleted. When the Job is being deleted, its lifecycle guarantees (e.g. finalizers) will be honored. If this field is unset, the Job won't be automatically deleted. If this field is set to zero, the Job becomes eligible to be deleted immediately after it finishes. This field is alpha-level and is only honored by servers that enable the TTLAfterFinished feature. Only works for Always types",
 							Type:        []string{"integer"},
 							Format:      "int32",
 						},
@@ -748,9 +761,9 @@ func schema_pkg_apis_apps_v1alpha1_FailurePolicy(ref common.ReferenceCallback) c
 				Description: "FailurePolicy indicates the behavior of the job, when failed pod is found.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"type": {
+					"types": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Type indicates the type of FailurePolicyType.",
+							Description: "Type indicates the types of FailurePolicyType.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -837,7 +850,7 @@ func schema_pkg_apis_apps_v1alpha1_JobCondition(ref common.ReferenceCallback) co
 				Description: "JobCondition describes current state of a job.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"type": {
+					"types": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Type of job condition, Complete or Failed.",
 							Type:        []string{"string"},
@@ -878,11 +891,448 @@ func schema_pkg_apis_apps_v1alpha1_JobCondition(ref common.ReferenceCallback) co
 						},
 					},
 				},
-				Required: []string{"type", "status"},
+				Required: []string{"types", "status"},
 			},
 		},
 		Dependencies: []string{
 			"k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_KanaryAnalysis(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "KanaryAnalysis is the Schema for the kanaryanalyses API",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryAnalysisSpec"),
+						},
+					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryAnalysisStatus"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryAnalysisSpec", "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryAnalysisStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_KanaryAnalysisCondition(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "KanaryDeploymentCondition describes the state of a deployment at a certain point.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"types": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Type of deployment condition.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Status of the condition, one of True, False, Unknown.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"lastUpdateTime": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The last time this condition was updated.",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
+						},
+					},
+					"lastTransitionTime": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Last time the condition transitioned from one status to another.",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
+						},
+					},
+					"reason": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The reason for the condition's last transition.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"message": {
+						SchemaProps: spec.SchemaProps{
+							Description: "A human readable message indicating details about the transition.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"types", "status"},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_KanaryAnalysisList(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "KanaryAnalysisList contains a list of KanaryAnalysis",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
+						},
+					},
+					"items": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryAnalysis"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"items"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryAnalysis", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_KanaryAnalysisSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "KanaryAnalysisSpec defines the desired state of KanaryAnalysis",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"workload": {
+						SchemaProps: spec.SchemaProps{
+							Description: "INSERT ADDITIONAL SPEC FIELDS - desired state of cluster Important: Run \"make\" to regenerate code after modifying this file",
+							Ref:         ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryWorkload"),
+						},
+					},
+					"selectedDeployedPodMethod": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"validation": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryValidation"),
+						},
+					},
+				},
+				Required: []string{"workload", "selectedDeployedPodMethod", "validation"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryValidation", "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryWorkload"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_KanaryAnalysisStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "KanaryAnalysisStatus defines the observed state of KanaryAnalysis",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"currentHash": {
+						SchemaProps: spec.SchemaProps{
+							Description: "CurrentHash represents the current MD5 spec deployment template hash",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"conditions": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Represents the latest available observations of a kanarydeployment's current state.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryAnalysisCondition"),
+									},
+								},
+							},
+						},
+					},
+					"report": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Report",
+							Ref:         ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryAnalysisStatusReport"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryAnalysisCondition", "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryAnalysisStatusReport"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_KanaryAnalysisStatusReport(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"validation": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"workload": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_KanaryValidation(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "KanaryValidation define the analysis configuration for workload",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"initialDelay": {
+						SchemaProps: spec.SchemaProps{
+							Description: "InitialDelay duration after the KanaryDeployment has started before validation checks is started.",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Duration"),
+						},
+					},
+					"validationPeriod": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ValidationPeriod validation checks duration.",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Duration"),
+						},
+					},
+					"items": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryValidationItem"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"items"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryValidationItem", "k8s.io/apimachinery/pkg/apis/meta/v1.Duration"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_KanaryValidationItem(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "KanaryValidationItem define item of KanaryValidation",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"manual": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryValidationManual"),
+						},
+					},
+					"labelWatch": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryValidationLabelWatch"),
+						},
+					},
+					"promQL": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryValidationPromQL"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryValidationLabelWatch", "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryValidationManual", "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.KanaryValidationPromQL"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_KanaryValidationLabelWatch(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"podInvalidationLabels": {
+						SchemaProps: spec.SchemaProps{
+							Description: "it means that label should be present on the workload pods.",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector"),
+						},
+					},
+					"workloadInvalidationLabels": {
+						SchemaProps: spec.SchemaProps{
+							Description: "it means that label should be present on the workload.",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_KanaryValidationManual(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "KanaryValidationManual define workload validation status in case of manual.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_KanaryValidationPromQL(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "KanaryValidationPromQL define the promql validation configuration",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"prometheusService": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"query": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"valueInRange": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.ValueInRange"),
+						},
+					},
+				},
+				Required: []string{"prometheusService", "query"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.ValueInRange"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_KanaryWorkload(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Workload defines the analysis the workload",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"namespace": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+				Required: []string{"kind", "apiVersion", "namespace", "name"},
+			},
+		},
 	}
 }
 
@@ -1442,7 +1892,7 @@ func schema_pkg_apis_apps_v1alpha1_StatefulSetStatus(ref common.ReferenceCallbac
 					"conditions": {
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
-								"x-kubernetes-patch-merge-key": "type",
+								"x-kubernetes-patch-merge-key": "types",
 								"x-kubernetes-patch-strategy":  "merge",
 							},
 						},
@@ -1500,9 +1950,9 @@ func schema_pkg_apis_apps_v1alpha1_StatefulSetUpdateStrategy(ref common.Referenc
 				Description: "StatefulSetUpdateStrategy indicates the strategy that the StatefulSet controller will use to perform updates. It includes any additional parameters necessary to perform the update for the indicated strategy.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"type": {
+					"types": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Type indicates the type of the StatefulSetUpdateStrategy. Default is RollingUpdate.",
+							Description: "Type indicates the types of the StatefulSetUpdateStrategy. Default is RollingUpdate.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1656,7 +2106,7 @@ func schema_pkg_apis_apps_v1alpha1_UnitedDeploymentCondition(ref common.Referenc
 				Description: "UnitedDeploymentCondition describes current state of a UnitedDeployment.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"type": {
+					"types": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Type of in place set condition.",
 							Type:        []string{"string"},
@@ -1905,7 +2355,7 @@ func schema_pkg_apis_apps_v1alpha1_UnitedDeploymentUpdateStrategy(ref common.Ref
 				Description: "UnitedDeploymentUpdateStrategy defines the update strategy of UnitedDeployment.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"type": {
+					"types": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Type of UnitedDeployment update. Default is Manual.",
 							Type:        []string{"string"},
@@ -1956,6 +2406,31 @@ func schema_pkg_apis_apps_v1alpha1_UpdateStatus(ref common.ReferenceCallback) co
 						},
 					},
 				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_ValueInRange(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"min": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"number"},
+							Format: "double",
+						},
+					},
+					"max": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"number"},
+							Format: "double",
+						},
+					},
+				},
+				Required: []string{"min", "max"},
 			},
 		},
 	}

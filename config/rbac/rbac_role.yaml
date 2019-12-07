@@ -143,6 +143,26 @@ rules:
 - apiGroups:
   - apps.kruise.io
   resources:
+  - kanaryanalyses
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - apps.kruise.io
+  resources:
+  - kanaryanalyses/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - apps.kruise.io
+  resources:
   - sidecarsets
   verbs:
   - get

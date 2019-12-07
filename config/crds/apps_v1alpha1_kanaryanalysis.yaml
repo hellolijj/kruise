@@ -1,0 +1,76 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: kanaryanalyses.apps.kruise.io
+spec:
+  group: apps.kruise.io
+  names:
+    kind: KanaryAnalysis
+    plural: kanaryanalyses
+    shortNames:
+      - ka
+  additionalPrinterColumns:
+    - name: Status
+      type: string
+      description: Status for the KanaryDeployment.
+      JSONPath: ".status.report.status"
+    - name: Workload
+      type: string
+      description: Deployment Name used for the KanaryDeployment.
+      JSONPath: ".status.report.workload"
+    - name: Validation
+      type: string
+      description: Validation configuration used for the KanaryDeployment.
+      JSONPath: ".status.report.validation"
+  scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          properties:
+            workload:
+              description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                Important: Run "make" to regenerate code after modifying this file'
+              properties:
+                apiVersion:
+                  type: string
+                kind:
+                  type: string
+                name:
+                  type: string
+                namespace:
+                  type: string
+              required:
+              - kind
+              - apiVersion
+              - namespace
+              - name
+              type: object
+          required:
+          - workload
+          - validation
+          type: object
+        status:
+          type: object
+  version: v1alpha1
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
