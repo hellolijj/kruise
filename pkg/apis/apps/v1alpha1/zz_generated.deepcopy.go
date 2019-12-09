@@ -632,6 +632,11 @@ func (in *KanaryValidation) DeepCopyInto(out *KanaryValidation) {
 		*out = new(v1.Duration)
 		**out = **in
 	}
+	if in.Interval != nil {
+		in, out := &in.Interval, &out.Interval
+		*out = new(v1.Duration)
+		**out = **in
+	}
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]KanaryValidationItem, len(*in))

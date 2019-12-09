@@ -14,3 +14,17 @@ func IsValidationStartLine(ka *v1alpha1.KanaryAnalysis) bool {
 
 	return ka.CreationTimestamp.Time.Add(ka.Spec.Validation.InitialDelay.Duration).Before(time.Now())
 }
+
+// true 表示已经超过了 deadline
+func IsDeadlinePeriodDone(ka *v1alpha1.KanaryAnalysis) bool {
+	if ka.Spec.Validation.ValidationPeriod == nil {
+		return false
+	}
+
+	create := ka.CreationTimestamp.Time
+	if ka.Spec.Validation.InitialDelay != nil {
+		create = create.Add(ka.Spec.Validation.InitialDelay.Duration)
+	}
+
+	return create.Add(ka.Spec.Validation.ValidationPeriod.Duration).Before(time.Now())
+}

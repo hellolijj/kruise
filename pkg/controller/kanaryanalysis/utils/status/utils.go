@@ -114,23 +114,27 @@ func getReportStatus(status *v1alpha1.KanaryAnalysisStatus) string {
 		return string(v1alpha1.FailedKanaryAnalysisConditionType)
 	}
 
-	if IsWorkloadKanaryAnalysisUpdated(status) {
-		return string(v1alpha1.WorkloadUpdatedKanaryAnalysisConditionType)
+	if IsKanaryAnalysisDeployed(status) {
+		return string(v1alpha1.DeployedKanryAnalysisConditionType)
+	}
+
+	if IsKanaryAnalysisSucceed(status) {
+		return string(v1alpha1.SucceedKanaryAnalysisConditionType)
 	}
 
 	if IsKanaryAnalysisRunning(status) {
 		return string(v1alpha1.RunningKanaryAnalysisConditionType)
 	}
 
-	if isKanaryAnalysisScheduled(status) {
-		return string(v1alpha1.ScheduledKanaryAnalysisConditionType)
-	}
-
-	if isKanaryAnalysisErrored(status) {
+	if IsKanaryAnalysisErrored(status) {
 		return string(v1alpha1.ErroredKanaryAnalysisConditionType)
 	}
 
-	return "-"
+	if IsKanaryAnalysisReady(status) {
+		return string(v1alpha1.ReadyKanaryAnalysisConditionType)
+	}
+
+	return string(v1alpha1.UnKnownUpdatKanaryAnalysisConditionType)
 }
 
 func IsKanaryAnalysisFailed(status *v1alpha1.KanaryAnalysisStatus) bool {
@@ -155,11 +159,22 @@ func GetKanaryAnalysisFailedReason(status *v1alpha1.KanaryAnalysisStatus) string
 	return ""
 }
 
-func IsWorkloadKanaryAnalysisUpdated(status *v1alpha1.KanaryAnalysisStatus) bool {
+func IsKanaryAnalysisDeployed(status *v1alpha1.KanaryAnalysisStatus) bool {
 	if status == nil {
 		return false
 	}
-	id := getIndexForConditionType(status, v1alpha1.WorkloadUpdatedKanaryAnalysisConditionType)
+	id := getIndexForConditionType(status, v1alpha1.DeployedKanryAnalysisConditionType)
+	if id >= 0 && status.Conditions[id].Status == v1.ConditionTrue {
+		return true
+	}
+	return false
+}
+
+func IsKanaryAnalysisSucceed(status *v1alpha1.KanaryAnalysisStatus) bool {
+	if status == nil {
+		return false
+	}
+	id := getIndexForConditionType(status, v1alpha1.SucceedKanaryAnalysisConditionType)
 	if id >= 0 && status.Conditions[id].Status == v1.ConditionTrue {
 		return true
 	}
@@ -177,18 +192,18 @@ func IsKanaryAnalysisRunning(status *v1alpha1.KanaryAnalysisStatus) bool {
 	return false
 }
 
-func isKanaryAnalysisScheduled(status *v1alpha1.KanaryAnalysisStatus) bool {
+func IsKanaryAnalysisReady(status *v1alpha1.KanaryAnalysisStatus) bool {
 	if status == nil {
 		return false
 	}
-	id := getIndexForConditionType(status, v1alpha1.ScheduledKanaryAnalysisConditionType)
+	id := getIndexForConditionType(status, v1alpha1.ReadyKanaryAnalysisConditionType)
 	if id >= 0 && status.Conditions[id].Status == v1.ConditionTrue {
 		return true
 	}
 	return false
 }
 
-func isKanaryAnalysisErrored(status *v1alpha1.KanaryAnalysisStatus) bool {
+func IsKanaryAnalysisErrored(status *v1alpha1.KanaryAnalysisStatus) bool {
 	if status == nil {
 		return false
 	}

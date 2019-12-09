@@ -38,7 +38,7 @@ type SelectedDeployedPodMethod string
 
 const (
 	Ordered    SelectedDeployedPodMethod = "ordered"
-	Labeled    SelectedDeployedPodMethod = "labeled.go"
+	Labeled    SelectedDeployedPodMethod = "labeled"
 	Disordered SelectedDeployedPodMethod = "disordered"
 )
 
@@ -56,7 +56,7 @@ type KanaryValidation struct {
 	InitialDelay *metav1.Duration `json:"initialDelay,omitempty"`
 	// ValidationPeriod validation checks duration.
 	ValidationPeriod *metav1.Duration       `json:"validationPeriod,omitempty"`
-	Interval    *metav1.Duration     `json:"interval,omitempty"`
+	Interval         *metav1.Duration       `json:"interval,omitempty"`
 	Items            []KanaryValidationItem `json:"items"`
 }
 
@@ -126,15 +126,21 @@ type KanaryAnalysisCondition struct {
 
 type KanaryAnalysisConditionType string
 
-// These are valid conditions of a kanarydeployment.
 const (
-	ScheduledKanaryAnalysisConditionType       KanaryAnalysisConditionType = "Scheduled"
-	FailedKanaryAnalysisConditionType          KanaryAnalysisConditionType = "Failed"
-	RunningKanaryAnalysisConditionType         KanaryAnalysisConditionType = "Running"
-	WorkloadUpdatedKanaryAnalysisConditionType KanaryAnalysisConditionType = "WorkloadUpdated"
-	ErroredKanaryAnalysisConditionType         KanaryAnalysisConditionType = "Errored"
-	WorkloadNoUpdatKanaryAnalysisConditionType         KanaryAnalysisConditionType = "WorkloadNoUpdated"
-	UnKnownUpdatKanaryAnalysisConditionType         KanaryAnalysisConditionType = "UnKnown"
+	ReadyKanaryAnalysisConditionType        KanaryAnalysisConditionType = "Ready"
+	DeployedKanryAnalysisConditionType      KanaryAnalysisConditionType = "Deployed"
+	FailedKanaryAnalysisConditionType       KanaryAnalysisConditionType = "Failed"
+	RunningKanaryAnalysisConditionType      KanaryAnalysisConditionType = "Running"
+	ErroredKanaryAnalysisConditionType      KanaryAnalysisConditionType = "Errored"
+	SucceedKanaryAnalysisConditionType      KanaryAnalysisConditionType = "Succeed"
+	UnKnownUpdatKanaryAnalysisConditionType KanaryAnalysisConditionType = "UnKnown"
+
+	//ScheduledKanaryAnalysisConditionType       KanaryAnalysisConditionType = "Scheduled"
+
+	//WorkloadUpdatedKanaryAnalysisConditionType KanaryAnalysisConditionType = "WorkloadUpdated"
+
+	//WorkloadNoUpdatKanaryAnalysisConditionType         KanaryAnalysisConditionType = "WorkloadNoUpdated"
+
 )
 
 type KanaryAnalysisStatusReport struct {

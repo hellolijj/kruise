@@ -47,5 +47,8 @@ func (d *ValueInRangeAnalyser) CheckOutOfRange(pods []*v1.Pod) (*types.ValidateR
 		}
 	}
 
-	return nil, nil
+	return &types.ValidateResult{
+		IsFailed: false,
+		Reason:   "valid succeed",
+	}, nil
 }

@@ -42,5 +42,9 @@ func (s *strategy) Apply(client client.Client, ka *appsv1alpha1.KanaryAnalysis, 
 			return result, nil
 		}
 	}
-	return nil, nil
+
+	return &types.ValidateResult{
+		IsFailed: false,
+		Reason:   "valid succeed",
+	}, nil
 }

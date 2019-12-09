@@ -68,14 +68,14 @@ func (p *promValueRangeAnalyser) doAnalysis(pods []*v1.Pod) (inRangeByPodName, e
 		allSearchResult[podName] = float64(sample.Value)
 	}
 
-	result := inRangeByPodName{}
+	matchResult := inRangeByPodName{}
 	for _, pod := range pods {
 		if value, ok := allSearchResult[pod.Name]; ok {
-			result[pod.Name] = value
+			matchResult[pod.Name] = value
 		}
 	}
 
-	klog.V(4).Info("prometheus search result ", result)
+	klog.V(4).Infof("prometheus search ql: %v, all result %v, match result %v ", p.promConfig, allSearchResult, matchResult)
 
-	return result, nil
+	return matchResult, nil
 }

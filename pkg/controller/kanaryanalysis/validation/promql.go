@@ -55,10 +55,9 @@ func (p *promQLImpl) initAnomalyDetector(client client.Client) error {
 }
 func (p *promQLImpl) Validate(client client.Client, pods []*v1.Pod) (*types.ValidateResult, error) {
 	var err error
-	result := &types.ValidateResult{}
 
 	if err = p.initAnomalyDetector(client); err != nil {
-		return result, err
+		return nil, err
 	}
 
 	return p.anomalyDetector.CheckOutOfRange(pods)
