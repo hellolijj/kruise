@@ -23,10 +23,10 @@ import (
 	"github.com/openkruise/kruise/pkg/controller/kanaryanalysis/utils/status"
 	"github.com/openkruise/kruise/pkg/controller/kanaryanalysis/validation"
 	"github.com/openkruise/kruise/pkg/controller/kanaryanalysis/workloadpods"
+	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/klog"
-	"k8s.io/kubernetes/pkg/apis/apps"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -70,25 +70,22 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// Watch for changes to KanaryAnalysis
-	err = c.Watch(&source.Kind{Type: &appsv1alpha1.KanaryAnalysis{}}, &handler.EnqueueRequestForObject{})
-	if err != nil {
+	if err = c.Watch(&source.Kind{Type: &appsv1alpha1.KanaryAnalysis{}}, &handler.EnqueueRequestForObject{}); err != nil {
 		return err
 	}
 
-	err = c.Watch(&source.Kind{Type: &appsv1alpha1.StatefulSet{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &appsv1alpha1.KanaryAnalysis{},
-	})
-	if err != nil {
+	// watch deployment
+	if err = c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, &enqueueRequestForDeployment{client: mgr.GetClient()}); err != nil {
 		return err
 	}
 
-	err = c.Watch(&source.Kind{Type: &apps.Deployment{}}, &handler.EnqueueRequestForOwner{
-		OwnerType:    &appsv1alpha1.KanaryAnalysis{},
-		IsController: true,
-	})
-	if err != nil {
+	// watch statefulset
+	if err = c.Watch(&source.Kind{Type: &appsv1.StatefulSet{}}, &enqueueRequestForStatefulset{client: mgr.GetClient()}); err != nil {
+		return err
+	}
+
+	// watch advanced statefulset
+	if err = c.Watch(&source.Kind{Type: &appsv1alpha1.StatefulSet{}}, &enqueueRequestForAdvancedStatefulset{client: mgr.GetClient()}); err != nil {
 		return err
 	}
 
@@ -220,7 +217,6 @@ func (r *ReconcileKanaryAnalysis) updateKanaryAnalysisStatus(ka *appsv1alpha1.Ka
 // 根据 ka 的 status 决定接下来的操作
 // true 表示要继续往下执行
 func (r *ReconcileKanaryAnalysis) isContinueByKAStatus(ka *appsv1alpha1.KanaryAnalysis) (bool, reconcile.Result, error) {
-
 	if status.IsKanaryAnalysisFailed(&ka.Status) {
 		klog.V(4).Infof("ka failed: %s", status.GetKanaryAnalysisFailedReason(&ka.Status))
 		return false, reconcile.Result{}, nil
@@ -250,11 +246,3 @@ func (r *ReconcileKanaryAnalysis) isContinueByKAStatus(ka *appsv1alpha1.KanaryAn
 
 	return false, reconcile.Result{}, nil
 }
-
-// 根据 Ka 状态是否进一步执行
-
-// todo 统一灰度集成
-// todo watch 资源过滤
-// todo 队列里面 放 workload, name 通过分隔符判断 | workload
-
-// todo 各种字段也用起来 还有 label watch and 手动获取没有实现。
