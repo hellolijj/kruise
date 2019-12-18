@@ -18,14 +18,10 @@ package rolloutdefinition
 
 import (
 	"context"
-
-	"k8s.io/klog"
+	"fmt"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
-	"github.com/openkruise/kruise/pkg/dynamic"
-	dynamicclientset "github.com/openkruise/kruise/pkg/dynamic/clientset"
-	dynamicdiscovery "github.com/openkruise/kruise/pkg/dynamic/discovery"
-	dynamicinformer "github.com/openkruise/kruise/pkg/dynamic/informer"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -39,28 +35,15 @@ import (
 // Add creates a new RolloutDefinition Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
-	r, err := newReconciler(mgr)
-	if err != nil {
-		return err
-	}
-	return add(mgr, r)
+	return add(mgr, newReconciler(mgr))
 }
 
 // newReconciler returns a new reconcile.Reconciler
-func newReconciler(mgr manager.Manager) (reconcile.Reconciler, error) {
-
-	dynamic, err := dynamic.GetDynamic()
-	if err != nil {
-		return nil, err
-	}
-
+func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	return &ReconcileRolloutDefinition{
-		Client:       mgr.GetClient(),
-		scheme:       mgr.GetScheme(),
-		resources:    dynamic.Resources,
-		dynClient:    dynamic.DynClient,
-		dynInformers: dynamic.DynInformers,
-	}, nil
+		Client: mgr.GetClient(),
+		scheme: mgr.GetScheme(),
+	}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -85,10 +68,7 @@ var _ reconcile.Reconciler = &ReconcileRolloutDefinition{}
 // ReconcileRolloutDefinition reconciles a RolloutDefinition object
 type ReconcileRolloutDefinition struct {
 	client.Client
-	scheme       *runtime.Scheme
-	resources    *dynamicdiscovery.ResourceMap
-	dynClient    *dynamicclientset.Clientset
-	dynInformers *dynamicinformer.SharedInformerFactory
+	scheme *runtime.Scheme
 }
 
 // Reconcile reads that state of the cluster for a RolloutDefinition object and makes changes based on the state read
@@ -102,26 +82,27 @@ func (r *ReconcileRolloutDefinition) Reconcile(request reconcile.Request) (recon
 	err := r.Get(context.TODO(), request.NamespacedName, rolloutDef)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			// Object not found, return.  Created objects are automatically garbage collected.
-			// For additional cleanup logic use finalizers.
 			return reconcile.Result{}, nil
 		}
-		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
 
 	controlResource := rolloutDef.Spec.ControlResource
-	if ResourcePathTable.Get(controlResource.APIVersion, controlResource.Resource) == nil {
-		klog.Infof("create a new resource controller for %v/%v", controlResource.APIVersion, controlResource.Resource)
-		rc, err := newResourceController(&controlResource, r.dynClient, r.dynInformers)
-		if err != nil {
-			return reconcile.Result{}, err
+	objList := &unstructured.UnstructuredList{}
+	objList.SetAPIVersion(controlResource.APIVersion)
+	objList.SetKind(controlResource.Kind)
+
+	err = r.List(context.TODO(), &client.ListOptions{}, objList)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return reconcile.Result{}, nil
 		}
-		rc.Start()
+		return reconcile.Result{}, err
 	}
 
-	// update pathTable
-	ResourcePathTable.Set(controlResource, &rolloutDef.Spec.Path)
+	for _, obj := range objList.Items {
+		fmt.Println(obj.GetName(), obj.GetNamespace(), obj.GetLabels())
+	}
 
 	return reconcile.Result{}, nil
 }

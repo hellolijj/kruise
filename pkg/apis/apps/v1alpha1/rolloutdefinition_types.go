@@ -33,7 +33,7 @@ type RolloutDefinitionStatus struct {
 // ControlResource defines the controlled resource
 type ControlResource struct {
 	APIVersion string `json:"apiVersion"`
-	Resource   string `json:"resource"`
+	Kind       string `json:"kind"`
 }
 
 // Path indicates the path
@@ -88,6 +88,18 @@ type RolloutDefinitionList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []RolloutDefinition `json:"items"`
+}
+
+type ResourceController struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	resource          *ControlResource
+}
+
+type ResourceControllerList struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Items             []ResourceController `json:"items"`
 }
 
 func init() {

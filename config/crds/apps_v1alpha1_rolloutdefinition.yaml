@@ -32,11 +32,11 @@ spec:
               properties:
                 apiVersion:
                   type: string
-                resource:
+                kind:
                   type: string
               required:
               - apiVersion
-              - resource
+              - kind
               type: object
             path:
               properties:

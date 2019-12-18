@@ -22,13 +22,7 @@ import (
 	"strings"
 
 	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
-	"github.com/openkruise/kruise/pkg/controller/rolloutdefinition"
-	"github.com/openkruise/kruise/pkg/dynamic"
-	dynamicclientset "github.com/openkruise/kruise/pkg/dynamic/clientset"
-	dynamicdiscovery "github.com/openkruise/kruise/pkg/dynamic/discovery"
-	dynamicinformer "github.com/openkruise/kruise/pkg/dynamic/informer"
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -44,27 +38,15 @@ import (
 // Add creates a new RolloutControl Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
-	r, err := newReconciler(mgr)
-	if err != nil {
-		return err
-	}
-	return add(mgr, r)
+	return add(mgr, newReconciler(mgr))
 }
 
 // newReconciler returns a new reconcile.Reconciler
-func newReconciler(mgr manager.Manager) (reconcile.Reconciler, error) {
-	dynamic, err := dynamic.GetDynamic()
-	if err != nil {
-		return nil, err
-	}
-
+func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	return &ReconcileRolloutControl{
-		Client:       mgr.GetClient(),
-		scheme:       mgr.GetScheme(),
-		resources:    dynamic.Resources,
-		dynClient:    dynamic.DynClient,
-		dynInformers: dynamic.DynInformers,
-	}, nil
+		Client: mgr.GetClient(),
+		scheme: mgr.GetScheme(),
+	}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -89,10 +71,7 @@ var _ reconcile.Reconciler = &ReconcileRolloutControl{}
 // ReconcileRolloutControl reconciles a RolloutControl object
 type ReconcileRolloutControl struct {
 	client.Client
-	scheme       *runtime.Scheme
-	resources    *dynamicdiscovery.ResourceMap
-	dynClient    *dynamicclientset.Clientset
-	dynInformers *dynamicinformer.SharedInformerFactory
+	scheme *runtime.Scheme
 }
 
 // Reconcile reads that state of the cluster for a RolloutControl object and makes changes based on the state read
@@ -116,22 +95,31 @@ func (r *ReconcileRolloutControl) Reconcile(request reconcile.Request) (reconcil
 		return reconcile.Result{}, err
 	}
 
-	if r.dynInformers == nil {
-		return reconcile.Result{}, fmt.Errorf("dynInformers is nil")
+	obj := &unstructured.Unstructured{}
+	obj.SetAPIVersion(rolloutCtl.Spec.Resource.APIVersion)
+	obj.SetKind(rolloutCtl.Spec.Resource.Kind)
+	obj.SetNamespace(rolloutCtl.Spec.Resource.NameSpace)
+	obj.SetName(rolloutCtl.Spec.Resource.Name)
+
+	err = r.Get(context.TODO(), types.NamespacedName{
+		Namespace: rolloutCtl.Spec.Resource.NameSpace,
+		Name:      rolloutCtl.Spec.Resource.Name,
+	}, obj)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return reconcile.Result{}, nil
+		}
+		return reconcile.Result{}, err
 	}
 
-	resourceInformer, err := r.dynInformers.Resource(rolloutCtl.Spec.Resource.APIVersion, rolloutCtl.Spec.Resource.Kind)
+	rolloutDef, err := r.getDefFromControl(rolloutCtl)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
 
-	resource, err := resourceInformer.Lister().Get(rolloutCtl.Spec.Resource.NameSpace, rolloutCtl.Spec.Resource.Name)
-	if err != nil {
-		return reconcile.Result{}, err
-	}
+	resourcePath := rolloutDef.Spec.Path
 
-	resourcePath := rolloutdefinition.ResourcePathTable.Get(rolloutCtl.Spec.Resource.APIVersion, rolloutCtl.Spec.Resource.Kind)
-	if resourcePath == nil {
+	if &resourcePath == nil {
 		klog.Info("have no resourcePath")
 		return reconcile.Result{}, nil
 	}
@@ -139,7 +127,7 @@ func (r *ReconcileRolloutControl) Reconcile(request reconcile.Request) (reconcil
 	// set paused field
 	if resourcePath.SpecPath.Paused != "" {
 		pausedPathArr := strings.Split(resourcePath.SpecPath.Paused, ".")
-		err = unstructured.SetNestedField(resource.Object, rolloutCtl.Spec.RolloutStrategy.Paused, pausedPathArr...)
+		err = unstructured.SetNestedField(obj.Object, rolloutCtl.Spec.RolloutStrategy.Paused, pausedPathArr...)
 		if err != nil {
 			return reconcile.Result{}, err
 		}
@@ -150,12 +138,12 @@ func (r *ReconcileRolloutControl) Reconcile(request reconcile.Request) (reconcil
 	// set partition field
 	if resourcePath.SpecPath.Partition != "" {
 		partitionPathArr := strings.Split(resourcePath.SpecPath.Partition, ".")
-		_, b, err := unstructured.NestedFieldNoCopy(resource.Object, partitionPathArr...)
+		_, b, err := unstructured.NestedFieldNoCopy(obj.Object, partitionPathArr...)
 		if err != nil {
 			return reconcile.Result{}, err
 		}
 		if b == true {
-			err = SetNestedField(resource.Object, rolloutCtl.Spec.RolloutStrategy.Partition, partitionPathArr...)
+			err = unstructured.SetNestedField(obj.Object, rolloutCtl.Spec.RolloutStrategy.Partition, partitionPathArr...)
 			if err != nil {
 				return reconcile.Result{}, err
 			}
@@ -169,12 +157,12 @@ func (r *ReconcileRolloutControl) Reconcile(request reconcile.Request) (reconcil
 	// set maxUnavailable field
 	if resourcePath.SpecPath.MaxUnavailable != "" {
 		maxUnavailablePathArr := strings.Split(resourcePath.SpecPath.MaxUnavailable, ".")
-		_, b, err := unstructured.NestedFieldNoCopy(resource.Object, maxUnavailablePathArr...)
+		_, b, err := unstructured.NestedFieldNoCopy(obj.Object, maxUnavailablePathArr...)
 		if err != nil {
 			return reconcile.Result{}, err
 		}
 		if b == true {
-			err = SetNestedField(resource.Object, rolloutCtl.Spec.RolloutStrategy.MaxUnavailable, maxUnavailablePathArr...)
+			err = setNestedField(obj.Object, rolloutCtl.Spec.RolloutStrategy.MaxUnavailable, maxUnavailablePathArr...)
 			if err != nil {
 				return reconcile.Result{}, err
 			}
@@ -185,34 +173,54 @@ func (r *ReconcileRolloutControl) Reconcile(request reconcile.Request) (reconcil
 		klog.Info("maxUnavailable is not supported")
 	}
 
-	// update the spec of paused,partition,maxUnavailable by client
-	resourceClient, err := r.dynClient.Resource(rolloutCtl.Spec.Resource.APIVersion, rolloutCtl.Spec.Resource.Kind)
+	err = r.Update(context.TODO(), obj)
 	if err != nil {
 		return reconcile.Result{}, err
-	}
-	_, err = resourceClient.Namespace(rolloutCtl.Spec.Resource.NameSpace).Update(resource, metav1.UpdateOptions{})
-	if err != nil {
-		return reconcile.Result{}, err
-	}
-
-	// update the ResourceCintrolTable
-	key := rolloutCtl.Spec.Resource
-	value := types.NamespacedName{
-		Namespace: rolloutCtl.Namespace,
-		Name:      rolloutCtl.Name,
-	}
-	if !hasControl(rolloutdefinition.ResourceControlTable[key], rolloutCtl.Namespace, rolloutCtl.Name) {
-		rolloutdefinition.ResourceControlTable[key] = append(rolloutdefinition.ResourceControlTable[key], value)
 	}
 
 	return reconcile.Result{}, nil
 }
 
-func hasControl(arr []types.NamespacedName, namespace string, name string) bool {
-	for i := 0; i < len(arr); i++ {
-		if arr[i].Namespace == namespace && arr[i].Name == name {
-			return true
+func (r *ReconcileRolloutControl) getDefFromControl(rolloutControl *appsv1alpha1.RolloutControl) (*appsv1alpha1.RolloutDefinition, error) {
+	rolloutDefs := appsv1alpha1.RolloutDefinitionList{}
+	if err := r.List(context.TODO(), &client.ListOptions{}, &rolloutDefs); err != nil {
+		return nil, err
+	}
+	if rolloutControl == nil {
+		return nil, fmt.Errorf("rollout contol is nil")
+	}
+
+	for _, rolloutDef := range rolloutDefs.Items {
+		if rolloutDef.Spec.ControlResource.Kind == rolloutControl.Spec.Resource.Kind && rolloutDef.Spec.ControlResource.APIVersion == rolloutControl.Spec.Resource.APIVersion {
+			return &rolloutDef, nil
 		}
 	}
-	return false
+
+	return nil, fmt.Errorf("there is no rollout definition")
+}
+
+// 如果使用 unstructured.SetNestedField 遇到如下错误
+// err: Observed a panic: &errors.errorString{s:"cannot deep copy intstr.IntOrString"} (cannot deep copy intstr.IntOrString)
+func setNestedField(obj map[string]interface{}, value interface{}, fields ...string) error {
+	m := obj
+
+	for i, field := range fields[:len(fields)-1] {
+		if val, ok := m[field]; ok {
+			if valMap, ok := val.(map[string]interface{}); ok {
+				m = valMap
+			} else {
+				return fmt.Errorf("value cannot be set because %v is not a map[string]interface{}", jsonPath(fields[:i+1]))
+			}
+		} else {
+			newVal := make(map[string]interface{})
+			m[field] = newVal
+			m = newVal
+		}
+	}
+	m[fields[len(fields)-1]] = value
+	return nil
+}
+
+func jsonPath(fields []string) string {
+	return "." + strings.Join(fields, ".")
 }
