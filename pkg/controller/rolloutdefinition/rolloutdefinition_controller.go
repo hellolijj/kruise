@@ -18,7 +18,7 @@ package rolloutdefinition
 
 import (
 	"context"
-	"fmt"
+	"github.com/openkruise/kruise/pkg/controller/rolloutcontrol"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
@@ -88,21 +88,10 @@ func (r *ReconcileRolloutDefinition) Reconcile(request reconcile.Request) (recon
 	}
 
 	controlResource := rolloutDef.Spec.ControlResource
-	objList := &unstructured.UnstructuredList{}
-	objList.SetAPIVersion(controlResource.APIVersion)
-	objList.SetKind(controlResource.Kind)
+	obj := &unstructured.Unstructured{}
+	obj.SetAPIVersion(controlResource.APIVersion)
+	obj.SetKind(controlResource.Kind)
 
-	err = r.List(context.TODO(), &client.ListOptions{}, objList)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			return reconcile.Result{}, nil
-		}
-		return reconcile.Result{}, err
-	}
-
-	for _, obj := range objList.Items {
-		fmt.Println(obj.GetName(), obj.GetNamespace(), obj.GetLabels())
-	}
-
-	return reconcile.Result{}, nil
+	err = rolloutcontrol.Controller.Watch(&source.Kind{Type: obj}, &enqueueRolloutControlForDefinition{client: r.Client})
+	return reconcile.Result{}, err
 }
