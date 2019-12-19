@@ -161,9 +161,6 @@ func (r *ReconcileRolloutControl) syncStatus(rolloutCtl *appsv1alpha1.RolloutCon
 		}
 		if b == true {
 			rolloutControlCopy.Status.Replicas = int32(replicas)
-			if err != nil {
-				return err
-			}
 		} else {
 			klog.Info("can't get path field of Replicas")
 		}
@@ -178,9 +175,6 @@ func (r *ReconcileRolloutControl) syncStatus(rolloutCtl *appsv1alpha1.RolloutCon
 		}
 		if b == true {
 			rolloutControlCopy.Status.CurrentReplicas = int32(currentReplicas)
-			if err != nil {
-				return err
-			}
 		} else {
 			klog.Info("can't get path field of currentReplicas")
 		}
@@ -195,9 +189,6 @@ func (r *ReconcileRolloutControl) syncStatus(rolloutCtl *appsv1alpha1.RolloutCon
 		}
 		if b == true {
 			rolloutControlCopy.Status.ReadyReplicas = int32(readyReplicas)
-			if err != nil {
-				return err
-			}
 		} else {
 			klog.Info("can't get path field of ready Replicas")
 		}
@@ -212,9 +203,6 @@ func (r *ReconcileRolloutControl) syncStatus(rolloutCtl *appsv1alpha1.RolloutCon
 		}
 		if b == true {
 			rolloutControlCopy.Status.UpdatedReplicas = int32(updatedReplicas)
-			if err != nil {
-				return err
-			}
 		} else {
 			klog.Info("can't get path field of ready Replicas")
 		}
@@ -229,9 +217,6 @@ func (r *ReconcileRolloutControl) syncStatus(rolloutCtl *appsv1alpha1.RolloutCon
 		}
 		if b == true {
 			rolloutControlCopy.Status.ObservedGeneration = observedGeneration
-			if err != nil {
-				return err
-			}
 		} else {
 			klog.Info("can't get path field of observed Generation")
 		}

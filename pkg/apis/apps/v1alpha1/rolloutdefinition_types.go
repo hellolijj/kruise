@@ -90,18 +90,6 @@ type RolloutDefinitionList struct {
 	Items           []RolloutDefinition `json:"items"`
 }
 
-type ResourceController struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-	resource          *ControlResource
-}
-
-type ResourceControllerList struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Items             []ResourceController `json:"items"`
-}
-
 func init() {
 	SchemeBuilder.Register(&RolloutDefinition{}, &RolloutDefinitionList{})
 }
