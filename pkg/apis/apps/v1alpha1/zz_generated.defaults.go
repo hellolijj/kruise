@@ -27,5 +27,70 @@ import (
 // Public to allow building arbitrary schemes.
 // All generated defaulters are covering - they call all nested defaulters.
 func RegisterDefaults(scheme *runtime.Scheme) error {
+	scheme.AddTypeDefaultingFunc(&BroadcastJob{}, func(obj interface{}) { SetObjectDefaults_BroadcastJob(obj.(*BroadcastJob)) })
+	scheme.AddTypeDefaultingFunc(&BroadcastJobList{}, func(obj interface{}) { SetObjectDefaults_BroadcastJobList(obj.(*BroadcastJobList)) })
+	scheme.AddTypeDefaultingFunc(&CloneSet{}, func(obj interface{}) { SetObjectDefaults_CloneSet(obj.(*CloneSet)) })
+	scheme.AddTypeDefaultingFunc(&CloneSetList{}, func(obj interface{}) { SetObjectDefaults_CloneSetList(obj.(*CloneSetList)) })
+	scheme.AddTypeDefaultingFunc(&SidecarSet{}, func(obj interface{}) { SetObjectDefaults_SidecarSet(obj.(*SidecarSet)) })
+	scheme.AddTypeDefaultingFunc(&SidecarSetList{}, func(obj interface{}) { SetObjectDefaults_SidecarSetList(obj.(*SidecarSetList)) })
+	scheme.AddTypeDefaultingFunc(&StatefulSet{}, func(obj interface{}) { SetObjectDefaults_StatefulSet(obj.(*StatefulSet)) })
+	scheme.AddTypeDefaultingFunc(&StatefulSetList{}, func(obj interface{}) { SetObjectDefaults_StatefulSetList(obj.(*StatefulSetList)) })
+	scheme.AddTypeDefaultingFunc(&UnitedDeployment{}, func(obj interface{}) { SetObjectDefaults_UnitedDeployment(obj.(*UnitedDeployment)) })
+	scheme.AddTypeDefaultingFunc(&UnitedDeploymentList{}, func(obj interface{}) { SetObjectDefaults_UnitedDeploymentList(obj.(*UnitedDeploymentList)) })
 	return nil
+}
+
+func SetObjectDefaults_BroadcastJob(in *BroadcastJob) {
+	SetDefaults_BroadcastJob(in)
+}
+
+func SetObjectDefaults_BroadcastJobList(in *BroadcastJobList) {
+	for i := range in.Items {
+		a := &in.Items[i]
+		SetObjectDefaults_BroadcastJob(a)
+	}
+}
+
+func SetObjectDefaults_CloneSet(in *CloneSet) {
+	SetDefaults_CloneSet(in)
+}
+
+func SetObjectDefaults_CloneSetList(in *CloneSetList) {
+	for i := range in.Items {
+		a := &in.Items[i]
+		SetObjectDefaults_CloneSet(a)
+	}
+}
+
+func SetObjectDefaults_SidecarSet(in *SidecarSet) {
+	SetDefaults_SidecarSet(in)
+}
+
+func SetObjectDefaults_SidecarSetList(in *SidecarSetList) {
+	for i := range in.Items {
+		a := &in.Items[i]
+		SetObjectDefaults_SidecarSet(a)
+	}
+}
+
+func SetObjectDefaults_StatefulSet(in *StatefulSet) {
+	SetDefaults_StatefulSet(in)
+}
+
+func SetObjectDefaults_StatefulSetList(in *StatefulSetList) {
+	for i := range in.Items {
+		a := &in.Items[i]
+		SetObjectDefaults_StatefulSet(a)
+	}
+}
+
+func SetObjectDefaults_UnitedDeployment(in *UnitedDeployment) {
+	SetDefaults_UnitedDeployment(in)
+}
+
+func SetObjectDefaults_UnitedDeploymentList(in *UnitedDeploymentList) {
+	for i := range in.Items {
+		a := &in.Items[i]
+		SetObjectDefaults_UnitedDeployment(a)
+	}
 }

@@ -16,21 +16,214 @@ limitations under the License.
 
 package v1alpha1
 
-import "k8s.io/apimachinery/pkg/runtime"
+import (
+	"github.com/openkruise/kruise/pkg/webhook/default_server/utils"
+	appsv1 "k8s.io/api/apps/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/kubernetes/pkg/apis/core/v1"
+)
 
 func addDefaultingFuncs(scheme *runtime.Scheme) error {
 	return RegisterDefaults(scheme)
 }
 
-// SetDefaultsBroadcastJob sets any unspecified values to defaults.
-func SetDefaultsBroadcastJob(job *BroadcastJob) {
-	if job.Spec.CompletionPolicy.Type == "" {
-		job.Spec.CompletionPolicy.Type = Always
+// SetDefaults_SidecarSet set default values for SidecarSet.
+func SetDefaults_SidecarSet(obj *SidecarSet) {
+	setSidecarSetUpdateStratety(&obj.Spec.Strategy)
+
+	for i := range obj.Spec.Containers {
+		setSidecarDefaultContainer(&obj.Spec.Containers[i])
+	}
+}
+
+func setSidecarSetUpdateStratety(strategy *SidecarSetUpdateStrategy) {
+	if strategy.RollingUpdate == nil {
+		rollingUpdate := RollingUpdateSidecarSet{}
+		strategy.RollingUpdate = &rollingUpdate
+	}
+	if strategy.RollingUpdate.MaxUnavailable == nil {
+		maxUnavailable := intstr.FromInt(1)
+		strategy.RollingUpdate.MaxUnavailable = &maxUnavailable
+	}
+}
+
+func setSidecarDefaultContainer(sidecarContainer *SidecarContainer) {
+	container := &sidecarContainer.Container
+	v1.SetDefaults_Container(container)
+	for i := range container.Ports {
+		p := &container.Ports[i]
+		v1.SetDefaults_ContainerPort(p)
+	}
+	for i := range container.Env {
+		e := &container.Env[i]
+		if e.ValueFrom != nil {
+			if e.ValueFrom.FieldRef != nil {
+				v1.SetDefaults_ObjectFieldSelector(e.ValueFrom.FieldRef)
+			}
+		}
+	}
+	v1.SetDefaults_ResourceList(&container.Resources.Limits)
+	v1.SetDefaults_ResourceList(&container.Resources.Requests)
+	if container.LivenessProbe != nil {
+		v1.SetDefaults_Probe(container.LivenessProbe)
+		if container.LivenessProbe.Handler.HTTPGet != nil {
+			v1.SetDefaults_HTTPGetAction(container.LivenessProbe.Handler.HTTPGet)
+		}
+	}
+	if container.ReadinessProbe != nil {
+		v1.SetDefaults_Probe(container.ReadinessProbe)
+		if container.ReadinessProbe.Handler.HTTPGet != nil {
+			v1.SetDefaults_HTTPGetAction(container.ReadinessProbe.Handler.HTTPGet)
+		}
+	}
+	if container.Lifecycle != nil {
+		if container.Lifecycle.PostStart != nil {
+			if container.Lifecycle.PostStart.HTTPGet != nil {
+				v1.SetDefaults_HTTPGetAction(container.Lifecycle.PostStart.HTTPGet)
+			}
+		}
+		if container.Lifecycle.PreStop != nil {
+			if container.Lifecycle.PreStop.HTTPGet != nil {
+				v1.SetDefaults_HTTPGetAction(container.Lifecycle.PreStop.HTTPGet)
+			}
+		}
+	}
+}
+
+// SetDefaults_BroadcastJob set default values for BroadcastJob.
+func SetDefaults_BroadcastJob(obj *BroadcastJob) {
+	utils.SetDefaultPodTemplate(&obj.Spec.Template.Spec)
+	if obj.Spec.CompletionPolicy.Type == "" {
+		obj.Spec.CompletionPolicy.Type = Always
 	}
 
-	if job.Spec.Parallelism == nil {
+	if obj.Spec.Parallelism == nil {
 		parallelism := int32(1<<31 - 1)
-		job.Spec.Parallelism = &parallelism
+		parallelismIntStr := intstr.FromInt(int(parallelism))
+		obj.Spec.Parallelism = &parallelismIntStr
 	}
 
+	if obj.Spec.FailurePolicy.Type == "" {
+		obj.Spec.FailurePolicy.Type = FailurePolicyTypeFailFast
+	}
+}
+
+// SetDefaults_StatefulSet set default values for StatefulSet.
+func SetDefaults_StatefulSet(obj *StatefulSet) {
+	if len(obj.Spec.PodManagementPolicy) == 0 {
+		obj.Spec.PodManagementPolicy = appsv1.OrderedReadyPodManagement
+	}
+
+	if obj.Spec.UpdateStrategy.Type == "" {
+		obj.Spec.UpdateStrategy.Type = appsv1.RollingUpdateStatefulSetStrategyType
+
+		// UpdateStrategy.RollingUpdate will take default values below.
+		obj.Spec.UpdateStrategy.RollingUpdate = &RollingUpdateStatefulSetStrategy{}
+	}
+
+	if obj.Spec.UpdateStrategy.Type == appsv1.RollingUpdateStatefulSetStrategyType {
+		if obj.Spec.UpdateStrategy.RollingUpdate == nil {
+			obj.Spec.UpdateStrategy.RollingUpdate = &RollingUpdateStatefulSetStrategy{}
+		}
+		if obj.Spec.UpdateStrategy.RollingUpdate.Partition == nil {
+			obj.Spec.UpdateStrategy.RollingUpdate.Partition = new(int32)
+			*obj.Spec.UpdateStrategy.RollingUpdate.Partition = 0
+		}
+		if obj.Spec.UpdateStrategy.RollingUpdate.MaxUnavailable == nil {
+			maxUnavailable := intstr.FromInt(1)
+			obj.Spec.UpdateStrategy.RollingUpdate.MaxUnavailable = &maxUnavailable
+		}
+		if obj.Spec.UpdateStrategy.RollingUpdate.PodUpdatePolicy == "" {
+			obj.Spec.UpdateStrategy.RollingUpdate.PodUpdatePolicy = RecreatePodUpdateStrategyType
+		}
+	}
+
+	if obj.Spec.Replicas == nil {
+		obj.Spec.Replicas = new(int32)
+		*obj.Spec.Replicas = 1
+	}
+	if obj.Spec.RevisionHistoryLimit == nil {
+		obj.Spec.RevisionHistoryLimit = new(int32)
+		*obj.Spec.RevisionHistoryLimit = 10
+	}
+
+	utils.SetDefaultPodTemplate(&obj.Spec.Template.Spec)
+	for i := range obj.Spec.VolumeClaimTemplates {
+		a := &obj.Spec.VolumeClaimTemplates[i]
+		v1.SetDefaults_PersistentVolumeClaim(a)
+		v1.SetDefaults_ResourceList(&a.Spec.Resources.Limits)
+		v1.SetDefaults_ResourceList(&a.Spec.Resources.Requests)
+		v1.SetDefaults_ResourceList(&a.Status.Capacity)
+	}
+}
+
+// SetDefaults_UnitedDeployment set default values for UnitedDeployment.
+func SetDefaults_UnitedDeployment(obj *UnitedDeployment) {
+	if obj.Spec.Replicas == nil {
+		obj.Spec.Replicas = new(int32)
+		*obj.Spec.Replicas = 1
+	}
+	if obj.Spec.RevisionHistoryLimit == nil {
+		obj.Spec.RevisionHistoryLimit = new(int32)
+		*obj.Spec.RevisionHistoryLimit = 10
+	}
+
+	if len(obj.Spec.UpdateStrategy.Type) == 0 {
+		obj.Spec.UpdateStrategy.Type = ManualUpdateStrategyType
+	}
+
+	if obj.Spec.UpdateStrategy.Type == ManualUpdateStrategyType && obj.Spec.UpdateStrategy.ManualUpdate == nil {
+		obj.Spec.UpdateStrategy.ManualUpdate = &ManualUpdate{}
+	}
+
+	if obj.Spec.Template.StatefulSetTemplate != nil {
+		utils.SetDefaultPodTemplate(&obj.Spec.Template.StatefulSetTemplate.Spec.Template.Spec)
+		for i := range obj.Spec.Template.StatefulSetTemplate.Spec.VolumeClaimTemplates {
+			a := &obj.Spec.Template.StatefulSetTemplate.Spec.VolumeClaimTemplates[i]
+			v1.SetDefaults_PersistentVolumeClaim(a)
+			v1.SetDefaults_ResourceList(&a.Spec.Resources.Limits)
+			v1.SetDefaults_ResourceList(&a.Spec.Resources.Requests)
+			v1.SetDefaults_ResourceList(&a.Status.Capacity)
+		}
+	}
+}
+
+// SetDefaults_CloneSet set default values for CloneSet.
+func SetDefaults_CloneSet(obj *CloneSet) {
+	if obj.Spec.Replicas == nil {
+		obj.Spec.Replicas = new(int32)
+		*obj.Spec.Replicas = 1
+	}
+	if obj.Spec.RevisionHistoryLimit == nil {
+		obj.Spec.RevisionHistoryLimit = new(int32)
+		*obj.Spec.RevisionHistoryLimit = 10
+	}
+
+	utils.SetDefaultPodTemplate(&obj.Spec.Template.Spec)
+	for i := range obj.Spec.VolumeClaimTemplates {
+		a := &obj.Spec.VolumeClaimTemplates[i]
+		v1.SetDefaults_PersistentVolumeClaim(a)
+		v1.SetDefaults_ResourceList(&a.Spec.Resources.Limits)
+		v1.SetDefaults_ResourceList(&a.Spec.Resources.Requests)
+		v1.SetDefaults_ResourceList(&a.Status.Capacity)
+	}
+
+	switch obj.Spec.UpdateStrategy.Type {
+	case "":
+		obj.Spec.UpdateStrategy.Type = RecreateCloneSetUpdateStrategyType
+	case InPlaceIfPossibleCloneSetUpdateStrategyType, InPlaceOnlyCloneSetUpdateStrategyType:
+		if obj.Spec.UpdateStrategy.InPlaceUpdateStrategy == nil {
+			obj.Spec.UpdateStrategy.InPlaceUpdateStrategy = &CloneSetInPlaceUpdateStrategy{}
+		}
+	}
+
+	if obj.Spec.UpdateStrategy.Partition == nil {
+		obj.Spec.UpdateStrategy.Partition = new(int32)
+		*obj.Spec.UpdateStrategy.Partition = 0
+	}
+	if obj.Spec.UpdateStrategy.MaxUnavailable == nil {
+		maxUnavailable := intstr.FromInt(1)
+		obj.Spec.UpdateStrategy.MaxUnavailable = &maxUnavailable
+	}
 }

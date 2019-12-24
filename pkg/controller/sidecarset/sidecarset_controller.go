@@ -19,6 +19,7 @@ package sidecarset
 import (
 	"context"
 
+	"github.com/openkruise/kruise/pkg/util/gate"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -44,6 +45,9 @@ import (
 // Add creates a new SidecarSet Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
+	if !gate.ResourceEnabled(&appsv1alpha1.SidecarSet{}) {
+		return nil
+	}
 	return add(mgr, newReconciler(mgr))
 }
 
@@ -164,9 +168,9 @@ func (r *ReconcileSidecarSet) Reconcile(request reconcile.Request) (reconcile.Re
 	if err != nil {
 		return reconcile.Result{}, err
 	}
-	// we only support sequential update currently, equals to maxUnavailable = 1
-	if unavailableNum != 0 {
-		klog.V(3).Infof("current unavailable pod number: %v, skip update", unavailableNum)
+	maxUnavailableNum := getMaxUnavailable(sidecarSet)
+	if unavailableNum >= maxUnavailableNum {
+		klog.V(3).Infof("current unavailable pod number: %v(max: %v), skip update", unavailableNum, maxUnavailableNum)
 		return reconcile.Result{}, nil
 	}
 
@@ -180,5 +184,6 @@ func (r *ReconcileSidecarSet) Reconcile(request reconcile.Request) (reconcile.Re
 			podsNeedUpdate = append(podsNeedUpdate, pod)
 		}
 	}
-	return reconcile.Result{}, r.updateSidecarImageAndHash(sidecarSet, podsNeedUpdate)
+	updateNum := maxUnavailableNum - unavailableNum
+	return reconcile.Result{}, r.updateSidecarImageAndHash(sidecarSet, podsNeedUpdate, updateNum)
 }

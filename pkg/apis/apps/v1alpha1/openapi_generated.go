@@ -32,12 +32,29 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.BroadcastJobList":                 schema_pkg_apis_apps_v1alpha1_BroadcastJobList(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.BroadcastJobSpec":                 schema_pkg_apis_apps_v1alpha1_BroadcastJobSpec(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.BroadcastJobStatus":               schema_pkg_apis_apps_v1alpha1_BroadcastJobStatus(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CloneSet":                         schema_pkg_apis_apps_v1alpha1_CloneSet(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CloneSetCondition":                schema_pkg_apis_apps_v1alpha1_CloneSetCondition(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CloneSetInPlaceUpdateStrategy":    schema_pkg_apis_apps_v1alpha1_CloneSetInPlaceUpdateStrategy(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CloneSetList":                     schema_pkg_apis_apps_v1alpha1_CloneSetList(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CloneSetScaleStrategy":            schema_pkg_apis_apps_v1alpha1_CloneSetScaleStrategy(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CloneSetSpec":                     schema_pkg_apis_apps_v1alpha1_CloneSetSpec(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CloneSetStatus":                   schema_pkg_apis_apps_v1alpha1_CloneSetStatus(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CloneSetUpdateStrategy":           schema_pkg_apis_apps_v1alpha1_CloneSetUpdateStrategy(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CompletionPolicy":                 schema_pkg_apis_apps_v1alpha1_CompletionPolicy(ref),
+<<<<<<< HEAD
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.ControlResource":                  schema_pkg_apis_apps_v1alpha1_ControlResource(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.InPlaceUpdateContainerStatus":     schema_pkg_apis_apps_v1alpha1_InPlaceUpdateContainerStatus(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.InPlaceUpdateState":               schema_pkg_apis_apps_v1alpha1_InPlaceUpdateState(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.JobCondition":                     schema_pkg_apis_apps_v1alpha1_JobCondition(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.Path":                             schema_pkg_apis_apps_v1alpha1_Path(ref),
+=======
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.FailurePolicy":                    schema_pkg_apis_apps_v1alpha1_FailurePolicy(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.InPlaceUpdateContainerStatus":     schema_pkg_apis_apps_v1alpha1_InPlaceUpdateContainerStatus(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.InPlaceUpdateState":               schema_pkg_apis_apps_v1alpha1_InPlaceUpdateState(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.JobCondition":                     schema_pkg_apis_apps_v1alpha1_JobCondition(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.ManualUpdate":                     schema_pkg_apis_apps_v1alpha1_ManualUpdate(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RollingUpdateSidecarSet":          schema_pkg_apis_apps_v1alpha1_RollingUpdateSidecarSet(ref),
+>>>>>>> master
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RollingUpdateStatefulSetStrategy": schema_pkg_apis_apps_v1alpha1_RollingUpdateStatefulSetStrategy(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RolloutControl":                   schema_pkg_apis_apps_v1alpha1_RolloutControl(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RolloutControlList":               schema_pkg_apis_apps_v1alpha1_RolloutControlList(ref),
@@ -52,13 +69,34 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarSetList":                   schema_pkg_apis_apps_v1alpha1_SidecarSetList(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarSetSpec":                   schema_pkg_apis_apps_v1alpha1_SidecarSetSpec(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarSetStatus":                 schema_pkg_apis_apps_v1alpha1_SidecarSetStatus(ref),
+<<<<<<< HEAD
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SpecPath":                         schema_pkg_apis_apps_v1alpha1_SpecPath(ref),
+=======
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarSetUpdateStrategy":         schema_pkg_apis_apps_v1alpha1_SidecarSetUpdateStrategy(ref),
+>>>>>>> master
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatefulSet":                      schema_pkg_apis_apps_v1alpha1_StatefulSet(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatefulSetList":                  schema_pkg_apis_apps_v1alpha1_StatefulSetList(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatefulSetSpec":                  schema_pkg_apis_apps_v1alpha1_StatefulSetSpec(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatefulSetStatus":                schema_pkg_apis_apps_v1alpha1_StatefulSetStatus(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatefulSetTemplateSpec":          schema_pkg_apis_apps_v1alpha1_StatefulSetTemplateSpec(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatefulSetUpdateStrategy":        schema_pkg_apis_apps_v1alpha1_StatefulSetUpdateStrategy(ref),
+<<<<<<< HEAD
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatusPath":                       schema_pkg_apis_apps_v1alpha1_StatusPath(ref),
+=======
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.Subset":                           schema_pkg_apis_apps_v1alpha1_Subset(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SubsetTemplate":                   schema_pkg_apis_apps_v1alpha1_SubsetTemplate(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.Topology":                         schema_pkg_apis_apps_v1alpha1_Topology(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UnitedDeployment":                 schema_pkg_apis_apps_v1alpha1_UnitedDeployment(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UnitedDeploymentCondition":        schema_pkg_apis_apps_v1alpha1_UnitedDeploymentCondition(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UnitedDeploymentList":             schema_pkg_apis_apps_v1alpha1_UnitedDeploymentList(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UnitedDeploymentSpec":             schema_pkg_apis_apps_v1alpha1_UnitedDeploymentSpec(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UnitedDeploymentStatus":           schema_pkg_apis_apps_v1alpha1_UnitedDeploymentStatus(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UnitedDeploymentUpdateStrategy":   schema_pkg_apis_apps_v1alpha1_UnitedDeploymentUpdateStrategy(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UpdatePriorityOrderTerm":          schema_pkg_apis_apps_v1alpha1_UpdatePriorityOrderTerm(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UpdatePriorityStrategy":           schema_pkg_apis_apps_v1alpha1_UpdatePriorityStrategy(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UpdatePriorityWeightTerm":         schema_pkg_apis_apps_v1alpha1_UpdatePriorityWeightTerm(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UpdateStatus":                     schema_pkg_apis_apps_v1alpha1_UpdateStatus(ref),
+>>>>>>> master
 	}
 }
 
@@ -163,8 +201,7 @@ func schema_pkg_apis_apps_v1alpha1_BroadcastJobSpec(ref common.ReferenceCallback
 					"parallelism": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Parallelism specifies the maximum desired number of pods the job should run at any given time. The actual number of pods running in steady state will be less than this number when the work left to do is less than max parallelism. Not setting this value means no limit.",
-							Type:        []string{"integer"},
-							Format:      "int32",
+							Ref:         ref("k8s.io/apimachinery/pkg/util/intstr.IntOrString"),
 						},
 					},
 					"template": {
@@ -179,12 +216,25 @@ func schema_pkg_apis_apps_v1alpha1_BroadcastJobSpec(ref common.ReferenceCallback
 							Ref:         ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CompletionPolicy"),
 						},
 					},
+					"paused": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Paused will pause the job.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"failurePolicy": {
+						SchemaProps: spec.SchemaProps{
+							Description: "FailurePolicy indicates the behavior of the job, when failed pod is found.",
+							Ref:         ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.FailurePolicy"),
+						},
+					},
 				},
 				Required: []string{"template"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CompletionPolicy", "k8s.io/api/core/v1.PodTemplateSpec"},
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CompletionPolicy", "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.FailurePolicy", "k8s.io/api/core/v1.PodTemplateSpec", "k8s.io/apimachinery/pkg/util/intstr.IntOrString"},
 	}
 }
 
@@ -254,6 +304,13 @@ func schema_pkg_apis_apps_v1alpha1_BroadcastJobStatus(ref common.ReferenceCallba
 							Format:      "int32",
 						},
 					},
+					"phase": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The phase of the job.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 			},
 		},
@@ -262,47 +319,7 @@ func schema_pkg_apis_apps_v1alpha1_BroadcastJobStatus(ref common.ReferenceCallba
 	}
 }
 
-func schema_pkg_apis_apps_v1alpha1_CompletionPolicy(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "CompletionPolicy indicates the completion policy for the job",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"type": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Type indicates the type of the CompletionPolicy Default is Always",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"activeDeadlineSeconds": {
-						SchemaProps: spec.SchemaProps{
-							Description: "ActiveDeadlineSeconds specifies the duration in seconds relative to the startTime that the job may be active before the system tries to terminate it; value must be positive integer. Only works for Always type.",
-							Type:        []string{"integer"},
-							Format:      "int64",
-						},
-					},
-					"backoffLimit": {
-						SchemaProps: spec.SchemaProps{
-							Description: "BackoffLimit specifies the number of retries before marking this job failed. Not setting value means no limit. Only works for Always type.",
-							Type:        []string{"integer"},
-							Format:      "int32",
-						},
-					},
-					"ttlSecondsAfterFinished": {
-						SchemaProps: spec.SchemaProps{
-							Description: "ttlSecondsAfterFinished limits the lifetime of a Job that has finished execution (either Complete or Failed). If this field is set, ttlSecondsAfterFinished after the Job finishes, it is eligible to be automatically deleted. When the Job is being deleted, its lifecycle guarantees (e.g. finalizers) will be honored. If this field is unset, the Job won't be automatically deleted. If this field is set to zero, the Job becomes eligible to be deleted immediately after it finishes. This field is alpha-level and is only honored by servers that enable the TTLAfterFinished feature. Only works for Always type",
-							Type:        []string{"integer"},
-							Format:      "int32",
-						},
-					},
-				},
-			},
-		},
-	}
-}
-
+<<<<<<< HEAD
 func schema_pkg_apis_apps_v1alpha1_ControlResource(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -330,77 +347,62 @@ func schema_pkg_apis_apps_v1alpha1_ControlResource(ref common.ReferenceCallback)
 }
 
 func schema_pkg_apis_apps_v1alpha1_InPlaceUpdateContainerStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+=======
+func schema_pkg_apis_apps_v1alpha1_CloneSet(ref common.ReferenceCallback) common.OpenAPIDefinition {
+>>>>>>> master
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "InPlaceUpdateContainerStatus records the statuses of the container that are mainly used to determine whether the InPlaceUpdate is completed.",
+				Description: "CloneSet is the Schema for the clonesets API",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"imageID": {
+					"kind": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-				},
-			},
-		},
-	}
-}
-
-func schema_pkg_apis_apps_v1alpha1_InPlaceUpdateState(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "InPlaceUpdateState records latest inplace-update state, including old statuses of containers.",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"revision": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Revision is the updated statefulset revision hash.",
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
-					"updateTimestamp": {
+					"apiVersion": {
 						SchemaProps: spec.SchemaProps{
-							Description: "UpdateTimestamp is the time when the in-place update happens.",
-							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
-					"lastContainerStatuses": {
+					"metadata": {
 						SchemaProps: spec.SchemaProps{
-							Description: "LastContainerStatuses records the before-in-place-update container statuses. It is a map from ContainerName to InPlaceUpdateContainerStatus",
-							Type:        []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Allows: true,
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.InPlaceUpdateContainerStatus"),
-									},
-								},
-							},
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CloneSetSpec"),
+						},
+					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CloneSetStatus"),
 						},
 					},
 				},
-				Required: []string{"revision", "updateTimestamp", "lastContainerStatuses"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.InPlaceUpdateContainerStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CloneSetSpec", "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CloneSetStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
 	}
 }
 
-func schema_pkg_apis_apps_v1alpha1_JobCondition(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_apis_apps_v1alpha1_CloneSetCondition(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "JobCondition describes current state of a job.",
+				Description: "CloneSetCondition describes the state of a CloneSet at a certain point.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"type": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Type of job condition, Complete or Failed.",
+							Description: "Type of CloneSet condition.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -412,28 +414,22 @@ func schema_pkg_apis_apps_v1alpha1_JobCondition(ref common.ReferenceCallback) co
 							Format:      "",
 						},
 					},
-					"lastProbeTime": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Last time the condition was checked.",
-							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
-						},
-					},
 					"lastTransitionTime": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Last time the condition transit from one status to another.",
+							Description: "Last time the condition transitioned from one status to another.",
 							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
 						},
 					},
 					"reason": {
 						SchemaProps: spec.SchemaProps{
-							Description: "(brief) reason for the condition's last transition.",
+							Description: "The reason for the condition's last transition.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"message": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Human readable message indicating details about last transition.",
+							Description: "A human readable message indicating details about the transition.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -447,6 +443,7 @@ func schema_pkg_apis_apps_v1alpha1_JobCondition(ref common.ReferenceCallback) co
 	}
 }
 
+<<<<<<< HEAD
 func schema_pkg_apis_apps_v1alpha1_Path(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -756,6 +753,568 @@ func schema_pkg_apis_apps_v1alpha1_RolloutDefinitionStatus(ref common.ReferenceC
 }
 
 func schema_pkg_apis_apps_v1alpha1_SidecarContainer(ref common.ReferenceCallback) common.OpenAPIDefinition {
+=======
+func schema_pkg_apis_apps_v1alpha1_CloneSetInPlaceUpdateStrategy(ref common.ReferenceCallback) common.OpenAPIDefinition {
+>>>>>>> master
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "CloneSetInPlaceUpdateStrategy defines the strategies for in-place update.",
+				Type:        []string{"object"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_CloneSetList(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "CloneSetList contains a list of CloneSet",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
+						},
+					},
+					"items": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CloneSet"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"items"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CloneSet", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_CloneSetScaleStrategy(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "CloneSetScaleStrategy defines strategies for pods scale.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"podsToDelete": {
+						SchemaProps: spec.SchemaProps{
+							Description: "PodsToDelete is the names of Pod should be deleted. Note that this list will be truncated for non-existing pod names.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_CloneSetSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "CloneSetSpec defines the desired state of CloneSet",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"replicas": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Replicas is the desired number of replicas of the given Template. These are replicas in the sense that they are instantiations of the same Template. If unspecified, defaults to 1.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"selector": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Selector is a label query over pods that should match the replica count. It must match the pod template's labels. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector"),
+						},
+					},
+					"template": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Template describes the pods that will be created.",
+							Ref:         ref("k8s.io/api/core/v1.PodTemplateSpec"),
+						},
+					},
+					"volumeClaimTemplates": {
+						SchemaProps: spec.SchemaProps{
+							Description: "VolumeClaimTemplates is a list of claims that pods are allowed to reference. Note that PVC will be deleted when its pod has been deleted.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("k8s.io/api/core/v1.PersistentVolumeClaim"),
+									},
+								},
+							},
+						},
+					},
+					"scaleStrategy": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ScaleStrategy indicates the ScaleStrategy that will be employed to create and delete Pods in the CloneSet.",
+							Ref:         ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CloneSetScaleStrategy"),
+						},
+					},
+					"updateStrategy": {
+						SchemaProps: spec.SchemaProps{
+							Description: "UpdateStrategy indicates the UpdateStrategy that will be employed to update Pods in the CloneSet when a revision is made to Template.",
+							Ref:         ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CloneSetUpdateStrategy"),
+						},
+					},
+					"revisionHistoryLimit": {
+						SchemaProps: spec.SchemaProps{
+							Description: "RevisionHistoryLimit is the maximum number of revisions that will be maintained in the CloneSet's revision history. The revision history consists of all revisions not represented by a currently applied CloneSetSpec version. The default value is 10.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+				},
+				Required: []string{"replicas", "selector", "template"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CloneSetScaleStrategy", "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CloneSetUpdateStrategy", "k8s.io/api/core/v1.PersistentVolumeClaim", "k8s.io/api/core/v1.PodTemplateSpec", "k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_CloneSetStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "CloneSetStatus defines the observed state of CloneSet",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"observedGeneration": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ObservedGeneration is the most recent generation observed for this CloneSet. It corresponds to the CloneSet's generation, which is updated on mutation by the API Server.",
+							Type:        []string{"integer"},
+							Format:      "int64",
+						},
+					},
+					"replicas": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Replicas is the number of Pods created by the CloneSet controller.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"readyReplicas": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ReadyReplicas is the number of Pods created by the CloneSet controller that have a Ready Condition.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"updatedReplicas": {
+						SchemaProps: spec.SchemaProps{
+							Description: "UpdatedReplicas is the number of Pods created by the CloneSet controller from the CloneSet version indicated by updateRevision.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"updatedReadyReplicas": {
+						SchemaProps: spec.SchemaProps{
+							Description: "UpdatedReadyReplicas is the number of Pods created by the CloneSet controller from the CloneSet version indicated by updateRevision and have a Ready Condition.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"updateRevision": {
+						SchemaProps: spec.SchemaProps{
+							Description: "UpdateRevision, if not empty, indicates the latest revision of the CloneSet.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"collisionCount": {
+						SchemaProps: spec.SchemaProps{
+							Description: "CollisionCount is the count of hash collisions for the CloneSet. The CloneSet controller uses this field as a collision avoidance mechanism when it needs to create the name for the newest ControllerRevision.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"conditions": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Conditions represents the latest available observations of a CloneSet's current state.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CloneSetCondition"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"replicas", "readyReplicas", "updatedReplicas", "updatedReadyReplicas"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CloneSetCondition"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_CloneSetUpdateStrategy(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "CloneSetUpdateStrategy defines strategies for pods update.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Type indicates the type of the CloneSetUpdateStrategy. Default is ReCreate.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"partition": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Partition is the desired number of pods in old revisions. It means when partition is set during pods updating, (replicas - partition) number of pods will be updated. Default value is 0.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"priorityStrategy": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Priorities are the rules for calculating the priority of updating pods. Each pod to be updated, will pass through these terms and get a sum of weights.",
+							Ref:         ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UpdatePriorityStrategy"),
+						},
+					},
+					"maxUnavailable": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The maximum number of pods that can be unavailable during the update. Value can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%). Absolute number is calculated from percentage by rounding down. Defaults to 1.",
+							Ref:         ref("k8s.io/apimachinery/pkg/util/intstr.IntOrString"),
+						},
+					},
+					"paused": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Paused indicates that the CloneSet is paused. Default value is false",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"inPlaceUpdateStrategy": {
+						SchemaProps: spec.SchemaProps{
+							Description: "InPlaceUpdateStrategy contains strategies for in-place update.",
+							Ref:         ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CloneSetInPlaceUpdateStrategy"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CloneSetInPlaceUpdateStrategy", "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UpdatePriorityStrategy", "k8s.io/apimachinery/pkg/util/intstr.IntOrString"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_CompletionPolicy(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "CompletionPolicy indicates the completion policy for the job",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Type indicates the type of the CompletionPolicy Default is Always",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"activeDeadlineSeconds": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ActiveDeadlineSeconds specifies the duration in seconds relative to the startTime that the job may be active before the system tries to terminate it; value must be positive integer. Only works for Always type.",
+							Type:        []string{"integer"},
+							Format:      "int64",
+						},
+					},
+					"ttlSecondsAfterFinished": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ttlSecondsAfterFinished limits the lifetime of a Job that has finished execution (either Complete or Failed). If this field is set, ttlSecondsAfterFinished after the Job finishes, it is eligible to be automatically deleted. When the Job is being deleted, its lifecycle guarantees (e.g. finalizers) will be honored. If this field is unset, the Job won't be automatically deleted. If this field is set to zero, the Job becomes eligible to be deleted immediately after it finishes. This field is alpha-level and is only honored by servers that enable the TTLAfterFinished feature. Only works for Always type",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_FailurePolicy(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "FailurePolicy indicates the behavior of the job, when failed pod is found.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Type indicates the type of FailurePolicyType.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"restartLimit": {
+						SchemaProps: spec.SchemaProps{
+							Description: "RestartLimit specifies the number of retries before marking the pod failed.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_InPlaceUpdateContainerStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "InPlaceUpdateContainerStatus records the statuses of the container that are mainly used to determine whether the InPlaceUpdate is completed.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"imageID": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_InPlaceUpdateState(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "InPlaceUpdateState records latest inplace-update state, including old statuses of containers.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"revision": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Revision is the updated statefulset revision hash.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"updateTimestamp": {
+						SchemaProps: spec.SchemaProps{
+							Description: "UpdateTimestamp is the time when the in-place update happens.",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
+						},
+					},
+					"lastContainerStatuses": {
+						SchemaProps: spec.SchemaProps{
+							Description: "LastContainerStatuses records the before-in-place-update container statuses. It is a map from ContainerName to InPlaceUpdateContainerStatus",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.InPlaceUpdateContainerStatus"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"revision", "updateTimestamp", "lastContainerStatuses"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.InPlaceUpdateContainerStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_JobCondition(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "JobCondition describes current state of a job.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Type of job condition, Complete or Failed.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Status of the condition, one of True, False, Unknown.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"lastProbeTime": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Last time the condition was checked.",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
+						},
+					},
+					"lastTransitionTime": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Last time the condition transit from one status to another.",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
+						},
+					},
+					"reason": {
+						SchemaProps: spec.SchemaProps{
+							Description: "(brief) reason for the condition's last transition.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"message": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Human readable message indicating details about last transition.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"type", "status"},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_ManualUpdate(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ManualUpdate is a update strategy which allows users to control the update progress by providing the partition of each subset.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"partitions": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Indicates number of subset partition.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"integer"},
+										Format: "int32",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_RollingUpdateSidecarSet(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "RollingUpdateSidecarSet is used to communicate parameter",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"maxUnavailable": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/util/intstr.IntOrString"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/util/intstr.IntOrString"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_RollingUpdateStatefulSetStrategy(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "RollingUpdateStatefulSetStrategy is used to communicate parameter for RollingUpdateStatefulSetStrategyType.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"partition": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Partition indicates the number of pods with non-updated revisions when rolling update. This means controller will update $(replicas - partition) number of pod Default value is 0.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"maxUnavailable": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The maximum number of pods that can be unavailable during the update. Value can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%). Absolute number is calculated from percentage by rounding down. Also, maxUnavailable can just be allowed to work with Parallel podManagementPolicy. Defaults to 1.",
+							Ref:         ref("k8s.io/apimachinery/pkg/util/intstr.IntOrString"),
+						},
+					},
+					"podUpdatePolicy": {
+						SchemaProps: spec.SchemaProps{
+							Description: "PodUpdatePolicy indicates how pods should be updated Default value is \"ReCreate\"",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"paused": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Paused indicates that the StatefulSet is paused. Default value is false",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"priorityStrategy": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Priorities are the rules for calculating the priority of updating pods. Each pod to be updated, will pass through these terms and get a sum of weights. Also, priorityStrategy can just be allowed to work with Parallel podManagementPolicy.",
+							Ref:         ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UpdatePriorityStrategy"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UpdatePriorityStrategy", "k8s.io/apimachinery/pkg/util/intstr.IntOrString"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_SidecarContainer(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -893,6 +1452,19 @@ func schema_pkg_apis_apps_v1alpha1_SidecarSetSpec(ref common.ReferenceCallback) 
 							},
 						},
 					},
+					"volumes": {
+						SchemaProps: spec.SchemaProps{
+							Description: "List of volumes that can be mounted by sidecar containers",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("k8s.io/api/core/v1.Volume"),
+									},
+								},
+							},
+						},
+					},
 					"paused": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Paused indicates that the sidecarset is paused and will not be processed by the sidecarset controller.",
@@ -900,11 +1472,17 @@ func schema_pkg_apis_apps_v1alpha1_SidecarSetSpec(ref common.ReferenceCallback) 
 							Format:      "",
 						},
 					},
+					"strategy": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The sidecarset strategy to use to replace existing pods with new ones.",
+							Ref:         ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarSetUpdateStrategy"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarContainer", "k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector"},
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarContainer", "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarSetUpdateStrategy", "k8s.io/api/core/v1.Volume", "k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector"},
 	}
 }
 
@@ -950,37 +1528,23 @@ func schema_pkg_apis_apps_v1alpha1_SidecarSetStatus(ref common.ReferenceCallback
 	}
 }
 
-func schema_pkg_apis_apps_v1alpha1_SpecPath(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_apis_apps_v1alpha1_SidecarSetUpdateStrategy(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "SpecPath indicates the spec path",
+				Description: "SidecarSetUpdateStrategy indicates the strategy that the SidecarSet controller will use to perform updates. It includes any additional parameters necessary to perform the update for the indicated strategy.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"paused": {
+					"rollingUpdate": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Paused indicates the paused path of controlled workload",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"partition": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Partition indicates the partition path of controlled workload.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"maxUnavailable": {
-						SchemaProps: spec.SchemaProps{
-							Description: "MaxUnavailable indicates the maxUnavailable path of controlled workload.",
-							Type:        []string{"string"},
-							Format:      "",
+							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RollingUpdateSidecarSet"),
 						},
 					},
 				},
 			},
 		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RollingUpdateSidecarSet"},
 	}
 }
 
@@ -1241,6 +1805,32 @@ func schema_pkg_apis_apps_v1alpha1_StatefulSetStatus(ref common.ReferenceCallbac
 	}
 }
 
+func schema_pkg_apis_apps_v1alpha1_StatefulSetTemplateSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "StatefulSetTemplateSpec defines the subset template of StatefulSet.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/api/apps/v1.StatefulSetSpec"),
+						},
+					},
+				},
+				Required: []string{"spec"},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/api/apps/v1.StatefulSetSpec", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
 func schema_pkg_apis_apps_v1alpha1_StatefulSetUpdateStrategy(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -1266,6 +1856,575 @@ func schema_pkg_apis_apps_v1alpha1_StatefulSetUpdateStrategy(ref common.Referenc
 		},
 		Dependencies: []string{
 			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RollingUpdateStatefulSetStrategy"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_Subset(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Subset defines the detail of a subset.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Indicates subset name as a DNS_LABEL, which will be used to generate subset workload name prefix in the format '<deployment-name>-<subset-name>-'. Name should be unique between all of the subsets under one UnitedDeployment.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"nodeSelectorTerm": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Indicates the node selector to form the subset. Depending on the node selector, pods provisioned could be distributed across multiple groups of nodes. A subset's nodeSelectorTerm is not allowed to be updated.",
+							Ref:         ref("k8s.io/api/core/v1.NodeSelectorTerm"),
+						},
+					},
+					"replicas": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Indicates the number of the pod to be created under this subset. Replicas could also be percentage like '10%', which means 10% of UnitedDeployment replicas of pods will be distributed under this subset. If nil, the number of replicas in this subset is determined by controller. Controller will try to keep all the subsets with nil replicas have average pods.",
+							Ref:         ref("k8s.io/apimachinery/pkg/util/intstr.IntOrString"),
+						},
+					},
+				},
+				Required: []string{"name"},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.NodeSelectorTerm", "k8s.io/apimachinery/pkg/util/intstr.IntOrString"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_SubsetTemplate(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SubsetTemplate defines the subset template under the UnitedDeployment. UnitedDeployment will provision every subset based on one workload templates in SubsetTemplate.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"statefulSetTemplate": {
+						SchemaProps: spec.SchemaProps{
+							Description: "StatefulSet template",
+							Ref:         ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatefulSetTemplateSpec"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.StatefulSetTemplateSpec"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_Topology(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Topology defines the spread detail of each subset under UnitedDeployment. A UnitedDeployment manages multiple homogeneous workloads which are called subset. Each of subsets under the UnitedDeployment is described in Topology.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"subsets": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Contains the details of each subset. Each element in this array represents one subset which will be provisioned and managed by UnitedDeployment.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.Subset"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.Subset"},
+	}
+}
+
+<<<<<<< HEAD
+func schema_pkg_apis_apps_v1alpha1_SpecPath(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SpecPath indicates the spec path",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"paused": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Paused indicates the paused path of controlled workload",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"partition": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Partition indicates the partition path of controlled workload.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"maxUnavailable": {
+						SchemaProps: spec.SchemaProps{
+							Description: "MaxUnavailable indicates the maxUnavailable path of controlled workload.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_StatefulSet(ref common.ReferenceCallback) common.OpenAPIDefinition {
+=======
+func schema_pkg_apis_apps_v1alpha1_UnitedDeployment(ref common.ReferenceCallback) common.OpenAPIDefinition {
+>>>>>>> master
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "UnitedDeployment is the Schema for the uniteddeployments API",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UnitedDeploymentSpec"),
+						},
+					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UnitedDeploymentStatus"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UnitedDeploymentSpec", "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UnitedDeploymentStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_UnitedDeploymentCondition(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "UnitedDeploymentCondition describes current state of a UnitedDeployment.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Type of in place set condition.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Status of the condition, one of True, False, Unknown.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"lastTransitionTime": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Last time the condition transitioned from one status to another.",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
+						},
+					},
+					"reason": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The reason for the condition's last transition.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"message": {
+						SchemaProps: spec.SchemaProps{
+							Description: "A human readable message indicating details about the transition.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_UnitedDeploymentList(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "UnitedDeploymentList contains a list of UnitedDeployment.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
+						},
+					},
+					"items": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UnitedDeployment"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"items"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UnitedDeployment", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_UnitedDeploymentSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "UnitedDeploymentSpec defines the desired state of UnitedDeployment.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"replicas": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Replicas is the total desired replicas of all the subsets. If unspecified, defaults to 1.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"selector": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Selector is a label query over pods that should match the replica count. It must match the pod template's labels.",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector"),
+						},
+					},
+					"template": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Template describes the subset that will be created.",
+							Ref:         ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SubsetTemplate"),
+						},
+					},
+					"topology": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Topology describes the pods distribution detail between each of subsets.",
+							Ref:         ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.Topology"),
+						},
+					},
+					"updateStrategy": {
+						SchemaProps: spec.SchemaProps{
+							Description: "UpdateStrategy indicates the strategy the UnitedDeployment use to preform the update, when template is changed.",
+							Ref:         ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UnitedDeploymentUpdateStrategy"),
+						},
+					},
+					"revisionHistoryLimit": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Indicates the number of histories to be conserved. If unspecified, defaults to 10.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+				},
+				Required: []string{"selector"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SubsetTemplate", "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.Topology", "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UnitedDeploymentUpdateStrategy", "k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_UnitedDeploymentStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "UnitedDeploymentStatus defines the observed state of UnitedDeployment.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"observedGeneration": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ObservedGeneration is the most recent generation observed for this UnitedDeployment. It corresponds to the UnitedDeployment's generation, which is updated on mutation by the API Server.",
+							Type:        []string{"integer"},
+							Format:      "int64",
+						},
+					},
+					"readyReplicas": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The number of ready replicas.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"replicas": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Replicas is the most recently observed number of replicas.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"updatedReplicas": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The number of pods in current version.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"updatedReadyReplicas": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The number of ready current revision replicas for this UnitedDeployment.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"collisionCount": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Count of hash collisions for the UnitedDeployment. The UnitedDeployment controller uses this field as a collision avoidance mechanism when it needs to create the name for the newest ControllerRevision.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"currentRevision": {
+						SchemaProps: spec.SchemaProps{
+							Description: "CurrentRevision, if not empty, indicates the current version of the UnitedDeployment.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"subsetReplicas": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Records the topology detail information of the replicas of each subset.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"integer"},
+										Format: "int32",
+									},
+								},
+							},
+						},
+					},
+					"conditions": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Represents the latest available observations of a UnitedDeployment's current state.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UnitedDeploymentCondition"),
+									},
+								},
+							},
+						},
+					},
+					"updateStatus": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Records the information of update progress.",
+							Ref:         ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UpdateStatus"),
+						},
+					},
+				},
+				Required: []string{"replicas", "updatedReplicas", "currentRevision"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UnitedDeploymentCondition", "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UpdateStatus"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_UnitedDeploymentUpdateStrategy(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "UnitedDeploymentUpdateStrategy defines the update performance when template of UnitedDeployment is changed.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Type of UnitedDeployment update strategy. Default is Manual.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"manualUpdate": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Includes all of the parameters a Manual update strategy needs.",
+							Ref:         ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.ManualUpdate"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.ManualUpdate"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_UpdatePriorityOrderTerm(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "UpdatePriorityOrder defines order priority.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"orderedKey": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Calculate priority by value of this key. Values of this key, will be sorted by GetInt(val). GetInt method will find the last int in value, such as getting 5 in value '5', getting 10 in value 'sts-10'.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"orderedKey"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_UpdatePriorityStrategy(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "UpdatePriorityStrategy is the strategy to define priority for pods update. Only one of orderPriority and weightPriority can be set.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"orderPriority": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Order priority terms, pods will be sorted by the value of orderedKey. For example: ``` orderPriority: - orderedKey: key1 - orderedKey: key2 ``` First, all pods which have key1 in labels will be sorted by the value of key1. Then, the left pods which have no key1 but have key2 in labels will be sorted by the value of key2 and put behind those pods have key1.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UpdatePriorityOrderTerm"),
+									},
+								},
+							},
+						},
+					},
+					"weightPriority": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Weight priority terms, pods will be sorted by the sum of all terms weight.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UpdatePriorityWeightTerm"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UpdatePriorityOrderTerm", "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.UpdatePriorityWeightTerm"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_UpdatePriorityWeightTerm(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "UpdatePriorityWeightTerm defines weight priority.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"weight": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Weight associated with matching the corresponding matchExpressions, in the range 1-100.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"matchSelector": {
+						SchemaProps: spec.SchemaProps{
+							Description: "MatchSelector is used to select by pod's labels.",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector"),
+						},
+					},
+				},
+				Required: []string{"weight", "matchSelector"},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_UpdateStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "UpdateStatus defines the observed update state of UnitedDeployment.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"updatedRevision": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Records the latest revision.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"currentPartitions": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Records the current partition.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"integer"},
+										Format: "int32",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 }
 

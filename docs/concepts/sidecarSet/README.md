@@ -5,12 +5,10 @@ inject a sidecar container for every selected Pod when the Pod is created. The S
 injection process is similar to the automatic sidecar injection mechanism used in
 [istio](https://istio.io/docs/setup/kubernetes/additional-setup/sidecar-injection/).
 
-Besides deployment, in the future release, SidecarSet controller will provide
-additional capabilities such as in-place Sidecar container image upgrade
-and Sidecar container clean up if it is no longer needed.
+Besides deployment, SidecarSet controller also provides
+additional capabilities such as in-place Sidecar container image upgrade, mounting Sidecar volumes, etc.
 Basically, SidecarSet decouples the Sidecar container lifecycle
 management from the main container lifecycle management.
-The upgrade capability is under development.
 
 The SidecarSet is preferable for managing stateless sidecar containers such as
 monitoring tools or operation agents. Its API spec is listed below:
@@ -22,15 +20,21 @@ type SidecarSetSpec struct {
 
     // containers specifies the list of containers to be injected into the pod
     Containers []SidecarContainer `json:"containers,omitempty"`
+
+    // List of volumes that can be mounted by sidecar containers
+    Volumes []corev1.Volume `json:"volumes,omitempty"`
+
+    // Paused indicates that the sidecarset is paused and will not be processed by the sidecarset controller.
+    Paused bool `json:"paused,omitempty"`
+
+    // The sidecarset strategy to use to replace existing pods with new ones.
+    Strategy SidecarSetUpdateStrategy `json:"strategy,omitempty"`
 }
 
 type SidecarContainer struct {
     corev1.Container
 }
 ```
-
-The `Selector` selects which pods to inject the sidecar container using the label
-selector and the `Containers` specifies the list of containers to be injected.
 
 Note that the injection happens at Pod creation time and only Pod spec is updated.
 The workload template spec will not be updated.
@@ -51,10 +55,19 @@ spec:
   selector:
     matchLabels:
       app: nginx
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 2
   containers:
   - name: sidecar1
     image: centos:6.7
     command: ["sleep", "999d"] # do nothing at all
+    volumeMounts:
+    - name: log-volume
+      mountPath: /var/log
+  volumes: # this field will be merged into pod.spec.volumes
+  - name: log-volume
+    emptyDir: {}
 ```
 
 Create a SidecarSet based on the YAML file:
@@ -103,16 +116,16 @@ status:
 
 ### Update a SidecarSet
 
-Use ```kubectl edit sidecarset test-sidecarset``` to modify SidecarSet image from `centos:6.7` to `centos:6.8`. You
-should find that the matched pods will be updated in-place sequentially similar to Advanced StatefulSet.
-Note that we only support upgrading sidecar container one at a time, i.e., `maxUnavailable=1 for now.
+Using ```kubectl edit sidecarset test-sidecarset``` to modify SidecarSet image from `centos:6.7` to `centos:6.8`, You should find that the matched pods will be updated in-place sequentially.
+`.spec.strategy.rollingUpdate.maxUnavailable` is an optional field that specifies the maximum number of Pods that can be unavailable during the update process. The default value is 1. The value can be an absolute number or a percentage of desired pods. For example, 10% means 10% * `matched pods` number of pods can be upgraded simultaneously. The calculated value is rounded down to the nearest integer.
 
 You could use ```kubectl patch sidecarset test-sidecarset --type merge -p '{"spec":{"paused":true}}'``` to pause the update procedure.
 
-If user modifies fields other than image in sidecarSet, pod won't get updated until pod is recreated by workload(e.g. deployment), which we called "lazy update".
+If user modifies fields other than image in SidecarSet Spec, the sidecar container in the pod won't get updated until the pod is recreated by workload (e.g., Deployment).
+This behavior is also referred to as **lazy update** mode.
 
 ## Tutorial
 
-A more sophisticated tutorial is provided:
+A detailed tutorial is provided:
 
 - [Use SidecarSet to inject a sidecar container into the Guestbook application](../../tutorial/sidecarset.md)

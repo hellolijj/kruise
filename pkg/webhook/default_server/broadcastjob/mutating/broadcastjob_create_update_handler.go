@@ -18,10 +18,11 @@ package mutating
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
 	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
-	"github.com/openkruise/kruise/pkg/webhook/default_server/utils"
+	patchutil "github.com/openkruise/kruise/pkg/util/patch"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/types"
@@ -48,21 +49,8 @@ type BroadcastJobCreateUpdateHandler struct {
 }
 
 func (h *BroadcastJobCreateUpdateHandler) mutatingBroadcastJobFn(ctx context.Context, obj *appsv1alpha1.BroadcastJob) error {
-	setDefaultBroadcastJob(obj)
+	appsv1alpha1.SetDefaults_BroadcastJob(obj)
 	return nil
-}
-
-// SetDefaults_BroadcastJob sets any unspecified values to defaults.
-func setDefaultBroadcastJob(job *appsv1alpha1.BroadcastJob) {
-	utils.SetDefaultPodTemplate(&job.Spec.Template.Spec)
-	if job.Spec.CompletionPolicy.Type == "" {
-		job.Spec.CompletionPolicy.Type = appsv1alpha1.Always
-	}
-
-	if job.Spec.Parallelism == nil {
-		parallelism := int32(1<<31 - 1)
-		job.Spec.Parallelism = &parallelism
-	}
 }
 
 var _ admission.Handler = &BroadcastJobCreateUpdateHandler{}
@@ -81,7 +69,13 @@ func (h *BroadcastJobCreateUpdateHandler) Handle(ctx context.Context, req types.
 	if err != nil {
 		return admission.ErrorResponse(http.StatusInternalServerError, err)
 	}
-	return admission.PatchResponse(obj, copy)
+
+	//related issue: https://github.com/kubernetes-sigs/kubebuilder/issues/510
+	marshaledBroadcastJob, err := json.Marshal(copy)
+	if err != nil {
+		return admission.ErrorResponse(http.StatusInternalServerError, err)
+	}
+	return patchutil.ResponseFromRaw(req.AdmissionRequest.Object.Raw, marshaledBroadcastJob)
 }
 
 //var _ inject.Client = &BroadcastJobCreateUpdateHandler{}

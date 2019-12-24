@@ -20,16 +20,19 @@ package broadcastjob
 import (
 	"context"
 	"fmt"
+	"math"
 	"sync"
 	"time"
 
 	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
+	"github.com/openkruise/kruise/pkg/util/gate"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/retry"
@@ -52,6 +55,9 @@ var controllerKind = appsv1alpha1.SchemeGroupVersion.WithKind("BroadcastJob")
 // Add creates a new BroadcastJob Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
+	if !gate.ResourceEnabled(&appsv1alpha1.BroadcastJob{}) {
+		return nil
+	}
 	return add(mgr, newReconciler(mgr))
 }
 
@@ -133,12 +139,14 @@ func (r *ReconcileBroadcastJob) Reconcile(request reconcile.Request) (reconcile.
 	addLabelToPodTemplate(job)
 
 	if IsJobFinished(job) {
-		if pastTTLDeadline(job) {
+		if isPast, leftTime := pastTTLDeadline(job); isPast {
 			klog.Infof("deleting the job %s", job.Name)
 			err = r.Delete(context.TODO(), job)
 			if err != nil {
 				klog.Errorf("failed to delete job %s", job.Name)
 			}
+		} else if leftTime > 0 {
+			return reconcile.Result{RequeueAfter: leftTime}, nil
 		}
 		return reconcile.Result{}, nil
 	}
@@ -154,6 +162,10 @@ func (r *ReconcileBroadcastJob) Reconcile(request reconcile.Request) (reconcile.
 				job.Name, *job.Spec.CompletionPolicy.ActiveDeadlineSeconds)
 			requeueAfter = time.Duration(*job.Spec.CompletionPolicy.ActiveDeadlineSeconds) * time.Second
 		}
+	}
+
+	if job.Status.Phase == "" {
+		job.Status.Phase = appsv1alpha1.PhaseRunning
 	}
 
 	// list pods for this job
@@ -183,19 +195,54 @@ func (r *ReconcileBroadcastJob) Reconcile(request reconcile.Request) (reconcile.
 	}
 
 	// Get active, failed, succeeded pods
-	activePods, failedPods, succeededPods := filterPods(pods)
+	activePods, failedPods, succeededPods := filterPods(job.Spec.FailurePolicy.RestartLimit, pods)
 	active := int32(len(activePods))
 	failed := int32(len(failedPods))
 	succeeded := int32(len(succeededPods))
 
-	oldNumConditions := len(job.Status.Conditions)
 	var desired int32
 	desiredNodes, restNodesToRunPod, podsToDelete := getNodesToRunPod(nodes, job, existingNodeToPodMap)
 	desired = int32(len(desiredNodes))
 	klog.Infof("%s/%s has %d/%d nodes remaining to schedule pods", job.Namespace, job.Name, len(restNodesToRunPod), desired)
 	klog.Infof("Before broadcastjob reconcile %s/%s, desired=%d, active=%d, failed=%d", job.Namespace, job.Name, desired, active, failed)
+	job.Status.Active = active
+	job.Status.Failed = failed
+	job.Status.Succeeded = succeeded
+	job.Status.Desired = desired
 
-	jobFailed, failureReason, failureMessage := isJobFailed(job, pods)
+	if job.Status.Phase == appsv1alpha1.PhaseFailed {
+		return reconcile.Result{RequeueAfter: requeueAfter}, r.updateJobStatus(request, job)
+	}
+
+	if job.Spec.Paused && (job.Status.Phase == appsv1alpha1.PhaseRunning || job.Status.Phase == appsv1alpha1.PhasePaused) {
+		job.Status.Phase = appsv1alpha1.PhasePaused
+		return reconcile.Result{RequeueAfter: requeueAfter}, r.updateJobStatus(request, job)
+	}
+	if job.Spec.Paused == false && job.Status.Phase == appsv1alpha1.PhasePaused {
+		job.Status.Phase = appsv1alpha1.PhaseRunning
+		r.recorder.Event(job, corev1.EventTypeNormal, "Continue", "continue to process job")
+	}
+
+	jobFailed := false
+	var failureReason, failureMessage string
+	if failed > 0 {
+		switch job.Spec.FailurePolicy.Type {
+		case appsv1alpha1.FailurePolicyTypePause:
+			r.recorder.Event(job, corev1.EventTypeWarning, "Paused", "job is paused, due to failed pod")
+			job.Spec.Paused = true
+			job.Status.Phase = appsv1alpha1.PhasePaused
+			return reconcile.Result{RequeueAfter: requeueAfter}, r.updateJobStatus(request, job)
+		case appsv1alpha1.FailurePolicyTypeFailFast:
+			// mark the job is failed
+			jobFailed, failureReason, failureMessage = true, "failed pod is found", "failure policy is FailurePolicyTypeFailFast and failed pod is found"
+			r.recorder.Event(job, corev1.EventTypeWarning, failureReason, fmt.Sprintf("%s: %d pods succeeded, %d pods failed", failureMessage, succeeded, failed))
+		case appsv1alpha1.FailurePolicyTypeContinue:
+		}
+	}
+
+	if !jobFailed {
+		jobFailed, failureReason, failureMessage = isJobFailed(job, pods)
+	}
 	// Job is failed. For keepAlive type, the job will never fail.
 	if jobFailed {
 		// Handle Job failures, delete all active pods
@@ -203,6 +250,7 @@ func (r *ReconcileBroadcastJob) Reconcile(request reconcile.Request) (reconcile.
 		if err != nil {
 			klog.Errorf("failed to deleteJobPods for job %s,", job.Name)
 		}
+		job.Status.Phase = appsv1alpha1.PhaseFailed
 		requeueAfter = finishJob(job, appsv1alpha1.JobFailed, failureMessage)
 		r.recorder.Event(job, corev1.EventTypeWarning, failureReason,
 			fmt.Sprintf("%s: %d pods succeeded, %d pods failed", failureMessage, succeeded, failed))
@@ -218,7 +266,7 @@ func (r *ReconcileBroadcastJob) Reconcile(request reconcile.Request) (reconcile.
 
 		// DeletionTimestamp is not set and more nodes to run pod
 		if job.DeletionTimestamp == nil && len(restNodesToRunPod) > 0 {
-			active, err = r.reconcilePods(job, restNodesToRunPod, active)
+			active, err = r.reconcilePods(job, restNodesToRunPod, active, desired)
 			if err != nil {
 				klog.Errorf("failed to reconcilePods for job %s,", job.Name)
 			}
@@ -226,6 +274,7 @@ func (r *ReconcileBroadcastJob) Reconcile(request reconcile.Request) (reconcile.
 
 		if isJobComplete(job, desiredNodes) {
 			message := fmt.Sprintf("Job completed, %d pods succeeded, %d pods failed", succeeded, failed)
+			job.Status.Phase = appsv1alpha1.PhaseCompleted
 			requeueAfter = finishJob(job, appsv1alpha1.JobComplete, message)
 			r.recorder.Event(job, corev1.EventTypeNormal, "JobComplete",
 				fmt.Sprintf("Job %s/%s is completed, %d pods succeeded, %d pods failed", job.Namespace, job.Name, succeeded, failed))
@@ -233,41 +282,35 @@ func (r *ReconcileBroadcastJob) Reconcile(request reconcile.Request) (reconcile.
 	}
 	klog.Infof("After broadcastjob reconcile %s/%s, desired=%d, active=%d, failed=%d", job.Namespace, job.Name, desired, active, failed)
 
-	// no need to update the job if the status hasn't changed since last time
-	if job.Status.Active != active || job.Status.Succeeded != succeeded ||
-		job.Status.Desired != desired || job.Status.Failed != failed ||
-		len(job.Status.Conditions) != oldNumConditions {
+	// update the status
+	job.Status.Failed = failed
+	job.Status.Active = active
+	if err := r.updateJobStatus(request, job); err != nil {
+		klog.Errorf("failed to update job %s, %v", job.Name, err)
+	}
 
-		job.Status.Active = active
-		job.Status.Succeeded = succeeded
-		job.Status.Failed = failed
-		job.Status.Desired = desired
+	return reconcile.Result{RequeueAfter: requeueAfter}, err
+}
 
-		klog.Infof("Updating job %s status", job.Name)
-		// update the status
-		jobCopy := job.DeepCopy()
-		err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			err := r.Status().Update(context.TODO(), jobCopy)
-			if err == nil {
-				return nil
-			}
-
-			updated := &appsv1alpha1.BroadcastJob{}
-			err = r.Get(context.TODO(), request.NamespacedName, updated)
-			if err == nil {
-				jobCopy = updated
-				jobCopy.Status = job.Status
-			} else {
-				utilruntime.HandleError(fmt.Errorf("error getting updated broadcastjob %s/%s from lister: %v", job.Namespace, job.Name, err))
-			}
-			return err
-		})
-		if err != nil {
-			klog.Errorf("failed to update job %s, %v", job.Name, err)
+func (r *ReconcileBroadcastJob) updateJobStatus(request reconcile.Request, job *appsv1alpha1.BroadcastJob) error {
+	klog.Infof("Updating job %s status %#v", job.Name, job.Status)
+	jobCopy := job.DeepCopy()
+	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		err := r.Status().Update(context.TODO(), jobCopy)
+		if err == nil {
+			return nil
 		}
 
-	}
-	return reconcile.Result{RequeueAfter: requeueAfter}, err
+		updated := &appsv1alpha1.BroadcastJob{}
+		err = r.Get(context.TODO(), request.NamespacedName, updated)
+		if err == nil {
+			jobCopy = updated
+			jobCopy.Status = job.Status
+		} else {
+			utilruntime.HandleError(fmt.Errorf("error getting updated broadcastjob %s/%s from lister: %v", job.Namespace, job.Name, err))
+		}
+		return err
+	})
 }
 
 // finishJob appends the condition to JobStatus, and sets ttl if needed
@@ -300,7 +343,7 @@ func addLabelToPodTemplate(job *appsv1alpha1.BroadcastJob) {
 }
 
 func (r *ReconcileBroadcastJob) reconcilePods(job *appsv1alpha1.BroadcastJob,
-	restNodesToRunPod []*corev1.Node, active int32) (int32, error) {
+	restNodesToRunPod []*corev1.Node, active, desired int32) (int32, error) {
 
 	// max concurrent running pods
 	var parallelism int32
@@ -308,7 +351,16 @@ func (r *ReconcileBroadcastJob) reconcilePods(job *appsv1alpha1.BroadcastJob,
 		// not specify,take the max int
 		parallelism = int32(1<<31 - 1)
 	} else {
-		parallelism = *job.Spec.Parallelism
+		parallelismIntStr := *job.Spec.Parallelism
+		if parallelismIntStr.Type == intstr.String {
+			absolute, err := percentageToAbsolute(parallelismIntStr.StrVal)
+			if err != nil {
+				return active, err
+			}
+			parallelism = int32(math.Ceil(float64(int32(absolute)*desired) / 100))
+		} else {
+			parallelism = parallelismIntStr.IntVal
+		}
 	}
 
 	// The rest pods to run
@@ -417,11 +469,7 @@ func isJobFailed(job *appsv1alpha1.BroadcastJob, pods []*corev1.Pod) (bool, stri
 	jobFailed := false
 	var failureReason string
 	var failureMessage string
-	if pastBackoffLimitOnFailure(job, pods) {
-		jobFailed = true
-		failureReason = "BackoffLimitExceeded"
-		failureMessage = fmt.Sprintf("Job %s/%s has reached the specified backoff limit", job.Namespace, job.Name)
-	} else if pastActiveDeadline(job) {
+	if pastActiveDeadline(job) {
 		jobFailed = true
 		failureReason = "DeadlineExceeded"
 		failureMessage = fmt.Sprintf("Job %s/%s was active longer than specified deadline", job.Namespace, job.Name)
