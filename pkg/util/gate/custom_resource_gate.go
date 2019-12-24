@@ -57,10 +57,10 @@ func ResourceEnabled(obj runtime.Object) bool {
 		return false
 	}
 
-	return discoveryEnabled(gvk) && envEnabled(gvk)
+	return DiscoveryEnabled(gvk) && envEnabled(gvk)
 }
 
-func discoveryEnabled(gvk schema.GroupVersionKind) bool {
+func DiscoveryEnabled(gvk schema.GroupVersionKind) bool {
 	if discoveryClient == nil {
 		return true
 	}

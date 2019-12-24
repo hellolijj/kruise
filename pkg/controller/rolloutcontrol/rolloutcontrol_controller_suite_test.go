@@ -25,7 +25,6 @@ import (
 
 	"github.com/onsi/gomega"
 	"github.com/openkruise/kruise/pkg/apis"
-	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -38,7 +37,7 @@ func TestMain(m *testing.M) {
 	t := &envtest.Environment{
 		CRDDirectoryPaths: []string{filepath.Join("..", "..", "..", "config", "crds")},
 	}
-	apis.AddToScheme(scheme.Scheme)
+	apis.AddToScheme(scheme)
 
 	var err error
 	if cfg, err = t.Start(); err != nil {

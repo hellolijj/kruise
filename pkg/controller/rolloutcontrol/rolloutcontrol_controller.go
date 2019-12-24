@@ -19,7 +19,11 @@ package rolloutcontrol
 import (
 	"context"
 	"fmt"
+	"github.com/openkruise/kruise/pkg/util/gate"
+	"k8s.io/apimachinery/pkg/util/intstr"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"strings"
+	"sync"
 
 	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -28,18 +32,22 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-var Controller controller.Controller
+var (
+	rolloutController controller.Controller
+)
 
 // Add creates a new RolloutControl Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
+	if !gate.ResourceEnabled(&appsv1alpha1.RolloutControl{}) {
+		return nil
+	}
 	return add(mgr, newReconciler(mgr))
 }
 
@@ -60,7 +68,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// 包
-	Controller = c
+	rolloutController = c
 
 	// Watch for changes to RolloutControl
 	err = c.Watch(&source.Kind{Type: &appsv1alpha1.RolloutControl{}}, &handler.EnqueueRequestForObject{})
@@ -68,6 +76,33 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
+	return nil
+}
+
+// 线程安全 map
+var objWatchMap sync.Map
+
+func DoWatch(resource *appsv1alpha1.ControlResource, client client.Client) error {
+	if resource == nil {
+		return fmt.Errorf("rollout resouce can not be nil")
+	}
+
+	// remove duplicate
+	if _, ok := objWatchMap.Load(resource); ok {
+		return nil
+	}
+	obj := unstructured.Unstructured{}
+	obj.SetAPIVersion(resource.APIVersion)
+	obj.SetKind(resource.Kind)
+
+	if rolloutController == nil {
+		return fmt.Errorf("rollout controller is nil")
+	}
+	if err := rolloutController.Watch(&source.Kind{Type: &obj}, &enqueueRolloutControlForDef{client: client}); err != nil {
+		return err
+	}
+
+	objWatchMap.Store(resource, struct{}{})
 	return nil
 }
 
@@ -82,8 +117,6 @@ type ReconcileRolloutControl struct {
 // Reconcile reads that state of the cluster for a RolloutControl object and makes changes based on the state read
 // and what is in the RolloutControl.Spec
 // Automatically generate RBAC rules to allow the Controller to read and write Deployments
-// +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=apps,resources=deployments/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=apps.kruise.io,resources=rolloutcontrols,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps.kruise.io,resources=rolloutcontrols/status,verbs=get;update;patch
 func (r *ReconcileRolloutControl) Reconcile(request reconcile.Request) (reconcile.Result, error) {
@@ -100,23 +133,6 @@ func (r *ReconcileRolloutControl) Reconcile(request reconcile.Request) (reconcil
 		return reconcile.Result{}, err
 	}
 
-	obj := &unstructured.Unstructured{}
-	obj.SetAPIVersion(rolloutCtl.Spec.Resource.APIVersion)
-	obj.SetKind(rolloutCtl.Spec.Resource.Kind)
-	obj.SetNamespace(rolloutCtl.Spec.Resource.NameSpace)
-	obj.SetName(rolloutCtl.Spec.Resource.Name)
-
-	err = r.Get(context.TODO(), types.NamespacedName{
-		Namespace: rolloutCtl.Spec.Resource.NameSpace,
-		Name:      rolloutCtl.Spec.Resource.Name,
-	}, obj)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			return reconcile.Result{}, nil
-		}
-		return reconcile.Result{}, err
-	}
-
 	rolloutDef, err := r.getDefFromControl(rolloutCtl)
 	if err != nil {
 		return reconcile.Result{}, err
@@ -126,28 +142,87 @@ func (r *ReconcileRolloutControl) Reconcile(request reconcile.Request) (reconcil
 		return reconcile.Result{}, nil
 	}
 
-	return reconcile.Result{}, r.sync(rolloutCtl, rolloutDef, obj)
+	return reconcile.Result{}, r.sync(rolloutCtl, rolloutDef)
 }
 
-func (r *ReconcileRolloutControl) sync(rolloutCtl *appsv1alpha1.RolloutControl, rolloutDef *appsv1alpha1.RolloutDefinition, obj *unstructured.Unstructured) error {
+func (r *ReconcileRolloutControl) sync(rolloutCtl *appsv1alpha1.RolloutControl, rolloutDef *appsv1alpha1.RolloutDefinition) error {
 	resourcePath := rolloutDef.Spec.Path
 	if &resourcePath == nil {
 		return fmt.Errorf("have no resourcePath")
 	}
 
-	if err := r.updateControlWorkload(rolloutCtl, &resourcePath.SpecPath, obj); err != nil {
+	obj := &unstructured.Unstructured{}
+	obj.SetAPIVersion(rolloutCtl.Spec.Resource.APIVersion)
+	obj.SetKind(rolloutCtl.Spec.Resource.Kind)
+	obj.SetNamespace(rolloutCtl.Spec.Resource.NameSpace)
+	obj.SetName(rolloutCtl.Spec.Resource.Name)
+
+	err := r.Get(context.TODO(), types.NamespacedName{
+		Namespace: rolloutCtl.Spec.Resource.NameSpace,
+		Name:      rolloutCtl.Spec.Resource.Name,
+	}, obj)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return nil
+		}
 		return err
 	}
 
-	if err := r.syncStatus(rolloutCtl, &resourcePath.StatusPath, obj); err != nil {
+	specPath := resourcePath.SpecPath
+	if &specPath == nil {
+		return fmt.Errorf("have no specPath in rollout definition")
+	}
+
+	updateObj := obj.DeepCopy()
+
+	// set paused field
+	if specPath.Paused != "" {
+		pausedPathArr := strings.Split(specPath.Paused, ".")
+		err = unstructured.SetNestedField(updateObj.Object, rolloutCtl.Spec.RolloutStrategy.Paused, pausedPathArr...)
+		if err != nil {
+			return err
+		}
+	}
+
+	// set partition field
+	if specPath.Partition != "" {
+		partitionPathArr := strings.Split(specPath.Partition, ".")
+		err = unstructured.SetNestedField(updateObj.Object, int64(rolloutCtl.Spec.RolloutStrategy.Partition), partitionPathArr...)
+		if err != nil {
+			return err
+		}
+	}
+
+	// set maxUnavailable field
+	if specPath.MaxUnavailable != "" {
+		maxUnavailablePathArr := strings.Split(specPath.MaxUnavailable, ".")
+		_, b, err := unstructured.NestedFieldCopy(updateObj.Object, maxUnavailablePathArr...)
+		if err != nil {
+			return err
+		}
+		if b == true {
+			switch rolloutCtl.Spec.RolloutStrategy.MaxUnavailable.Type {
+			case intstr.Int:
+				err = unstructured.SetNestedField(updateObj.Object, int64(rolloutCtl.Spec.RolloutStrategy.MaxUnavailable.IntVal), maxUnavailablePathArr...)
+			case intstr.String:
+				err = unstructured.SetNestedField(updateObj.Object, rolloutCtl.Spec.RolloutStrategy.MaxUnavailable.StrVal, maxUnavailablePathArr...)
+			default:
+				err = fmt.Errorf("err maxUnavailable type")
+			}
+			if err != nil {
+				return err
+			}
+		} else {
+			klog.Info("can't get path field of maxUnavailable")
+		}
+	}
+
+	if err = r.Update(context.TODO(), updateObj); err != nil {
 		return err
 	}
 
-	return nil
-}
-
-func (r *ReconcileRolloutControl) syncStatus(rolloutCtl *appsv1alpha1.RolloutControl, rolloutDefStatusPath *appsv1alpha1.StatusPath, obj *unstructured.Unstructured) error {
-	if rolloutDefStatusPath == nil {
+	rolloutDefStatusPath := resourcePath.StatusPath
+	if &rolloutDefStatusPath == nil {
 		return fmt.Errorf("rollout definition status path is nil")
 	}
 
@@ -225,57 +300,6 @@ func (r *ReconcileRolloutControl) syncStatus(rolloutCtl *appsv1alpha1.RolloutCon
 	return r.Update(context.TODO(), rolloutControlCopy)
 }
 
-func (r *ReconcileRolloutControl) updateControlWorkload(rolloutCtl *appsv1alpha1.RolloutControl, RolloutDefSpecPath *appsv1alpha1.SpecPath, obj *unstructured.Unstructured) error {
-	if RolloutDefSpecPath == nil {
-		return fmt.Errorf("rollout definition spec path is nil")
-	}
-
-	// set paused field
-	if RolloutDefSpecPath.Paused != "" {
-		pausedPathArr := strings.Split(RolloutDefSpecPath.Paused, ".")
-		err := unstructured.SetNestedField(obj.Object, rolloutCtl.Spec.RolloutStrategy.Paused, pausedPathArr...)
-		if err != nil {
-			return err
-		}
-	}
-
-	// set partition field
-	if RolloutDefSpecPath.Partition != "" {
-		partitionPathArr := strings.Split(RolloutDefSpecPath.Partition, ".")
-		_, b, err := unstructured.NestedFieldNoCopy(obj.Object, partitionPathArr...)
-		if err != nil {
-			return err
-		}
-		if b == true {
-			err = unstructured.SetNestedField(obj.Object, rolloutCtl.Spec.RolloutStrategy.Partition, partitionPathArr...)
-			if err != nil {
-				return err
-			}
-		} else {
-			klog.Info("can't get path field of partition")
-		}
-	}
-
-	// set maxUnavailable field
-	if RolloutDefSpecPath.MaxUnavailable != "" {
-		maxUnavailablePathArr := strings.Split(RolloutDefSpecPath.MaxUnavailable, ".")
-		_, b, err := unstructured.NestedFieldNoCopy(obj.Object, maxUnavailablePathArr...)
-		if err != nil {
-			return err
-		}
-		if b == true {
-			err = setNestedField(obj.Object, rolloutCtl.Spec.RolloutStrategy.MaxUnavailable, maxUnavailablePathArr...)
-			if err != nil {
-				return err
-			}
-		} else {
-			klog.Info("can't get path field of maxUnavailable")
-		}
-	}
-
-	return r.Update(context.TODO(), obj)
-}
-
 func (r *ReconcileRolloutControl) getDefFromControl(rolloutControl *appsv1alpha1.RolloutControl) (*appsv1alpha1.RolloutDefinition, error) {
 	rolloutDefs := appsv1alpha1.RolloutDefinitionList{}
 	if err := r.List(context.TODO(), &client.ListOptions{}, &rolloutDefs); err != nil {
@@ -286,36 +310,11 @@ func (r *ReconcileRolloutControl) getDefFromControl(rolloutControl *appsv1alpha1
 	}
 
 	for _, rolloutDef := range rolloutDefs.Items {
-		if rolloutDef.Spec.ControlResource.Kind == rolloutControl.Spec.Resource.Kind && rolloutDef.Spec.ControlResource.APIVersion == rolloutControl.Spec.Resource.APIVersion {
+		if rolloutDef.Spec.ControlResource.Kind == rolloutControl.Spec.Resource.Kind &&
+			rolloutDef.Spec.ControlResource.APIVersion == rolloutControl.Spec.Resource.APIVersion {
 			return &rolloutDef, nil
 		}
 	}
 
 	return nil, fmt.Errorf("there is no rollout definition")
-}
-
-// 如果使用 unstructured.SetNestedField 遇到如下错误
-// err: Observed a panic: &errors.errorString{s:"cannot deep copy intstr.IntOrString"} (cannot deep copy intstr.IntOrString)
-func setNestedField(obj map[string]interface{}, value interface{}, fields ...string) error {
-	m := obj
-
-	for i, field := range fields[:len(fields)-1] {
-		if val, ok := m[field]; ok {
-			if valMap, ok := val.(map[string]interface{}); ok {
-				m = valMap
-			} else {
-				return fmt.Errorf("value cannot be set because %v is not a map[string]interface{}", jsonPath(fields[:i+1]))
-			}
-		} else {
-			newVal := make(map[string]interface{})
-			m[field] = newVal
-			m = newVal
-		}
-	}
-	m[fields[len(fields)-1]] = value
-	return nil
-}
-
-func jsonPath(fields []string) string {
-	return "." + strings.Join(fields, ".")
 }
