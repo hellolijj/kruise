@@ -457,7 +457,7 @@ func (ssc *defaultStatefulSetControl) updateStatefulSet(
 				set.Namespace,
 				set.Name,
 				replicas[i].Name)
-			return &status, nil
+			//return &status, nil
 		}
 		// Enforce the StatefulSet invariants
 		if identityMatches(set, replicas[i]) && storageMatches(set, replicas[i]) {
@@ -559,23 +559,24 @@ func (ssc *defaultStatefulSetControl) updateStatefulSet(
 				// we can not in-place update a pod util its last in-place-update has completed, because
 				// controller must record last imageID in pod annotation.
 				if isInPlaceUpdateCompleted != nil {
-					klog.V(3).Infof("StatefulSet %s/%s waiting for Pod %s last in-place update completed",
+					klog.V(3).Infof("StatefulSet %s/%s waiting for Pod %s last in-place update completed, error info %v",
 						set.Namespace,
 						set.Name,
-						replicas[target].Name)
+						replicas[target].Name,
+						isInPlaceUpdateCompleted)
 					skipUpdating = true
-				} else {
-					klog.V(2).Infof("StatefulSet %s/%s patching Pod %s for in-place update",
-						set.Namespace,
-						set.Name,
-						replicas[target].Name)
-					updateErr := ssc.inPlaceUpdatePod(set, replicas[target], inPlaceUpdateSpec)
-					if updateErr != nil && !errors.IsConflict(updateErr) && !isInPlaceOnly(set) {
-						// If it failed to in-place update && error is not conflict && podUpdatePolicy is not InPlaceOnly,
-						// then we should try to recreate this pod
-						useInPlaceUpdate = false
-					}
 				}
+				klog.V(2).Infof("StatefulSet %s/%s patching Pod %s for in-place update",
+					set.Namespace,
+					set.Name,
+					replicas[target].Name)
+				updateErr := ssc.inPlaceUpdatePod(set, replicas[target], inPlaceUpdateSpec)
+				if updateErr != nil && !errors.IsConflict(updateErr) && !isInPlaceOnly(set) {
+					// If it failed to in-place update && error is not conflict && podUpdatePolicy is not InPlaceOnly,
+					// then we should try to recreate this pod
+					useInPlaceUpdate = false
+				}
+
 			}
 			if !useInPlaceUpdate {
 				klog.V(2).Infof("StatefulSet %s/%s terminating Pod %s for update",
