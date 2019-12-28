@@ -31,7 +31,6 @@ import (
 	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
 	genericclient "github.com/openkruise/kruise/pkg/client"
 
-	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -47,16 +46,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
-
-var log = logf.Log.WithName("controller")
-
-/**
-* USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
-* business logic.  Delete these comments after modifying this file.*
- */
 
 // Add creates a new PodProbeMarker Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
@@ -93,16 +84,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// TODO(user): Modify this to be the types you create
-	// Uncomment watch a Deployment created by PodProbeMarker - change this for objects you create
-	err = c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &appsv1alpha1.PodProbeMarker{},
-	})
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -115,17 +96,10 @@ type ReconcilePodProbeMarker struct {
 	prober prober
 }
 
-// Reconcile reads that state of the cluster for a PodProbeMarker object and makes changes based on the state read
-// and what is in the PodProbeMarker.Spec
-// TODO(user): Modify this Reconcile function to implement your Controller logic.  The scaffolding writes
-// a Deployment as an example
 // Automatically generate RBAC rules to allow the Controller to read and write Deployments
-// +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=apps,resources=deployments/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=apps.kruise.io,resources=podprobemarkers,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps.kruise.io,resources=podprobemarkers/status,verbs=get;update;patch
 func (r *ReconcilePodProbeMarker) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	// Fetch the PodProbeMarker instance
 	podProbeMarker := &appsv1alpha1.PodProbeMarker{}
 	err := r.Get(context.TODO(), request.NamespacedName, podProbeMarker)
 	if err != nil {
@@ -137,47 +111,30 @@ func (r *ReconcilePodProbeMarker) Reconcile(request reconcile.Request) (reconcil
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
-
-	klog.V(3).Infof("begin to process podprobemarker %v", podProbeMarker)
-
-	// list pods for this job
-	selector, err := metav1.LabelSelectorAsSelector(podProbeMarker.Spec.Selector)
+	pods, err := r.listPodFromProbeMarker(podProbeMarker)
 	if err != nil {
-		return reconcile.Result{}, err
-	}
-	podList := &corev1.PodList{}
-	if err := r.List(context.TODO(), &client.ListOptions{LabelSelector: selector}, podList); err != nil {
-		klog.Errorf("failed to get podList for podProbeMarker %s,", podProbeMarker.Name)
-		return reconcile.Result{}, err
-	}
-
-	//  convert pod list to a slice of pointers
-	var pods []*corev1.Pod
-	for i := range podList.Items {
-		pods = append(pods, &podList.Items[i])
+		return reconcile.Result{}, nil
 	}
 
 	for _, p := range pods {
-		if p.Status.Phase == corev1.PodRunning {
-			log.V(4).Info("find pod %v", p.Name)
+		klog.V(4).Info("find pod %v, to probe", p.Name)
 
-			probeResult, _, err := r.runProbe(podProbeMarker, p)
-			if err != nil || probeResult == probe.Failure {
-				klog.Errorf("failed to run probe for podProbeMarker %s in pod %s, reason: %v", podProbeMarker.Name, p.Name, err)
+		probeResult, _, err := r.runProbe(podProbeMarker, p)
+		if err != nil || probeResult == probe.Failure {
+			klog.Errorf("failed to run probe for podProbeMarker %s in pod %s, reason: %v", podProbeMarker.Name, p.Name, err)
+			return reconcile.Result{}, err
+		}
+
+		klog.V(4).Infof("return probe result  %v", probeResult)
+		if probeResult == probe.Success {
+			newPod := updatePodLabels(p, podProbeMarker.Spec.Labels)
+			_, err = r.prober.client.CoreV1().Pods(newPod.Namespace).Update(newPod)
+			if err != nil {
+				klog.Errorf("failed to update pod %v reason %v", newPod.Name, err)
 				return reconcile.Result{}, err
 			}
+			klog.V(4).Infof("success in update pod %v", newPod.Name)
 
-			klog.V(4).Infof("return probe result  %v", probeResult)
-
-			if probeResult == probe.Success {
-				newPod := updatePodLabels(p, podProbeMarker.Spec.Labels)
-				_, err = r.prober.client.CoreV1().Pods(newPod.Namespace).Update(newPod)
-				if err != nil {
-					klog.Errorf("failed to update pod %v reason %v", newPod.Name, err)
-					return reconcile.Result{}, err
-				}
-				klog.V(4).Infof("success in update pod %v", newPod.Name)
-			}
 		}
 	}
 
@@ -194,12 +151,33 @@ func (r *ReconcilePodProbeMarker) Reconcile(request reconcile.Request) (reconcil
 	return reconcile.Result{}, nil
 }
 
+func (r *ReconcilePodProbeMarker) listPodFromProbeMarker(marker *appsv1alpha1.PodProbeMarker) ([]*corev1.Pod, error) {
+	selector, err := metav1.LabelSelectorAsSelector(marker.Spec.Selector)
+	if err != nil {
+		return nil, err
+	}
+	podList := &corev1.PodList{}
+	err = r.List(context.TODO(), &client.ListOptions{
+		Namespace:     marker.Namespace,
+		LabelSelector: selector,
+	}, podList)
+	if err != nil {
+		return nil, err
+	}
+
+	var pods []*corev1.Pod
+	for _, p := range podList.Items {
+		if isRunningAndReady(&p) {
+			pods = append(pods, &p)
+		}
+	}
+	return pods, nil
+}
+
 // func (pb *prober) runProbe(probeType probeType, p *v1.Probe, pod *v1.Pod, status v1.PodStatus, container v1.Container, containerID kubecontainer.ContainerID) (probe.Result, string, error) {
 func (r *ReconcilePodProbeMarker) runProbe(podProbeMarker *appsv1alpha1.PodProbeMarker, pod *corev1.Pod) (probe.Result, string, error) {
 	marker := podProbeMarker.Spec.MarkerProbe
 	timeout := time.Duration(marker.TimeoutSeconds) * time.Second
-
-	//
 
 	klog.V(4).Infof("debug: pod probe maker %v", podProbeMarker.Spec)
 
