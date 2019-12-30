@@ -41,11 +41,18 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CloneSetStatus":                   schema_pkg_apis_apps_v1alpha1_CloneSetStatus(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CloneSetUpdateStrategy":           schema_pkg_apis_apps_v1alpha1_CloneSetUpdateStrategy(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.CompletionPolicy":                 schema_pkg_apis_apps_v1alpha1_CompletionPolicy(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.ExecAction":                       schema_pkg_apis_apps_v1alpha1_ExecAction(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.FailurePolicy":                    schema_pkg_apis_apps_v1alpha1_FailurePolicy(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.Handler":                          schema_pkg_apis_apps_v1alpha1_Handler(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.InPlaceUpdateContainerStatus":     schema_pkg_apis_apps_v1alpha1_InPlaceUpdateContainerStatus(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.InPlaceUpdateState":               schema_pkg_apis_apps_v1alpha1_InPlaceUpdateState(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.JobCondition":                     schema_pkg_apis_apps_v1alpha1_JobCondition(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.ManualUpdate":                     schema_pkg_apis_apps_v1alpha1_ManualUpdate(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.MarkProbe":                        schema_pkg_apis_apps_v1alpha1_MarkProbe(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.PodProbeMarker":                   schema_pkg_apis_apps_v1alpha1_PodProbeMarker(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.PodProbeMarkerList":               schema_pkg_apis_apps_v1alpha1_PodProbeMarkerList(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.PodProbeMarkerSpec":               schema_pkg_apis_apps_v1alpha1_PodProbeMarkerSpec(ref),
+		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.PodProbeMarkerStatus":             schema_pkg_apis_apps_v1alpha1_PodProbeMarkerStatus(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RollingUpdateSidecarSet":          schema_pkg_apis_apps_v1alpha1_RollingUpdateSidecarSet(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.RollingUpdateStatefulSetStrategy": schema_pkg_apis_apps_v1alpha1_RollingUpdateStatefulSetStrategy(ref),
 		"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.SidecarContainer":                 schema_pkg_apis_apps_v1alpha1_SidecarContainer(ref),
@@ -707,6 +714,40 @@ func schema_pkg_apis_apps_v1alpha1_CompletionPolicy(ref common.ReferenceCallback
 	}
 }
 
+func schema_pkg_apis_apps_v1alpha1_ExecAction(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ExecAction describes a \"run in container\" action.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"command": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Command is the command line to execute inside the container, the working directory for the command  is root ('/') in the container's filesystem. The command is simply exec'd, it is not run inside a shell, so traditional shell instructions ('|', etc) won't work. To use a shell, you need to explicitly call out to that shell. Exit status of 0 is treated as live/healthy and non-zero is unhealthy.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+					"container": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+				Required: []string{"container"},
+			},
+		},
+	}
+}
+
 func schema_pkg_apis_apps_v1alpha1_FailurePolicy(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -731,6 +772,33 @@ func schema_pkg_apis_apps_v1alpha1_FailurePolicy(ref common.ReferenceCallback) c
 				},
 			},
 		},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_Handler(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Handler defines a specific action that should be taken",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"exec": {
+						SchemaProps: spec.SchemaProps{
+							Description: "One and only one of the following should be specified. Exec specifies the action to take.",
+							Ref:         ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.ExecAction"),
+						},
+					},
+					"httpGet": {
+						SchemaProps: spec.SchemaProps{
+							Description: "HTTPGet specifies the http request to perform.",
+							Ref:         ref("k8s.io/api/core/v1.HTTPGetAction"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.ExecAction", "k8s.io/api/core/v1.HTTPGetAction"},
 	}
 }
 
@@ -875,6 +943,212 @@ func schema_pkg_apis_apps_v1alpha1_ManualUpdate(ref common.ReferenceCallback) co
 						},
 					},
 				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_MarkProbe(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "MarkProbe describes a probe check to be performed against a pod to determine whether it is label",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"exec": {
+						SchemaProps: spec.SchemaProps{
+							Description: "One and only one of the following should be specified. Exec specifies the action to take.",
+							Ref:         ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.ExecAction"),
+						},
+					},
+					"httpGet": {
+						SchemaProps: spec.SchemaProps{
+							Description: "HTTPGet specifies the http request to perform.",
+							Ref:         ref("k8s.io/api/core/v1.HTTPGetAction"),
+						},
+					},
+					"timeoutSeconds": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"periodSeconds": {
+						SchemaProps: spec.SchemaProps{
+							Description: "How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.ExecAction", "k8s.io/api/core/v1.HTTPGetAction"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_PodProbeMarker(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "PodProbeMarker is the Schema for the podprobemarkers API",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.PodProbeMarkerSpec"),
+						},
+					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.PodProbeMarkerStatus"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.PodProbeMarkerSpec", "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.PodProbeMarkerStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_PodProbeMarkerList(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "PodProbeMarkerList contains a list of PodProbeMarker",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
+						},
+					},
+					"items": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.PodProbeMarker"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"items"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.PodProbeMarker", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_PodProbeMarkerSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "PodProbeMarkerSpec defines the desired state of PodProbeMarker",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"selector": {
+						SchemaProps: spec.SchemaProps{
+							Description: "INSERT ADDITIONAL SPEC FIELDS - desired state of cluster Important: Run \"make\" to regenerate code after modifying this file",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector"),
+						},
+					},
+					"labels": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+					"markProbe": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.MarkProbe"),
+						},
+					},
+				},
+				Required: []string{"selector", "markProbe"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/openkruise/kruise/pkg/apis/apps/v1alpha1.MarkProbe", "k8s.io/apimachinery/pkg/apis/meta/v1.LabelSelector"},
+	}
+}
+
+func schema_pkg_apis_apps_v1alpha1_PodProbeMarkerStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "PodProbeMarkerStatus defines the observed state of PodProbeMarker",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"matched": {
+						SchemaProps: spec.SchemaProps{
+							Description: "INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run \"make\" to regenerate code after modifying this file",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"succeeded": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"integer"},
+							Format: "int32",
+						},
+					},
+					"failed": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"integer"},
+							Format: "int32",
+						},
+					},
+				},
+				Required: []string{"matched", "succeeded", "failed"},
 			},
 		},
 	}
