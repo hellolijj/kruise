@@ -77,17 +77,9 @@ type PodProbeMarkerStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 	// replicas is the number of Pods mark by the MarkerProbeSet
-
-	// 选择出来了多少pod
-
-	Replicas int32 `json:"replicas"`
-
-	// selected label
-
-	// marker label
-
-	SelectedReplicas int32  `json:"selectedReplicas"`
-	MarkPodName      string `json:"markPodName"`
+	Matched   int32 `json:"matched"`
+	Succeeded int32 `json:"succeeded" protobuf:"varint,5,opt,name=succeeded"`
+	Failed    int32 `json:"failed"`
 }
 
 // +genclient

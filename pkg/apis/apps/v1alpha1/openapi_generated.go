@@ -665,11 +665,16 @@ func schema_pkg_apis_apps_v1alpha1_PodProbeMarkerStatus(ref common.ReferenceCall
 							Format:      "int32",
 						},
 					},
-					"selectedReplicas": {
+					"succeeded": {
 						SchemaProps: spec.SchemaProps{
-							Description: "readyReplicas is the number of Pods created by the StatefulSet controller that have a Ready Condition.",
-							Type:        []string{"integer"},
-							Format:      "int32",
+							Type:   []string{"integer"},
+							Format: "int32",
+						},
+					},
+					"Failed": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"integer"},
+							Format: "int32",
 						},
 					},
 					"markPodName": {
@@ -679,7 +684,7 @@ func schema_pkg_apis_apps_v1alpha1_PodProbeMarkerStatus(ref common.ReferenceCall
 						},
 					},
 				},
-				Required: []string{"replicas", "selectedReplicas", "markPodName"},
+				Required: []string{"replicas", "succeeded", "Failed", "markPodName"},
 			},
 		},
 	}

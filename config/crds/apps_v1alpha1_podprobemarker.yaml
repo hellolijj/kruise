@@ -6,6 +6,27 @@ metadata:
     controller-tools.k8s.io: "1.0"
   name: podprobemarkers.apps.kruise.io
 spec:
+  additionalPrinterColumns:
+    - JSONPath: .status.matched
+      description: The matched number of pods. This is typically equal to the number
+        of nodes satisfied to run pods.
+      name: Matched
+      type: integer
+    - JSONPath: .status.succeeded
+      description: The number of probe succeed pods.
+      name: Succeeded
+      type: integer
+    - JSONPath: .status.failed
+      description: The number of probe failed pods.
+      name: Failed
+      type: integer
+    - JSONPath: .metadata.creationTimestamp
+      description: CreationTimestamp is a timestamp representing the server time when
+        this object was created. It is not guaranteed to be set in happens-before order
+        across separate operations. Clients may not set this value. It is represented
+        in RFC3339 form and is in UTC.
+      name: AGE
+      type: date
   group: apps.kruise.io
   names:
     kind: PodProbeMarker

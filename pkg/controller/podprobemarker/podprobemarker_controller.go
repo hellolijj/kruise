@@ -20,12 +20,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
-	"net"
-	"net/http"
-	"net/url"
-	"strconv"
-	"strings"
 	"time"
 
 	appsv1alpha1 "github.com/openkruise/kruise/pkg/apis/apps/v1alpha1"
@@ -35,11 +29,10 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/kubernetes/scheme"
-	restclient "k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/remotecommand"
+	schemeutil "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/klog"
 	"k8s.io/kubernetes/pkg/probe"
+	"k8s.io/kubernetes/pkg/probe/http"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -57,16 +50,9 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	prober, err := newProber()
-	if err != nil {
-		klog.V(5).Infof("new reconciler err: %v", err)
-		return &ReconcilePodProbeMarker{}
-	}
-
 	return &ReconcilePodProbeMarker{
 		Client: mgr.GetClient(),
 		scheme: mgr.GetScheme(),
-		prober: prober,
 	}
 }
 
@@ -93,7 +79,6 @@ var _ reconcile.Reconciler = &ReconcilePodProbeMarker{}
 type ReconcilePodProbeMarker struct {
 	client.Client
 	scheme *runtime.Scheme
-	prober prober
 }
 
 // Automatically generate RBAC rules to allow the Controller to read and write Deployments
@@ -116,117 +101,63 @@ func (r *ReconcilePodProbeMarker) Reconcile(request reconcile.Request) (reconcil
 		return reconcile.Result{}, nil
 	}
 
+	var status appsv1alpha1.PodProbeMarkerStatus
+	status.Matched = int32(len(pods))
 	for _, p := range pods {
-		klog.V(4).Info("find pod %v, to probe", p.Name)
+		klog.V(4).Infof("find pod %v, to probe", p.Name)
 
-		probeResult, _, err := r.runProbe(podProbeMarker, p)
+		probeResult, err := r.probe(podProbeMarker, p)
 		if err != nil || probeResult == probe.Failure {
-			klog.Errorf("failed to run probe for podProbeMarker %s in pod %s, reason: %v", podProbeMarker.Name, p.Name, err)
-			return reconcile.Result{}, err
+			status.Failed++
+			klog.Errorf("exec pod %s err %v", p.Name, err)
+			continue
 		}
 
-		klog.V(4).Infof("return probe result  %v", probeResult)
 		if probeResult == probe.Success {
 			newPod := updatePodLabels(p, podProbeMarker.Spec.Labels)
-			_, err = r.prober.client.CoreV1().Pods(newPod.Namespace).Update(newPod)
-			if err != nil {
-				klog.Errorf("failed to update pod %v reason %v", newPod.Name, err)
-				return reconcile.Result{}, err
+			if err := r.Update(context.TODO(), newPod); err != nil {
+				status.Failed++
+				continue
+				klog.Errorf("update pod %s err %v", p.Name, err)
 			}
-			klog.V(4).Infof("success in update pod %v", newPod.Name)
-
+			status.Succeeded++
 		}
 	}
 
-	klog.V(4).Infof("reconcile request: %v", request)
-
-	probeTickerPeriod := time.Duration(podProbeMarker.Spec.MarkerProbe.PeriodSeconds) * time.Second
-	if probeTickerPeriod != 0 {
+	period := podProbeMarker.Spec.MarkerProbe.PeriodSeconds
+	if period != 0 {
 		return reconcile.Result{
 			Requeue:      true,
-			RequeueAfter: probeTickerPeriod,
-		}, nil
+			RequeueAfter: time.Duration(period) * time.Second,
+		}, r.syncStatus(podProbeMarker, &status)
 	}
 
-	return reconcile.Result{}, nil
+	return reconcile.Result{}, r.syncStatus(podProbeMarker, &status)
 }
 
-func (r *ReconcilePodProbeMarker) listPodFromProbeMarker(marker *appsv1alpha1.PodProbeMarker) ([]*corev1.Pod, error) {
-	selector, err := metav1.LabelSelectorAsSelector(marker.Spec.Selector)
-	if err != nil {
-		return nil, err
-	}
-	podList := &corev1.PodList{}
-	err = r.List(context.TODO(), &client.ListOptions{
-		Namespace:     marker.Namespace,
-		LabelSelector: selector,
-	}, podList)
-	if err != nil {
-		return nil, err
-	}
-
-	var pods []*corev1.Pod
-	for _, p := range podList.Items {
-		if isRunningAndReady(&p) {
-			pods = append(pods, &p)
-		}
-	}
-	return pods, nil
-}
-
-// func (pb *prober) runProbe(probeType probeType, p *v1.Probe, pod *v1.Pod, status v1.PodStatus, container v1.Container, containerID kubecontainer.ContainerID) (probe.Result, string, error) {
-func (r *ReconcilePodProbeMarker) runProbe(podProbeMarker *appsv1alpha1.PodProbeMarker, pod *corev1.Pod) (probe.Result, string, error) {
+func (r *ReconcilePodProbeMarker) probe(podProbeMarker *appsv1alpha1.PodProbeMarker, pod *corev1.Pod) (probe.Result, error) {
 	marker := podProbeMarker.Spec.MarkerProbe
-	timeout := time.Duration(marker.TimeoutSeconds) * time.Second
-
 	klog.V(4).Infof("debug: pod probe maker %v", podProbeMarker.Spec)
 
 	if marker.Exec != nil {
-		klog.V(4).Infof("Exec-Probe Pod: %v, Container: %v, Command: %v", pod.Name, marker.Exec.Container, marker.Exec.Command)
-		execContainer := corev1.Container{}
-		for _, c := range pod.Spec.Containers {
-			if c.Name == marker.Exec.Container {
-				execContainer = c
-				break
-			}
+		klog.V(3).Infof("Exec-Probe Pod: %v, Container: %v, Command: %v", pod.Name, marker.Exec.Container, marker.Exec.Command)
+		execContainer := findContainerFromMarkProbe(pod, &marker)
+		if execContainer == nil {
+			return probe.Failure, fmt.Errorf("can't found container %s in pod %s", marker.Exec.Container, pod.Name)
 		}
-		if len(execContainer.Name) == 0 {
-			klog.Errorf("wrong pod name %v", podProbeMarker.Name)
-		}
-		return r.execProbe(podProbeMarker, pod, timeout)
+		return r.execProbe(pod, &marker)
 	} else if marker.HTTPGet != nil {
-		klog.V(4).Infof("find a http probe in pod %v", pod.Name)
-		httpGet := podProbeMarker.Spec.MarkerProbe.HTTPGet
-		scheme := strings.ToLower(string(httpGet.Scheme))
-		if len(scheme) == 0 {
-			scheme = "http"
-		}
-		host := httpGet.Host
-		if host == "" {
-			host = pod.Status.PodIP
-		}
-		// TODO: add condition for port
-		port := int(httpGet.Port.IntVal)
-		if port == 0 {
-			klog.Errorf("failed to get proProbeMark port %s,", podProbeMarker.Name)
-		}
-		path := httpGet.Path
-		klog.V(4).Infof("HTTP-Probe Host: %v://%v, Port: %v, Path: %v", scheme, host, port, path)
-		url := formatURL(scheme, host, port, path)
-		headers := buildHeader(httpGet.HTTPHeaders)
-		klog.V(4).Infof("HTTP-Probe Headers: %v", headers)
-		return r.prober.http.Probe(url, headers, timeout)
-	} else {
-		return probe.Failure, "invalid mark probe method only support exec and http", fmt.Errorf("invalid mark probe method")
+		klog.V(3).Infof("find a http probe in pod %v", pod.Name)
+		return r.httpProbe(pod, &marker)
 	}
 
-	return probe.Success, "", nil
-
+	return probe.Failure, fmt.Errorf("invalid mark probe method")
 }
 
-func (r *ReconcilePodProbeMarker) execProbe(podProbeMarker *appsv1alpha1.PodProbeMarker, pod *corev1.Pod, timeout time.Duration) (probe.Result, string, error) {
-	klog.V(4).Infof("start exec probe in pod %v", pod.Name)
+func (r *ReconcilePodProbeMarker) execProbe(pod *corev1.Pod, marker *appsv1alpha1.MarkProbe) (probe.Result, error) {
+	klog.V(3).Infof("start exec probe in pod %v", pod.Name)
 	kubeClient := genericclient.GetGenericClient().KubeClient
+	timeout := time.Duration(marker.TimeoutSeconds) * time.Second
 
 	req := kubeClient.CoreV1().RESTClient().Post().
 		Resource("pods").
@@ -235,79 +166,66 @@ func (r *ReconcilePodProbeMarker) execProbe(podProbeMarker *appsv1alpha1.PodProb
 		SubResource("exec").
 		Timeout(timeout).
 		VersionedParams(&corev1.PodExecOptions{
-			Container: podProbeMarker.Spec.MarkerProbe.Exec.Container,
-			Command:   podProbeMarker.Spec.MarkerProbe.Exec.Command,
+			Container: marker.Exec.Container,
+			Command:   marker.Exec.Command,
 			Stdout:    true,
 			Stderr:    true,
 			TTY:       false,
 			Stdin:     true,
-		}, scheme.ParameterCodec)
+		}, schemeutil.ParameterCodec)
 
-	klog.V(4).Infof("build req object: %v", req)
-	klog.V(4).Infof("build req url: %v", req.URL().String())
+	klog.V(3).Infof("build req object: %v, url: %v", req, req.URL().String())
 
 	cfg, err := config.GetConfig()
 	if err != nil {
-		return probe.Failure, "unable to set up client config", err
+		return probe.Failure, err
 	}
 
 	var stdout, stderr bytes.Buffer
-	// stdin := strings.NewReader(strings.Join(podProbeMarker.Spec.MarkerProbe.Exec.Command, " "))
-	err = execute("POST", req.URL(), cfg, nil, &stdout, &stderr, false)
-	if err != nil {
-		klog.V(4).Infof("exec post error: %v", err)
+	if err = execute("POST", req.URL(), cfg, nil, &stdout, &stderr, false); err != nil {
+		return probe.Failure, err
 	}
 
-	return probe.Success, strings.TrimSpace(stdout.String()), err
+	return probe.Success, nil
 }
 
-// formatURL formats a URL from args.  For testability.
-func formatURL(scheme string, host string, port int, path string) *url.URL {
-	u, err := url.Parse(path)
-	// Something is busted with the path, but it's too late to reject it. Pass it along as is.
+func (r *ReconcilePodProbeMarker) httpProbe(pod *corev1.Pod, marker *appsv1alpha1.MarkProbe) (probe.Result, error) {
+	timeout := time.Duration(marker.TimeoutSeconds) * time.Second
+	url, err := buildURL(pod, marker.HTTPGet)
 	if err != nil {
-		u = &url.URL{
-			Path: path,
+		return probe.Failure, err
+	}
+	headers := buildHeader(marker.HTTPGet)
+	res, _, err := http.New().Probe(url, headers, timeout)
+	return res, err
+}
+
+func (r *ReconcilePodProbeMarker) listPodFromProbeMarker(marker *appsv1alpha1.PodProbeMarker) ([]*corev1.Pod, error) {
+	selector, err := metav1.LabelSelectorAsSelector(marker.Spec.Selector)
+	if err != nil {
+		return nil, err
+	}
+	podList := &corev1.PodList{}
+	if err = r.List(context.TODO(), &client.ListOptions{
+		LabelSelector: selector,
+		Namespace:     marker.Namespace,
+	}, podList); err != nil {
+		return nil, err
+	}
+
+	var pods []*corev1.Pod
+	for i, p := range podList.Items {
+		if isRunningAndReady(&p) {
+			pods = append(pods, &podList.Items[i])
 		}
 	}
-	u.Scheme = scheme
-	u.Host = net.JoinHostPort(host, strconv.Itoa(port))
-	return u
+	return pods, nil
 }
 
-// buildHeaderMap takes a list of HTTPHeader <name, value> string
-// pairs and returns a populated string->[]string http.Header map.
-func buildHeader(headerList []corev1.HTTPHeader) http.Header {
-	headers := make(http.Header)
-	for _, header := range headerList {
-		headers[header.Name] = append(headers[header.Name], header.Value)
-	}
-	return headers
+func (r *ReconcilePodProbeMarker) syncStatus(podProbeMarker *appsv1alpha1.PodProbeMarker, status *appsv1alpha1.PodProbeMarkerStatus) error {
+	newPodProbeMarker := podProbeMarker.DeepCopy()
+	newPodProbeMarker.Status = *status
+	return r.Update(context.TODO(), newPodProbeMarker)
 }
 
-//  update pod env with assigned status
-func updatePodLabels(oldPod *corev1.Pod, labels map[string]string) (newPod *corev1.Pod) {
-	newPod = oldPod.DeepCopy()
-	if len(newPod.ObjectMeta.Labels) == 0 {
-		newPod.ObjectMeta.Labels = map[string]string{}
-	}
-	for k, v := range labels {
-		newPod.ObjectMeta.Labels[k] = v
-	}
-	klog.V(4).Infof("update new pod %v add labels: %v", oldPod.Name, labels)
-	return newPod
-}
-
-func execute(method string, url *url.URL, config *restclient.Config, stdin io.Reader, stdout, stderr io.Writer, tty bool) error {
-	exec, err := remotecommand.NewSPDYExecutor(config, method, url)
-	if err != nil {
-		return err
-	}
-	klog.V(4).Infof("exec is  %v", exec)
-	return exec.Stream(remotecommand.StreamOptions{
-		Stdin:  stdin,
-		Stdout: stdout,
-		Stderr: stderr,
-		Tty:    tty,
-	})
-}
+// todo: 写单元测试、增加 gate、合并代码。
